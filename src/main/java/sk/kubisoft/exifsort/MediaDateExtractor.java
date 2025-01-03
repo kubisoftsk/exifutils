@@ -13,18 +13,24 @@ import java.time.format.DateTimeFormatter;
 import com.thebuzzmedia.exiftool.ExifTool;
 import com.thebuzzmedia.exiftool.ExifToolBuilder;
 import com.thebuzzmedia.exiftool.core.UnspecifiedTag;
+import sk.kubisoft.exifsort.config.ConfigService;
 
 public class MediaDateExtractor {
 
 	private static final Logger logger = LoggerFactory.getLogger(MediaDateExtractor.class);
 
+	private final ConfigService configService = ConfigService.getInstance();
 	private final ExifTool exifTool;
 	private static final DateTimeFormatter EXIF_DATE_FORMAT =
 			DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
 
 	public MediaDateExtractor() {
+		var exifToolConfig = configService.getConfig().getExifTool();
+		if (exifToolConfig == null || exifToolConfig.getPath() == null) {
+			throw new IllegalArgumentException("ExifTool path not configured");
+		}
 		this.exifTool = new ExifToolBuilder()
-				.withPath("/home/jgondar/apps/Image-ExifTool-13.11/exiftool")
+				.withPath(exifToolConfig.getPath())
 				.enableStayOpen()  // Performance optimization for multiple files
 				.build();
 	}

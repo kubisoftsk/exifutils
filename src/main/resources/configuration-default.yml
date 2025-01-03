@@ -1,0 +1,3 @@
+exifTool:
+  # Path to the exiftool executable
+  path:

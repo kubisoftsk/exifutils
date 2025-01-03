@@ -1,8 +1,14 @@
 package sk.kubisoft.exifsort.config;
 
-public record ExifSortConfiguration (
+public class ExifSortConfiguration {
 
-		ExifToolConfig exifTool
-) {
+	private ExifToolConfig exifTool;
 
+	public ExifToolConfig getExifTool() {
+		return exifTool;
+	}
+
+	public void setExifTool(ExifToolConfig exifTool) {
+		this.exifTool = exifTool;
+	}
 }

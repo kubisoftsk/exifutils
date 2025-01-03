@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 
 import java.time.ZoneId;
 
+import sk.kubisoft.exifsort.config.ConfigService;
+
 public class ExifSort {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExifSort.class);
@@ -18,6 +20,8 @@ public class ExifSort {
 
 		var files = fileExplorer.listFiles(input.sourceDirectories());
 		logger.info("Found {} files", files.size());
+
+		ConfigService.getInstance();
 
 		for (var file : files) {
 			try {
