@@ -1,88 +1,76 @@
 package sk.kubisoft.exifsort;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
-import com.thebuzzmedia.exiftool.ExifTool;
-import com.thebuzzmedia.exiftool.ExifToolBuilder;
-import com.thebuzzmedia.exiftool.core.UnspecifiedTag;
-import sk.kubisoft.exifsort.config.ConfigService;
+import java.time.format.DateTimeParseException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class MediaDateExtractor {
 
-	private static final Logger logger = LoggerFactory.getLogger(MediaDateExtractor.class);
+    /*
+       Tip for improvement: OnePlus videos does not contain offset in exif data. However, it can be guessed
+       from the file name. For example, the file name "VID_20210101_120000.mp4" can be parsed to extract the
+         date and time, and the offset can be guessed from the file name.
+       Second guess can be from file modify date, where the offset is present. However this is dangerous and
+       it shoudl be checked if it is the same minute / second as in Created date. Then it can be used as offset.
 
-	private final ConfigService configService = ConfigService.getInstance();
-	private final ExifTool exifTool;
-	private static final DateTimeFormatter EXIF_DATE_FORMAT =
-			DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
+       Another thing I found is that older oneplus phones do not have offset in exif data in PHOTOS, however
+       they have it in local time, so it is still useful for sorting. Problem is in videos, because there the date
+       is for some reason stored in UTC time, so it may cause problems when photos are taken around midnight.
+     */
 
-	public MediaDateExtractor() {
-		var exifToolConfig = configService.getConfig().getExifTool();
-		if (exifToolConfig == null || exifToolConfig.getPath() == null) {
-			throw new IllegalArgumentException("ExifTool path not configured");
-		}
-		this.exifTool = new ExifToolBuilder()
-				.withPath(exifToolConfig.getPath())
-				.enableStayOpen()  // Performance optimization for multiple files
-				.build();
-	}
+    private static final Logger logger = LoggerFactory.getLogger(MediaDateExtractor.class);
 
-	public Instant extractCreationDate(Path file) throws Exception {
-		try {
-			var metadata = exifTool.getImageMeta(file.toFile());
+    public Optional<MediaDateTime> extractCreationDate(MediaFile mediaFile) {
+        return extractDate(mediaFile.metadata());
+    }
 
-			// Order of precedence for date fields
-			String[] dateFields = {
-					"DateTimeOriginal",     // Standard Exif date
-					"CreateDate",           // General creation date
-					"MediaCreateDate",      // For videos
-					"TrackCreateDate",      // For videos
-					"ModifyDate"            // Last resort
-			};
+    public Optional<MediaDateTime> extractDate(Map<String, String> metadata) {
+        // Order of precedence for date fields
+        OffsetDateTimeField[] dateFields = {
+                new OffsetDateTimeField("CreationDate", "OffsetTime"),
+                new OffsetDateTimeField("CreateDate", "OffsetTime"),
+                new OffsetDateTimeField("DateTimeOriginal", "OffsetTimeOriginal"),
+                new OffsetDateTimeField("MediaCreateDate", null),
+        };
 
-			for (String field : dateFields) {
-				String dateStr = metadata.get(new UnspecifiedTag(field));
-				if (dateStr != null && !dateStr.trim().isEmpty()) {
-					try {
-						return parseExifDate(dateStr);
-					} catch (Exception e) {
-						// Log and continue to next field
-						logger.warn("Could not parse date from {} field: {}", field, dateStr, e);
-					}
-				}
-			}
+        Map<OffsetDateTimeField, MediaDateTime> dateFieldsWithDate = new LinkedHashMap<>();
+        for (var dateField : dateFields) {
+            String dateStr = metadata.get(dateField.dateField());
+            String offsetStr = (dateField.offsetField() == null) ? null : metadata.get(dateField.offsetField());
 
-			// Fallback to file system date if no EXIF date found
-			logger.info("No EXIF date found for {}, using file modification time", file);
-			return Files.getLastModifiedTime(file).toInstant();
+            if (StringUtils.isBlank(dateStr)) {
+                continue;
+            }
 
-		} catch (Exception e) {
-			throw new Exception("Failed to read media date from " + file + ": " + e.getMessage(), e);
-		}
-	}
+            try {
+                var mediaDateTime = ExifDateParser.parseExifDate(dateStr, offsetStr);
+                mediaDateTime.ifPresent(dateTime -> dateFieldsWithDate.put(dateField, dateTime));
+            } catch (DateTimeParseException e) {
+                logger.warn("Could not parse date from {} field: '{}': {}", dateField.dateField(), dateStr, e.getMessage());
+            } catch (Exception e) {
+                logger.error("Error parsing date from {} field: {}", dateField.dateField(), dateStr, e);
+            }
+        }
 
-	private Instant parseExifDate(String dateStr) {
-		// Clean up the date string (some cameras add timezone or fractional seconds)
-		dateStr = dateStr.split("\\+")[0].split("\\.")[0].trim();
-		LocalDateTime dateTime = LocalDateTime.parse(dateStr, EXIF_DATE_FORMAT);
-		return dateTime.atZone(ZoneId.systemDefault()).toInstant();
-	}
+        // Check parsed dates and return the first valid one with offset present
+        Optional<MediaDateTime> firstWithOffset = dateFieldsWithDate.values().stream()
+                .filter(MediaDateTime::hasZoneOffset)
+                .findFirst();
 
-	public void close() {
-		if (exifTool != null) {
-			try {
-				exifTool.close();
-			} catch (Exception e) {
-				logger.error("Error closing ExifTool", e);
-			}
-		}
-	}
+        if (firstWithOffset.isPresent()) {
+            return firstWithOffset;
+        }
+
+        // If no valid date with offset found, return the first valid date without offset
+        return dateFieldsWithDate.values().stream()
+                .findFirst();
+    }
+
+    record OffsetDateTimeField(String dateField, String offsetField) {
+    }
 }
