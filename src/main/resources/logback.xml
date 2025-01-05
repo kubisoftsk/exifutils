@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+	<timestamp key="timestamp" datePattern="yyyy-MM-dd-HH-mm-ss"/>
+
 	<!-- Console appender -->
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
@@ -7,9 +9,9 @@
 		</encoder>
 	</appender>
 
-	<!-- File appender -->
+	<!-- File appender with timestamp -->
 	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
-		<file>exifsort.log</file>
+		<file>exifsort_${timestamp}.log</file>
 		<append>true</append>
 		<encoder>
 			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>

@@ -61,6 +61,7 @@ public class FileMover {
                 }
 
                 // Perform atomic move
+                logger.info("Moving {} to {}", source, target);
                 try {
                     Files.move(source, target, StandardCopyOption.ATOMIC_MOVE);
                     successCount++;
