@@ -34,7 +34,11 @@ public class ExifSortApplication {
 			CommandLine cmd = new DefaultParser().parse(EXIF_SORT_OPTIONS, args);
 
 			var input = parseInput(cmd);
-			new ExifSort().run(input);
+
+			// Create Dagger component and get ExifSort instance
+			ExifSortComponent component = ExifSortComponent.create();
+			ExifSort exifSort = component.getExifSort();
+			exifSort.run(input);
 		} catch (ParseException e) {
 			printHelp(e.getMessage());
 			System.exit(64);

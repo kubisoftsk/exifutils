@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sk.kubisoft.exifsort.config.MediaFileSorter;
 
+import javax.inject.Inject;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -12,9 +13,23 @@ public class ExifSort {
 
     private static final Logger logger = LoggerFactory.getLogger(ExifSort.class);
 
-    private final FileExplorer fileExplorer = new FileExplorer();
+    private final FileExplorer fileExplorer;
+    private final MediaDateExtractor mediaDateExtractor;
+    private final MediaFileSorter mediaFileSorter;
+    private final FileMover fileMover;
 
-    private final MediaDateExtractor mediaDateExtractor = new MediaDateExtractor();
+    @Inject
+    public ExifSort(
+            FileExplorer fileExplorer,
+            MediaDateExtractor mediaDateExtractor,
+            MediaFileSorter mediaFileSorter,
+            FileMover fileMover) {
+        this.fileExplorer = fileExplorer;
+        this.mediaDateExtractor = mediaDateExtractor;
+        this.mediaFileSorter = mediaFileSorter;
+        this.fileMover = fileMover;
+    }
+
 
     public void run(ExifSortApplicationInput input) {
         logger.info("Running ExifSort with input: {}", input);
@@ -55,7 +70,7 @@ public class ExifSort {
 
         logger.info("Found {} files with valid dates", mediaFilesWithDate.size());
 
-        Map<Path, Path> moveActions = new MediaFileSorter().sort(mediaFilesWithDate, input.destinationDirectory());
+        Map<Path, Path> moveActions = mediaFileSorter.sort(mediaFilesWithDate, input.destinationDirectory());
         logger.info("Files should be sorted as follows:");
         moveActions.forEach((source, target) -> logger.info("Move {} to {}", source, target));
 
@@ -63,7 +78,7 @@ public class ExifSort {
             logger.info("Dry run, not moving files");
         } else {
             logger.info("Moving files...");
-            new FileMover().moveFiles(moveActions);
+            fileMover.moveFiles(moveActions);
         }
     }
 
