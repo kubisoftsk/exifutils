@@ -5,7 +5,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.time.DateTimeException;
 import java.time.format.DateTimeParseException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,7 +19,8 @@ class ExifDateParserTest {
         var dateTime = ExifDateParser.parseExifDate(dateStr, offsetStr);
 
         assertTrue(dateTime.isPresent());
-        assertEquals("2023-08-31T15:10:31Z", dateTime.get().toString());
+        assertEquals("2023-08-31T15:10:31", dateTime.get().getLocalDateTime().toString());
+        assertNull(dateTime.get().getZoneOffset());
     }
 
     @Test
@@ -31,7 +31,8 @@ class ExifDateParserTest {
         var dateTime = ExifDateParser.parseExifDate(dateStr, offsetStr);
 
         assertTrue(dateTime.isPresent());
-        assertEquals("2023-08-31T15:10:31+03:00", dateTime.get().toString());
+        assertEquals("2023-08-31T15:10:31", dateTime.get().getLocalDateTime().toString());
+        assertEquals("+03:00", dateTime.get().getZoneOffset().toString());
     }
 
     @Test
@@ -42,7 +43,8 @@ class ExifDateParserTest {
         var dateTime = ExifDateParser.parseExifDate(dateStr, offsetStr);
 
         assertTrue(dateTime.isPresent());
-        assertEquals("2023-08-31T15:10:31+03:00", dateTime.get().toString());
+        assertEquals("2023-08-31T15:10:31", dateTime.get().getLocalDateTime().toString());
+        assertEquals("+03:00", dateTime.get().getZoneOffset().toString());
     }
 
     @Test
@@ -53,7 +55,8 @@ class ExifDateParserTest {
         var dateTime = ExifDateParser.parseExifDate(dateStr, offsetStr);
 
         assertTrue(dateTime.isPresent());
-        assertEquals("2023-08-31T15:10:31Z", dateTime.get().toString());
+        assertEquals("2023-08-31T15:10:31", dateTime.get().getLocalDateTime().toString());
+        assertNull(dateTime.get().getZoneOffset());
     }
 
     @Test
@@ -64,7 +67,8 @@ class ExifDateParserTest {
         var dateTime = ExifDateParser.parseExifDate(dateStr, offsetStr);
 
         assertTrue(dateTime.isPresent());
-        assertEquals("2023-08-31T15:10:31+03:00", dateTime.get().toString());
+        assertEquals("2023-08-31T15:10:31", dateTime.get().getLocalDateTime().toString());
+        assertEquals("+03:00", dateTime.get().getZoneOffset().toString());
     }
 
     @Test
@@ -75,7 +79,8 @@ class ExifDateParserTest {
         var dateTime = ExifDateParser.parseExifDate(dateStr, offsetStr);
 
         assertTrue(dateTime.isPresent());
-        assertEquals("2023-08-31T15:10:31+03:00", dateTime.get().toString());
+        assertEquals("2023-08-31T15:10:31", dateTime.get().getLocalDateTime().toString());
+        assertEquals("+03:00", dateTime.get().getZoneOffset().toString());
     }
 
     @ParameterizedTest
@@ -102,20 +107,9 @@ class ExifDateParserTest {
 
         var dateTime = ExifDateParser.parseExifDate(dateStr, offsetStr);
 
-        // Should fallback to UTC when offset is invalid
         assertTrue(dateTime.isPresent());
-        assertEquals("2023-08-31T15:10:31Z", dateTime.get().toString());
-    }
-
-    @Test
-    void testDateWithZuluTimezone() {
-        String dateStr = "2023:08:31 15:10:31Z";
-        String offsetStr = null;
-
-        var dateTime = ExifDateParser.parseExifDate(dateStr, offsetStr);
-
-        assertTrue(dateTime.isPresent());
-        assertEquals("2023-08-31T15:10:31Z", dateTime.get().toString());
+        assertEquals("2023-08-31T15:10:31", dateTime.get().getLocalDateTime().toString());
+        assertNull(dateTime.get().getZoneOffset());
     }
 
     @Test
@@ -126,6 +120,7 @@ class ExifDateParserTest {
         var dateTime = ExifDateParser.parseExifDate(dateStr, offsetStr);
 
         assertTrue(dateTime.isPresent());
-        assertEquals("2023-08-31T15:10:31-05:00", dateTime.get().toString());
+        assertEquals("2023-08-31T15:10:31", dateTime.get().getLocalDateTime().toString());
+        assertEquals("-05:00", dateTime.get().getZoneOffset().toString());
     }
 }
