@@ -2,7 +2,9 @@ package sk.kubisoft.exifsort;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sk.kubisoft.exifsort.config.MediaFileSorter;
 
+import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -51,8 +53,18 @@ public class ExifSort {
             throw new RuntimeException("Error processing files", e);
         }
 
+        logger.info("Found {} files with valid dates", mediaFilesWithDate.size());
 
-        logger.info("Finished processing files, found {} files with valid dates", mediaFilesWithDate.size());
+        Map<Path, Path> moveActions = new MediaFileSorter().sort(mediaFilesWithDate, input.destinationDirectory());
+        logger.info("Files should be sorted as follows:");
+        moveActions.forEach((source, target) -> logger.info("Move {} to {}", source, target));
+
+        if (input.dryRun()) {
+            logger.info("Dry run, not moving files");
+        } else {
+            logger.info("Moving files...");
+            new FileMover().moveFiles(moveActions);
+        }
     }
 
 }

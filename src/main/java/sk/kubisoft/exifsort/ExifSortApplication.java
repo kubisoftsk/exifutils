@@ -14,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static sk.kubisoft.exifsort.ExifSortCliOptions.EXIF_SORT_OPTIONS;
@@ -85,9 +84,11 @@ public class ExifSortApplication {
 				}
 
 				try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(destinationDir)) {
+					/* TODO Make this check configurable via an option
 					if (dirStream.iterator().hasNext()) {
 						throw new ParseException("Destination directory is not empty: " + destPath);
 					}
+					 */
 				} catch (IOException e) {
 					throw new ParseException("Cannot access destination directory: " + e.getMessage());
 				}
