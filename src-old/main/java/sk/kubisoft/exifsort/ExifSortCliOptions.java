@@ -35,24 +35,7 @@ final class ExifSortCliOptions {
 	public static final String USAGE = "exifsort [-v] [-n] -d DIR [DIR...]";
 	public static final Options EXIF_SORT_OPTIONS = new Options();
 
-	public static final Option DESTINATION = Option.builder()
-												   .option("d").hasArg()
-												   .longOpt("destination").hasArg().argName("DIR")
-												   .required()
-												   .desc("Destination root directory for the sorted files.")
-												   .build();
 
-	public static final Option DRY_RUN = Option.builder()
-											   .option("n")
-											   .longOpt("dry-run")
-											   .desc("Show what would be done, without making any changes.")
-											   .build();
-
-	public static final Option VERBOSE = Option.builder()
-											   .option("v")
-											   .longOpt("verbose")
-											   .desc("Print verbose output.")
-											   .build();
 
 	static {
 		EXIF_SORT_OPTIONS.addOption(DESTINATION);
