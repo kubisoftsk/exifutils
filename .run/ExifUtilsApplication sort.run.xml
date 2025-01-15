@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ExifUtilsApplication sort" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="sk.kubisoft.exifutils.cli.ExifUtilsApplication" />
+    <module name="exifutils-cli" />
+    <option name="PROGRAM_PARAMETERS" value="sort -n -d &quot;$USER_HOME$/Pictures/exifutils/output&quot; &quot;$USER_HOME$/Pictures/exifutils/input&quot;" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="sk.kubisoft.exifutils.core.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
