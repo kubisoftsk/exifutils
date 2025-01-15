@@ -49,7 +49,6 @@ public class ExifUtilsModule {
         return renameCommandRunner;
     }
 
-
     // Main component that will be used in the main method to bootstrap the application
     @Singleton
     @Component(modules = {ExifUtilsModule.class})

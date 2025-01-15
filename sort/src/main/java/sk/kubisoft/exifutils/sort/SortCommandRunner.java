@@ -20,6 +20,8 @@ import java.util.List;
 @Singleton
 public class SortCommandRunner implements CommandRunner {
 
+    private final SortCommand sortCommand;
+
     private static final Option DESTINATION = Option.builder()
             .option("d").hasArg()
             .longOpt("destination").hasArg().argName("DIR")
@@ -40,14 +42,15 @@ public class SortCommandRunner implements CommandRunner {
             .build();
 
     @Inject
-    public SortCommandRunner() {
+    public SortCommandRunner(SortCommand sortCommand) {
+        this.sortCommand = sortCommand;
     }
 
     @Override
     public int runCommand(CommandLine command) {
         try {
             SortCommandInput input = parseInput(command);
-            System.out.println("Running sort command with input: " + input);
+            sortCommand.execute(input);
             return 0;
         } catch (ParseException e) {
             System.err.println("Error parsing command arguments: " + e.getMessage());
