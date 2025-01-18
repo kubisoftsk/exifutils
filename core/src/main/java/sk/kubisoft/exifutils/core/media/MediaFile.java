@@ -1,4 +1,4 @@
-package sk.kubisoft.exifutils.sort;
+package sk.kubisoft.exifutils.core.media;
 
 import java.nio.file.Path;
 import java.util.Map;

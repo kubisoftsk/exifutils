@@ -1,4 +1,4 @@
-package sk.kubisoft.exifutils.sort;
+package sk.kubisoft.exifutils.core.analysis;
 
 import com.thebuzzmedia.exiftool.ExifTool;
 import com.thebuzzmedia.exiftool.ExifToolBuilder;
@@ -8,7 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sk.kubisoft.exifutils.core.config.ConfigService;
+import sk.kubisoft.exifutils.core.media.MediaFile;
+import sk.kubisoft.exifutils.core.media.MediaType;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -18,7 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
-public class MetaDataExtractor implements AutoCloseable {
+class MetaDataExtractor implements AutoCloseable {
 
     private static final Logger logger = LoggerFactory.getLogger(MetaDataExtractor.class);
 
@@ -26,23 +27,17 @@ public class MetaDataExtractor implements AutoCloseable {
     private static final List<String> COMMON_IMAGE_EXTENSIONS = List.of("jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp", "heic", "heif");
 
     private final Tika tika = new Tika();
-    private final ConfigService configService = ConfigService.getInstance();
 
     private final ExifTool exifTool;
 
-    public MetaDataExtractor() {
-        var exifToolConfig = configService.getConfig().getExifTool();
-        if (exifToolConfig == null || exifToolConfig.getPath() == null) {
-            throw new IllegalArgumentException("ExifTool path not configured");
-        }
-
+    MetaDataExtractor(String exifToolPath) {
         this.exifTool = new ExifToolBuilder()
-                .withPath(exifToolConfig.getPath())
+                .withPath(exifToolPath)
                 .enableStayOpen()  // Performance optimization for multiple files
                 .build();
     }
 
-    public Optional<MediaFile> extractMetaData(Path file) {
+    Optional<MediaFile> extractMetaData(Path file) {
         try {
             var mediaType = getMediaType(file);
             if (mediaType == null) {

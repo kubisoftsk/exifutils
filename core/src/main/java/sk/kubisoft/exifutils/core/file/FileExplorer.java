@@ -1,4 +1,4 @@
-package sk.kubisoft.exifutils.sort;
+package sk.kubisoft.exifutils.core.file;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

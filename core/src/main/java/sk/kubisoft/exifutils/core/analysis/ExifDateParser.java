@@ -1,7 +1,8 @@
-package sk.kubisoft.exifutils.sort;
+package sk.kubisoft.exifutils.core.analysis;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sk.kubisoft.exifutils.core.media.MediaDateTime;
 
 import java.time.DateTimeException;
 import java.time.LocalDateTime;

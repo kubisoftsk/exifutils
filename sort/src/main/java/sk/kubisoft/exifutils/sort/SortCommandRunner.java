@@ -29,6 +29,12 @@ public class SortCommandRunner implements CommandRunner {
             .desc("Destination root directory for the sorted files.")
             .build();
 
+    private static final Option RENAME = Option.builder()
+            .option("r")
+            .longOpt("rename")
+            .desc("Rename files according to their original date and time.")
+            .build();
+
     private static final Option DRY_RUN = Option.builder()
             .option("n")
             .longOpt("dry-run")
@@ -61,7 +67,7 @@ public class SortCommandRunner implements CommandRunner {
         }
     }
 
-    private static SortCommandInput parseInput(CommandLine cmd) throws ParseException {
+    private SortCommandInput parseInput(CommandLine cmd) throws ParseException {
         // Parse source directories - if none provided, use current directory
         List<Path> sourceDirs = new ArrayList<>();
         String[] args = cmd.getArgs();
@@ -86,6 +92,8 @@ public class SortCommandRunner implements CommandRunner {
         // Parse destination directory (already validated as required by Options setup)
         String destPath = cmd.getOptionValue(DESTINATION.getOpt());
         Path destinationDir = Paths.get(destPath);
+
+        boolean renameFiles = cmd.hasOption(RENAME.getOpt());
 
         // Check if destination exists and is a directory
         // If not dry run, perform directory checks
@@ -117,7 +125,7 @@ public class SortCommandRunner implements CommandRunner {
 
         boolean verbose = cmd.hasOption(VERBOSE.getOpt());
 
-        return new SortCommandInput(sourceDirs, destinationDir, dryRun, verbose);
+        return new SortCommandInput(sourceDirs, destinationDir, renameFiles, dryRun, verbose);
     }
 
     @Override
@@ -134,6 +142,7 @@ public class SortCommandRunner implements CommandRunner {
     public Options getOptions() {
         Options options = new Options();
         options.addOption(DESTINATION);
+        options.addOption(RENAME);
         options.addOption(DRY_RUN);
         options.addOption(VERBOSE);
         return options;

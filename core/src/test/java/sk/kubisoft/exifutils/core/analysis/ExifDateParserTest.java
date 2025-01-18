@@ -1,4 +1,4 @@
-package sk.kubisoft.exifutils.sort;
+package sk.kubisoft.exifutils.core.analysis;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

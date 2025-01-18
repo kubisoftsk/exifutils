@@ -2,6 +2,11 @@ package sk.kubisoft.exifutils.sort;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import sk.kubisoft.exifutils.core.media.MediaDateTime;
+import sk.kubisoft.exifutils.core.media.MediaFile;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -11,15 +16,19 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
 class MediaFileSorterTest {
 
+    @Mock
+    private MediaFileRenamer mediaFileRenamer;
+    
     private MediaFileSorter sorter;
     private Path sourceRoot;
     private Path targetRoot;
 
     @BeforeEach
     void setUp() {
-        sorter = new MediaFileSorter();
+        sorter = new MediaFileSorter(mediaFileRenamer);
         sourceRoot = Path.of("/source");
         targetRoot = Path.of("/target");
     }
@@ -34,7 +43,7 @@ class MediaFileSorterTest {
         input.put(mediaFile, dateTime);
 
         // When
-        Map<Path, Path> result = sorter.sort(input, targetRoot);
+        Map<Path, Path> result = sorter.sort(input, targetRoot, false);
 
         // Then
         assertEquals(1, result.size());
@@ -56,7 +65,7 @@ class MediaFileSorterTest {
         input.put(file2, date);
 
         // When
-        Map<Path, Path> result = sorter.sort(input, targetRoot);
+        Map<Path, Path> result = sorter.sort(input, targetRoot, false);
 
         // Then
         assertEquals(2, result.size());
@@ -83,7 +92,7 @@ class MediaFileSorterTest {
         input.put(augustFile, augustDate);
 
         // When
-        Map<Path, Path> result = sorter.sort(input, targetRoot);
+        Map<Path, Path> result = sorter.sort(input, targetRoot, false);
 
         // Then
         assertEquals(2, result.size());
@@ -110,7 +119,7 @@ class MediaFileSorterTest {
         input.put(file2023, date2023);
 
         // When
-        Map<Path, Path> result = sorter.sort(input, targetRoot);
+        Map<Path, Path> result = sorter.sort(input, targetRoot, false);
 
         // Then
         assertEquals(2, result.size());
@@ -130,7 +139,7 @@ class MediaFileSorterTest {
         Map<MediaFile, MediaDateTime> input = new HashMap<>();
 
         // When
-        Map<Path, Path> result = sorter.sort(input, targetRoot);
+        Map<Path, Path> result = sorter.sort(input, targetRoot, false);
 
         // Then
         assertTrue(result.isEmpty());
@@ -150,7 +159,7 @@ class MediaFileSorterTest {
         input.put(complexFileName, date);
 
         // When
-        Map<Path, Path> result = sorter.sort(input, targetRoot);
+        Map<Path, Path> result = sorter.sort(input, targetRoot, false);
 
         // Then
         assertEquals(

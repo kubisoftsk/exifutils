@@ -1,4 +1,4 @@
-package sk.kubisoft.exifutils.sort;
+package sk.kubisoft.exifutils.core.media;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;

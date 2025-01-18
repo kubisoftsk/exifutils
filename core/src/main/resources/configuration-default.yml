@@ -1,3 +1,9 @@
 exifTool:
   # Path to the exiftool executable
   path:
+
+rename:
+  # Pattern to new file name, where following variables are available (extension is preserved):
+  # ${prefix}: IMG for VID for video files
+  # ${date}: patter for formatting date of creation, specs here: https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/format/DateTimeFormatter.html
+  pattern: IMG_${date,yyyyMMdd}_${date,HHmmss}

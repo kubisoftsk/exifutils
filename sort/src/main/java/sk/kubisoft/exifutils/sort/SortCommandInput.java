@@ -9,6 +9,8 @@ public record SortCommandInput(
 
         Path destinationDirectory,
 
+        boolean rename,
+
         boolean dryRun,
 
         boolean verbose

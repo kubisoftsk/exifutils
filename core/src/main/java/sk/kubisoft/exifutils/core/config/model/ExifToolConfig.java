@@ -1,4 +1,4 @@
-package sk.kubisoft.exifutils.core.config;
+package sk.kubisoft.exifutils.core.config.model;
 
 public class ExifToolConfig {
 

@@ -3,7 +3,10 @@ package sk.kubisoft.exifutils.core.config;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sk.kubisoft.exifutils.core.config.model.ExifUtilsConfiguration;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -12,35 +15,22 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+@Singleton
 public final class ConfigService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConfigService.class);
 
 	private static final String APP_NAME = "exifsort";
 	private static final String CONFIG_FILE_NAME = "exifsort-config.yml";
-	private static final Logger log = LoggerFactory.getLogger(ConfigService.class);
 
-	private static ConfigService instance;
+	private ExifUtilsConfiguration config;
 
-	private ExifSortConfiguration config;
-
-	private ConfigService() {
+	@Inject
+	public ConfigService() {
+		loadConfig();
 	}
 
-	public static ConfigService getInstance() {
-		// not the best way to do it, but it's good enough for this
-		if (instance == null) {
-			synchronized (ConfigService.class) {
-				if (instance == null) {
-					instance = new ConfigService();
-					instance.loadConfig();
-				}
-			}
-		}
-		return instance;
-	}
-
-	public ExifSortConfiguration getConfig() {
+	public ExifUtilsConfiguration getConfig() {
 		return config;
 	}
 
@@ -80,7 +70,7 @@ public final class ConfigService {
 
 		org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml();
 		try (InputStream is = Files.newInputStream(configFile)) {
-			config = yaml.loadAs(is, ExifSortConfiguration.class);
+			config = yaml.loadAs(is, ExifUtilsConfiguration.class);
 			logger.info("Loaded config file: {}", configFile);
 		} catch (IOException e) {
 			throw new UncheckedIOException("Failed to load config file: " + configFile, e);
