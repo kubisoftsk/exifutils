@@ -1,10 +1,7 @@
-package sk.kubisoft.exifutils.sort;
+package sk.kubisoft.exifutils.core.media;
 
 import org.apache.commons.lang3.StringUtils;
 import sk.kubisoft.exifutils.core.config.ConfigService;
-import sk.kubisoft.exifutils.core.media.MediaDateTime;
-import sk.kubisoft.exifutils.core.media.MediaFile;
-import sk.kubisoft.exifutils.core.media.MediaType;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -18,22 +15,22 @@ import java.util.regex.Pattern;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
 @Singleton
-public class MediaFileRenamer {
+public class MediaFileNameUtils {
 
     private final ConfigService configService;
 
     @Inject
-    public MediaFileRenamer(ConfigService configService) {
+    public MediaFileNameUtils(ConfigService configService) {
         this.configService = configService;
     }
 
-    public String rename(MediaFile mediaFile, MediaDateTime date) {
+    public String createNewName(MediaFile mediaFile, MediaDateTime date) {
         String result = getPattern();
         LocalDateTime dateTime = date.getLocalDateTime();
 
         // Find all ${date,format} patterns
         Matcher dateMatcher = Pattern.compile("\\$\\{date,([^}]+)}").matcher(result);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (dateMatcher.find()) {
             String format = dateMatcher.group(1);
             String formatted = dateTime.format(DateTimeFormatter.ofPattern(format));

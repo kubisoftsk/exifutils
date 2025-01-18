@@ -41,12 +41,6 @@ public class SortCommandRunner implements CommandRunner {
             .desc("Show what would be done, without making any changes.")
             .build();
 
-    private static final Option VERBOSE = Option.builder()
-            .option("v")
-            .longOpt("verbose")
-            .desc("Print verbose output.")
-            .build();
-
     @Inject
     public SortCommandRunner(SortCommand sortCommand) {
         this.sortCommand = sortCommand;
@@ -122,10 +116,7 @@ public class SortCommandRunner implements CommandRunner {
             }
         }
 
-
-        boolean verbose = cmd.hasOption(VERBOSE.getOpt());
-
-        return new SortCommandInput(sourceDirs, destinationDir, renameFiles, dryRun, verbose);
+        return new SortCommandInput(sourceDirs, destinationDir, renameFiles, dryRun);
     }
 
     @Override
@@ -144,7 +135,6 @@ public class SortCommandRunner implements CommandRunner {
         options.addOption(DESTINATION);
         options.addOption(RENAME);
         options.addOption(DRY_RUN);
-        options.addOption(VERBOSE);
         return options;
     }
 

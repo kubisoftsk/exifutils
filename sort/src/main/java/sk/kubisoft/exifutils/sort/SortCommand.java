@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
+import sk.kubisoft.exifutils.core.file.FileMover;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 

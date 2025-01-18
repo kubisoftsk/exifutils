@@ -1,4 +1,4 @@
-package sk.kubisoft.exifutils.sort;
+package sk.kubisoft.exifutils.core.media;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,9 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.config.model.ExifUtilsConfiguration;
 import sk.kubisoft.exifutils.core.config.model.RenameConfig;
-import sk.kubisoft.exifutils.core.media.MediaDateTime;
-import sk.kubisoft.exifutils.core.media.MediaFile;
-import sk.kubisoft.exifutils.core.media.MediaType;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -20,12 +17,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MediaFileRenamerTest {
+class MediaFileNameUtilsTest {
 
     @Mock
     private ConfigService configService;
 
-    private MediaFileRenamer renamer;
+    private MediaFileNameUtils renamer;
     private static final String PATTERN = "IMG_${date,yyyyMMdd}_${date,HHmmss}";
 
     @BeforeEach
@@ -35,11 +32,11 @@ class MediaFileRenamerTest {
         renameConfig.setPattern(PATTERN);
         config.setRename(renameConfig);
         when(configService.getConfig()).thenReturn(config);
-        renamer = new MediaFileRenamer(configService);
+        renamer = new MediaFileNameUtils(configService);
     }
 
     @Test
-    void shouldRenameIPhoneImage() {
+    void shouldCreateNewNameIPhoneImage() {
         // given
         LocalDateTime dateTime = LocalDateTime.of(2024, 1, 18, 15, 30, 45);
         MediaDateTime mediaDateTime = new MediaDateTime(dateTime);
@@ -50,14 +47,14 @@ class MediaFileRenamerTest {
         );
 
         // when
-        String result = renamer.rename(mediaFile, mediaDateTime);
+        String result = renamer.createNewName(mediaFile, mediaDateTime);
 
         // then
         assertEquals("IMG_20240118_153045.jpg", result);
     }
 
     @Test
-    void shouldRenameIPhoneVideo() {
+    void shouldCreateNewNameIPhoneVideo() {
         // given
         LocalDateTime dateTime = LocalDateTime.of(2024, 1, 18, 15, 30, 45);
         MediaDateTime mediaDateTime = new MediaDateTime(dateTime);
@@ -68,14 +65,14 @@ class MediaFileRenamerTest {
         );
 
         // when
-        String result = renamer.rename(mediaFile, mediaDateTime);
+        String result = renamer.createNewName(mediaFile, mediaDateTime);
 
         // then
         assertEquals("IMG_20240118_153045.mov", result);
     }
 
     @Test
-    void shouldRenameAndroidImage() {
+    void shouldCreateNewNameAndroidImage() {
         // given
         LocalDateTime dateTime = LocalDateTime.of(2024, 1, 18, 15, 30, 45);
         MediaDateTime mediaDateTime = new MediaDateTime(dateTime);
@@ -86,7 +83,7 @@ class MediaFileRenamerTest {
         );
 
         // when
-        String result = renamer.rename(mediaFile, mediaDateTime);
+        String result = renamer.createNewName(mediaFile, mediaDateTime);
 
         // then
         assertEquals("IMG_20240118_153045.jpg", result);
@@ -104,10 +101,9 @@ class MediaFileRenamerTest {
         );
 
         // when
-        String result = renamer.rename(mediaFile, mediaDateTime);
+        String result = renamer.createNewName(mediaFile, mediaDateTime);
 
         // then
         assertEquals("IMG_20240118_153045.heic", result);
     }
-
 }

@@ -1,4 +1,4 @@
-package sk.kubisoft.exifutils.sort;
+package sk.kubisoft.exifutils.core.file;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

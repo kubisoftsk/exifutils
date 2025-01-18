@@ -37,12 +37,12 @@ public class MediaAnalyzer {
         try (var metaDataExtractor = new MetaDataExtractor(exifToolConfig.getPath())) {
             for (int i = 0; i < files.size(); i++) {
                 var file = files.get(i);
-                logger.info("Processing file {} of {}: {}", i + 1, files.size(), file);
+                logger.info("Analyzing file {} of {}: {}", i + 1, files.size(), file);
 
                 try {
                     var mediaFileOptional = metaDataExtractor.extractMetaData(file);
                     if (mediaFileOptional.isEmpty()) {
-                        logger.info("No metadata found, skipping file: {}", file);
+                        logger.debug("No metadata found, skipping file: {}", file);
                         continue;
                     }
 
@@ -50,10 +50,10 @@ public class MediaAnalyzer {
                     var dateOptional = mediaDateExtractor.extractCreationDate(mediaFile);
                     if (dateOptional.isPresent()) {
                         var date = dateOptional.get();
-                        logger.info("Found creation date: {}", date);
+                        logger.debug("Found creation date: {}", date);
                         mediaFilesWithDate.put(mediaFile, date);
                     } else {
-                        logger.info("No valid date found");
+                        logger.debug("No valid date found");
                     }
                 } catch (Exception e) {
                     logger.error("Error processing file: {}", file, e);

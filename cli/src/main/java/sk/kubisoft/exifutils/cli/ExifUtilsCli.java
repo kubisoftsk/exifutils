@@ -11,6 +11,13 @@ public class ExifUtilsCli {
 
     private final Map<String, CommandRunner> commands;
 
+    // Common options
+    private static final Option VERBOSE = Option.builder()
+            .option("v")
+            .longOpt("verbose")
+            .desc("Print verbose output.")
+            .build();
+
     @Inject
     public ExifUtilsCli(Map<String, CommandRunner> commands) {
         this.commands = commands;
@@ -34,8 +41,12 @@ public class ExifUtilsCli {
         String[] commandArgs = Arrays.copyOfRange(args, 1, args.length);
         CommandLineParser parser = new DefaultParser();
         var options = runner.getOptions();
+        options.addOption(VERBOSE);
         try {
             CommandLine cmd = parser.parse(options, commandArgs);
+            if (cmd.hasOption("verbose")) {
+                setRootLogLevelToDebug();
+            }
             System.exit(runner.runCommand(cmd));
         } catch (ParseException e) {
             System.err.println("Error parsing command arguments: " + e.getMessage());
@@ -57,6 +68,11 @@ public class ExifUtilsCli {
                 System.out.printf("  %-15s %s%n",
                         cmd.getCommandName(),
                         cmd.getCommandDescription()));
+    }
+
+    private void setRootLogLevelToDebug() {
+        ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("sk.kubisoft.exifutils");
+        rootLogger.setLevel(ch.qos.logback.classic.Level.DEBUG);
     }
 
 }

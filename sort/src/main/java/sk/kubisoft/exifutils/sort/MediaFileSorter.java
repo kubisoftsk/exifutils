@@ -2,6 +2,7 @@ package sk.kubisoft.exifutils.sort;
 
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
+import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -11,11 +12,11 @@ import java.util.Map;
 @Singleton
 public class MediaFileSorter {
 
-    private final MediaFileRenamer mediaFileRenamer;
+    private final MediaFileNameUtils fileNameUtils;
 
     @Inject
-    public MediaFileSorter(MediaFileRenamer mediaFileRenamer) {
-        this.mediaFileRenamer = mediaFileRenamer;
+    public MediaFileSorter(MediaFileNameUtils fileNameUtils) {
+        this.fileNameUtils = fileNameUtils;
     }
 
     public Map<Path, Path> sort(Map<MediaFile, MediaDateTime> mediaFilesWithDate, Path targetRootPath, boolean rename) {
@@ -30,7 +31,7 @@ public class MediaFileSorter {
 
             String targetFileName;
             if (rename) {
-                targetFileName = mediaFileRenamer.rename(mediaFile, date);
+                targetFileName = fileNameUtils.createNewName(mediaFile, date);
             } else {
                 targetFileName = originalFileName;
             }

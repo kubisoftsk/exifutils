@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
+import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MediaFileSorterTest {
 
     @Mock
-    private MediaFileRenamer mediaFileRenamer;
+    private MediaFileNameUtils fileNameUtils;
     
     private MediaFileSorter sorter;
     private Path sourceRoot;
@@ -28,7 +29,7 @@ class MediaFileSorterTest {
 
     @BeforeEach
     void setUp() {
-        sorter = new MediaFileSorter(mediaFileRenamer);
+        sorter = new MediaFileSorter(fileNameUtils);
         sourceRoot = Path.of("/source");
         targetRoot = Path.of("/target");
     }

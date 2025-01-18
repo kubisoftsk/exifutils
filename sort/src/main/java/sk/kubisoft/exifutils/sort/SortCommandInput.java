@@ -11,9 +11,7 @@ public record SortCommandInput(
 
         boolean rename,
 
-        boolean dryRun,
-
-        boolean verbose
+        boolean dryRun
 
 ) {
 }
