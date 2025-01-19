@@ -5,6 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import dagger.multibindings.StringKey;
+import sk.kubisoft.exifutils.cli.logging.SystemConsole;
 import sk.kubisoft.exifutils.core.CommandRunner;
 import sk.kubisoft.exifutils.dedupe.DeDupeCommandRunner;
 import sk.kubisoft.exifutils.rename.RenameCommandRunner;
@@ -54,5 +55,6 @@ public class ExifUtilsModule {
     @Component(modules = {ExifUtilsModule.class})
     public interface CliComponent {
         Map<String, CommandRunner> commandRunners();
+        SystemConsole systemConsole();
     }
 }

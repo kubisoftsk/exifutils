@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sk.kubisoft.exifutils.core.config.model.ExifUtilsConfiguration;
+import sk.kubisoft.exifutils.core.utils.EnvironmentUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -20,7 +21,6 @@ public final class ConfigService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConfigService.class);
 
-	private static final String APP_NAME = "exifsort";
 	private static final String CONFIG_FILE_NAME = "exifsort-config.yml";
 
 	private ExifUtilsConfiguration config;
@@ -34,38 +34,13 @@ public final class ConfigService {
 		return config;
 	}
 
-	/**
-	 * This handles:
-	 *
-	 * Windows: C:\Users\<username>\AppData\Roaming\exifsort\
-	 * macOS: ~/Library/Application Support/exifsort/
-	 * Linux: ~/.config/exifsort/ (or custom $XDG_CONFIG_HOME if set)
-	 */
-	private Path getConfigurationDirectory() {
-		String os = System.getProperty("os.name").toLowerCase();
-		String userHome = System.getProperty("user.home");
-
-		Path configRootDirectory = switch (os) {
-			case String s when s.contains("win") -> Path.of(System.getenv("APPDATA"));
-			case String s when s.contains("mac") -> Path.of(userHome, "Library", "Application Support");
-			default -> // Linux and others follow XDG Base Directory Specification
-					Path.of(
-							System.getenv("XDG_CONFIG_HOME") != null
-							? System.getenv("XDG_CONFIG_HOME")
-							: Path.of(userHome, ".config").toString()
-					);
-		};
-
-		return configRootDirectory.resolve(APP_NAME);
-	}
-
 	private void loadConfig() {
-		Path configDir = getConfigurationDirectory();
+		Path configDir = EnvironmentUtils.getApplicationDirectory();
 		Path configFile = configDir.resolve(CONFIG_FILE_NAME);
 
 		if (!Files.exists(configFile)) {
 			System.out.println("Config file does not exist: " + configFile);
-			createDefaultConfig(configDir, configFile);
+			createDefaultConfig(configFile);
 		}
 
 		org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml();
@@ -77,15 +52,7 @@ public final class ConfigService {
 		}
 	}
 
-	private void createDefaultConfig(Path configDir, Path configFile) {
-		// create the directory if it does not exist
-		try {
-			Files.createDirectories(configDir);
-			logger.info("Created directory: {}", configDir);
-		} catch (IOException e) {
-			throw new UncheckedIOException("Failed to create directory: " + configDir, e);
-		}
-
+	private void createDefaultConfig(Path configFile) {
 		// copy default config from resources to file
 		try (var defaultConfigIs = getClass().getResourceAsStream("/configuration-default.yml");
 			 Writer writer = Files.newBufferedWriter(configFile)) {

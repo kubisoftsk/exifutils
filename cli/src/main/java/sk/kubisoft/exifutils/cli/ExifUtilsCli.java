@@ -1,6 +1,8 @@
 package sk.kubisoft.exifutils.cli;
 
 import org.apache.commons.cli.*;
+import sk.kubisoft.exifutils.cli.logging.LoggingUtils;
+import sk.kubisoft.exifutils.cli.logging.SystemConsole;
 import sk.kubisoft.exifutils.core.CommandRunner;
 
 import javax.inject.Inject;
@@ -10,6 +12,7 @@ import java.util.Map;
 public class ExifUtilsCli {
 
     private final Map<String, CommandRunner> commands;
+    private final SystemConsole systemConsole;
 
     // Common options
     private static final Option VERBOSE = Option.builder()
@@ -19,8 +22,9 @@ public class ExifUtilsCli {
             .build();
 
     @Inject
-    public ExifUtilsCli(Map<String, CommandRunner> commands) {
+    public ExifUtilsCli(Map<String, CommandRunner> commands, SystemConsole console) {
         this.commands = commands;
+        this.systemConsole = console;
     }
 
     public void run(String[] args) {
@@ -44,9 +48,15 @@ public class ExifUtilsCli {
         options.addOption(VERBOSE);
         try {
             CommandLine cmd = parser.parse(options, commandArgs);
+
             if (cmd.hasOption("verbose")) {
-                setRootLogLevelToDebug();
+                systemConsole.setVerbose(true);
             }
+
+            LoggingUtils.getCurrentLogFile().ifPresent(logFile -> {
+                System.out.println("Started logging to file: " + logFile.toAbsolutePath());
+            });
+
             System.exit(runner.runCommand(cmd));
         } catch (ParseException e) {
             System.err.println("Error parsing command arguments: " + e.getMessage());
@@ -68,11 +78,6 @@ public class ExifUtilsCli {
                 System.out.printf("  %-15s %s%n",
                         cmd.getCommandName(),
                         cmd.getCommandDescription()));
-    }
-
-    private void setRootLogLevelToDebug() {
-        ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("sk.kubisoft.exifutils");
-        rootLogger.setLevel(ch.qos.logback.classic.Level.DEBUG);
     }
 
 }

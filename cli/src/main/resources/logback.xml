@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-	<timestamp key="timestamp" datePattern="yyyy-MM-dd-HH-mm-ss"/>
-
-	<!-- Console appender -->
-	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
-		</encoder>
-	</appender>
+	<!-- Define the property using your class -->
+	<define name="LOGGING_DIRECTORY" class="sk.kubisoft.exifutils.cli.logging.LoggingDirectoryProperty"/>
 
 	<!-- File appender with timestamp -->
+	<timestamp key="timestamp" datePattern="yyyy-MM-dd-HH-mm-ss"/>
 	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
-		<file>exifutils_${timestamp}.log</file>
+		<file>${LOGGING_DIRECTORY}/exifutils_${timestamp}.log</file>
 		<append>true</append>
 		<encoder>
 			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
@@ -21,6 +16,9 @@
 	<!-- Root logger -->
 	<root level="INFO">
 		<appender-ref ref="FILE"/>
-		<appender-ref ref="CONSOLE"/>
 	</root>
+
+	<!-- Root logger for my application -->
+	<logger name="sk.kubisoft.exifutils" level="DEBUG"/>
+
 </configuration>
