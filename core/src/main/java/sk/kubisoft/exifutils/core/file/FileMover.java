@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
+import java.util.Objects;
 
 @Singleton
 public class FileMover {
@@ -73,7 +74,11 @@ public class FileMover {
                 }
 
                 // Perform atomic move
-                console.println("Moving %s to %s", source, target);
+                if (Objects.equals(target.getParent(), source.getParent())) {
+                    console.println("Moving %s to %s", source, target.getFileName());
+                } else {
+                    console.println("Moving %s to %s", source, target);
+                }
                 try {
                     Files.move(source, target, StandardCopyOption.ATOMIC_MOVE);
                     successCount++;
