@@ -2,6 +2,7 @@ package sk.kubisoft.exifutils.core.file;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -18,9 +19,11 @@ public class DuplicateFileHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(DuplicateFileHandler.class);
     private static final int BUFFER_SIZE = 8192;
+    private Console console;
 
     @Inject
-    public DuplicateFileHandler() {
+    public DuplicateFileHandler(Console console) {
+        this.console = console;
     }
 
     /**
@@ -39,10 +42,10 @@ public class DuplicateFileHandler {
 
         // First, check if the files are identical
         if (areFilesIdentical(sourcePath, targetPath)) {
-            logger.info("Files are identical: {} and {}", sourcePath, targetPath);
+            logger.debug("Files are identical: {} and {}", sourcePath, targetPath);
             return targetPath;
         } else {
-            logger.info("Files are different: {} and {}", sourcePath, targetPath);
+            logger.debug("Files are different: {} and {}", sourcePath, targetPath);
         }
 
         // If not identical, find a new name

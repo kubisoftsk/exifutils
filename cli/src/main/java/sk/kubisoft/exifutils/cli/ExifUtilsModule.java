@@ -7,6 +7,7 @@ import dagger.multibindings.IntoMap;
 import dagger.multibindings.StringKey;
 import sk.kubisoft.exifutils.cli.logging.SystemConsole;
 import sk.kubisoft.exifutils.core.CommandRunner;
+import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.dedupe.DeDupeCommandRunner;
 import sk.kubisoft.exifutils.rename.RenameCommandRunner;
 import sk.kubisoft.exifutils.setdate.SetDateCommandRunner;
@@ -17,6 +18,12 @@ import java.util.Map;
 
 @Module
 public class ExifUtilsModule {
+
+    @Provides
+    @Singleton
+    Console provideConsole() {
+        return new SystemConsole();
+    }
 
     @Provides
     @Singleton
@@ -55,6 +62,6 @@ public class ExifUtilsModule {
     @Component(modules = {ExifUtilsModule.class})
     public interface CliComponent {
         Map<String, CommandRunner> commandRunners();
-        SystemConsole systemConsole();
+        Console console();
     }
 }

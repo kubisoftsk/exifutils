@@ -2,6 +2,7 @@ package sk.kubisoft.exifutils.core.file;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -17,9 +18,11 @@ public class FileMover {
 
     private static final Logger logger = LoggerFactory.getLogger(FileMover.class);
     private final DuplicateFileHandler duplicateHandler;
+    private final Console console;
 
     @Inject
-    public FileMover(DuplicateFileHandler duplicateHandler) {
+    public FileMover(Console console, DuplicateFileHandler duplicateHandler) {
+        this.console = console;
         this.duplicateHandler = duplicateHandler;
     }
 
@@ -33,19 +36,19 @@ public class FileMover {
             try {
                 // Basic validation
                 if (!Files.exists(source)) {
-                    logger.error("Source file does not exist: {}", source);
+                    console.error("Source file does not exist: %s", source);
                     continue;
                 }
 
                 if (!Files.isRegularFile(source)) {
-                    logger.error("Source is not a regular file: {}", source);
+                    console.error("Source is not a regular file: %s", source);
                     continue;
                 }
 
                 // Handle potential file conflicts
                 Path resolvedTarget = duplicateHandler.resolveConflict(source, target);
                 if (!resolvedTarget.equals(target)) {
-                    logger.info("Resolved file conflict: {} -> {}", target, resolvedTarget);
+                    console.verbose("Resolved file conflict: %s -> %s", target, resolvedTarget);
                     target = resolvedTarget;
                 }
 
@@ -54,23 +57,23 @@ public class FileMover {
                 try {
                     Files.createDirectories(targetDir);
                 } catch (IOException e) {
-                    logger.error("Failed to create target directory {}: {}", targetDir, e.getMessage());
+                    console.error("Failed to create target directory %s: %s", targetDir, e.getMessage());
                     continue;
                 }
 
                 // Rest of the existing move logic...
                 if (!Files.isWritable(source)) {
-                    logger.error("Source file is not writable: {}", source);
+                    console.error("Source file is not writable: %s", source);
                     continue;
                 }
 
                 if (targetDir != null && !Files.isWritable(targetDir)) {
-                    logger.error("Target directory is not writable: {}", targetDir);
+                    console.error("Target directory is not writable: %s", targetDir);
                     continue;
                 }
 
                 // Perform atomic move
-                logger.info("Moving {} to {}", source, target);
+                console.println("Moving %s to %s", source, target);
                 try {
                     Files.move(source, target, StandardCopyOption.ATOMIC_MOVE);
                     successCount++;
@@ -83,15 +86,15 @@ public class FileMover {
                 }
 
             } catch (SecurityException e) {
-                logger.error("Security violation moving {} to {}: {}", source, target, e.getMessage());
+                console.error("Security violation moving %s to %s: %s", source, target, e.getMessage());
             } catch (IOException e) {
-                logger.error("IO error moving {} to {}: {}", source, target, e.getMessage());
+                console.error("IO error moving %s to %s: %s", source, target, e.getMessage());
             } catch (Exception e) {
-                logger.error("Unexpected error moving {} to {}: {}", source, target, e.getMessage());
+                console.error("Unexpected error moving %s to %s: %s", source, target, e.getMessage());
             }
         }
 
-        logger.info("Move operation completed. Successfully moved {} out of {} files",
+        console.println("Operation completed. Successfully moved %s out of %s files",
                 successCount, moveActions.size());
     }
 }

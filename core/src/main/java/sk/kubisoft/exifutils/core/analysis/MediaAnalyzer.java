@@ -3,6 +3,7 @@ package sk.kubisoft.exifutils.core.analysis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sk.kubisoft.exifutils.core.config.ConfigService;
+import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 
@@ -18,11 +19,14 @@ public class MediaAnalyzer {
 
     private static final Logger logger = LoggerFactory.getLogger(MediaAnalyzer.class);
 
+    private final Console console;
     private final ConfigService configService;
     private final MediaDateExtractor mediaDateExtractor;
 
     @Inject
-    public MediaAnalyzer(ConfigService configService, MediaDateExtractor mediaDateExtractor) {
+    public MediaAnalyzer(Console console, ConfigService configService,
+                         MediaDateExtractor mediaDateExtractor) {
+        this.console = console;
         this.configService = configService;
         this.mediaDateExtractor = mediaDateExtractor;
     }
@@ -35,14 +39,19 @@ public class MediaAnalyzer {
             throw new IllegalArgumentException("ExifTool path not configured");
         }
         try (var metaDataExtractor = new MetaDataExtractor(exifToolConfig.getPath())) {
+            console.println("Starting analysis of media files...", files.size());
             for (int i = 0; i < files.size(); i++) {
                 var file = files.get(i);
-                logger.info("Analyzing file {} of {}: {}", i + 1, files.size(), file);
+                if (console.isVerbose()) {
+                    console.println("Analyzing file %d of %d: %s", i + 1, files.size(), file);
+                } else {
+                    console.progress("Analyzing file %d of %d: %s", i + 1, files.size(), file);
+                }
 
                 try {
                     var mediaFileOptional = metaDataExtractor.extractMetaData(file);
                     if (mediaFileOptional.isEmpty()) {
-                        logger.debug("No metadata found, skipping file: {}", file);
+                        console.verbose("No metadata found, skipping file");
                         continue;
                     }
 
@@ -50,15 +59,19 @@ public class MediaAnalyzer {
                     var dateOptional = mediaDateExtractor.extractCreationDate(mediaFile);
                     if (dateOptional.isPresent()) {
                         var date = dateOptional.get();
-                        logger.debug("Found creation date: {}", date);
+                        console.verbose("Found creation date: %s", date);
                         mediaFilesWithDate.put(mediaFile, date);
                     } else {
-                        logger.debug("No valid date found");
+                        console.verbose("No valid date found");
                     }
                 } catch (Exception e) {
-                    logger.error("Error processing file: {}", file, e);
+                    console.error("Error processing file: %s", e, file);
                 }
             }
+            if (!console.isVerbose()) {
+                console.progress("\33[2K\r"); // Clear progress line
+            }
+            console.println("Analysis finished.");
         } catch (Exception e) {
             throw new RuntimeException("Error processing files", e);
         }

@@ -2,8 +2,8 @@ package sk.kubisoft.exifutils.cli;
 
 import org.apache.commons.cli.*;
 import sk.kubisoft.exifutils.cli.logging.LoggingUtils;
-import sk.kubisoft.exifutils.cli.logging.SystemConsole;
 import sk.kubisoft.exifutils.core.CommandRunner;
+import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -12,7 +12,7 @@ import java.util.Map;
 public class ExifUtilsCli {
 
     private final Map<String, CommandRunner> commands;
-    private final SystemConsole systemConsole;
+    private final Console console;
 
     // Common options
     private static final Option VERBOSE = Option.builder()
@@ -22,9 +22,9 @@ public class ExifUtilsCli {
             .build();
 
     @Inject
-    public ExifUtilsCli(Map<String, CommandRunner> commands, SystemConsole console) {
+    public ExifUtilsCli(Map<String, CommandRunner> commands, Console console) {
         this.commands = commands;
-        this.systemConsole = console;
+        this.console = console;
     }
 
     public void run(String[] args) {
@@ -49,7 +49,7 @@ public class ExifUtilsCli {
         try {
             CommandLine cmd = parser.parse(options, commandArgs);
 
-            if (cmd.hasOption("verbose")) {
+            if (cmd.hasOption("verbose") && console instanceof sk.kubisoft.exifutils.cli.logging.SystemConsole systemConsole) {
                 systemConsole.setVerbose(true);
             }
 

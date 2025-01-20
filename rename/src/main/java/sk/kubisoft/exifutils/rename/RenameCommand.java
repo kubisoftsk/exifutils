@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.FileMover;
+import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
@@ -23,35 +24,42 @@ public class RenameCommand {
     private final MediaAnalyzer mediaAnalyzer;
     private final MediaFileNameUtils fileNameUtils;
     private final FileMover fileMover;
+    private final Console console;
 
     @Inject
     public RenameCommand(FileExplorer fileExplorer, MediaAnalyzer mediaAnalyzer,
-                         MediaFileNameUtils fileNameUtils, FileMover fileMover) {
+                         MediaFileNameUtils fileNameUtils, FileMover fileMover, Console console) {
         this.fileExplorer = fileExplorer;
         this.mediaAnalyzer = mediaAnalyzer;
         this.fileNameUtils = fileNameUtils;
         this.fileMover = fileMover;
+        this.console = console;
     }
 
     public void execute(RenameCommandInput input) {
-        logger.info("Running ExifUtils Rename command with input: {}", input);
+        console.verbose("Running ExifUtils Rename command with input: %s", input);
 
+        console.println("Searching for media files...");
         var allFiles = fileExplorer.listFiles(input.sourceDirectories());
-        logger.info("Found {} files", allFiles.size());
+        console.println("Found %d files.", allFiles.size());
 
         Map<MediaFile, MediaDateTime> mediaFilesWithDate = mediaAnalyzer.analyzeCreationDate(allFiles);
 
-        logger.info("Found {} media files with valid dates", mediaFilesWithDate.size());
+        console.println("Found %d media files with valid dates.", mediaFilesWithDate.size());
 
         Map<Path, Path> moveActions = createMoveActions(mediaFilesWithDate);
-        logger.info("Files should be renamed as follows:");
-        moveActions.forEach((source, target) -> logger.info("Move {} to {}", source, target));
+        console.println("Total %d files will be renamed:", moveActions.size());
+        moveActions.forEach((source, target) -> console.println("%s -> %s", source, target.getFileName()));
 
         if (input.dryRun()) {
-            logger.info("Dry run, not moving files");
+            console.println("Dry run, not renaming any files.");
         } else {
-            logger.info("Moving files...");
-            fileMover.moveFiles(moveActions);
+            if (console.confirmAction("Do you want to continue?")) {
+                console.println("Moving files...");
+                fileMover.moveFiles(moveActions);
+            } else {
+                console.println("Aborted.");
+            }
         }
     }
 
@@ -66,6 +74,11 @@ public class RenameCommand {
             var newName = fileNameUtils.createNewName(mediaFile, date);
 
             var targetPath = originalPath.getParent().resolve(newName);
+            if (originalPath.equals(targetPath)) {
+                logger.debug("Skipping move action, source and target are the same: {}", originalPath);
+                continue;
+            }
+            logger.debug("Created move action {} to {}", originalPath, targetPath);
             moveActions.put(originalPath, targetPath);
         }
 
