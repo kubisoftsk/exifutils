@@ -5,9 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
+import sk.kubisoft.exifutils.core.media.MediaType;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -35,10 +37,9 @@ public class MediaDateExtractor {
     }
 
     public Optional<MediaDateTime> extractCreationDate(MediaFile mediaFile) {
-        return extractDate(mediaFile.metadata());
-    }
+        var mediaType = mediaFile.mediaType();
+        var metadata = mediaFile.metadata();
 
-    public Optional<MediaDateTime> extractDate(Map<String, String> metadata) {
         // Order of precedence for date fields
         OffsetDateTimeField[] dateFields = {
                 new OffsetDateTimeField("CreationDate", "OffsetTime"),
@@ -76,8 +77,37 @@ public class MediaDateExtractor {
         }
 
         // If no valid date with offset found, return the first valid date without offset
-        return dateFieldsWithDate.values().stream()
+        var dateWithoutOffset = dateFieldsWithDate.values().stream()
                 .findFirst();
+
+        // If the media is video, try to guess the offset from file modify date, because OnePlus videos do not contain offset
+        // and store the CreationDate in UTC time, which is not useful for correct naming of the files
+        if (dateWithoutOffset.isPresent() && mediaType == MediaType.VIDEO) {
+            Optional<MediaDateTime> dateWithGuessedOffset = getOffsetFromFileModifyDate(metadata)
+                    .map(offset -> {
+                        // transform local time
+                        var localDateTime = dateWithoutOffset.get().getLocalDateTime();
+                        var utcDateTime = localDateTime.atOffset(ZoneOffset.UTC);
+                        var localTimeAtOffsetSameInstant = utcDateTime.withOffsetSameInstant(offset).toLocalDateTime();
+                        return new MediaDateTime(localTimeAtOffsetSameInstant, offset);
+                    });
+            if (dateWithGuessedOffset.isPresent()) {
+                return dateWithGuessedOffset;
+            } else {
+                return dateWithoutOffset;
+            }
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<ZoneOffset> getOffsetFromFileModifyDate(Map<String, String> metadata) {
+        var fileModifyDateString = metadata.get("FileModifyDate");
+        if (StringUtils.isBlank(fileModifyDateString)) {
+            return Optional.empty();
+        }
+        return ExifDateParser.parseExifDate(fileModifyDateString, null)
+                .map(MediaDateTime::getZoneOffset);
     }
 
     record OffsetDateTimeField(String dateField, String offsetField) {
