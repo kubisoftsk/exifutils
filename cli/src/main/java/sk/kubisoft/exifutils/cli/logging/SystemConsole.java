@@ -62,7 +62,7 @@ public class SystemConsole implements Console {
     @Override
     public void progress(String format, Object... args) {
         String message = String.format(format, args);
-        System.out.print("\r" + message);
+        System.out.print("\33[2K\r" + message); // Special character sequence to clear line and move cursor to beginning
         System.out.flush();
         logger.debug(message);
     }

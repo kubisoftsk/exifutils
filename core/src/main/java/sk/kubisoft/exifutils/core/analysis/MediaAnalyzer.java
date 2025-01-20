@@ -69,7 +69,7 @@ public class MediaAnalyzer {
                 }
             }
             if (!console.isVerbose()) {
-                console.progress("\33[2K\r"); // Clear progress line
+                console.progress(""); // Clear progress line
             }
             console.println("Analysis finished.");
         } catch (Exception e) {
