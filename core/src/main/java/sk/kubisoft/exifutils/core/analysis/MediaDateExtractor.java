@@ -84,12 +84,22 @@ public class MediaDateExtractor {
         // and store the CreationDate in UTC time, which is not useful for correct naming of the files
         if (dateWithoutOffset.isPresent() && mediaType == MediaType.VIDEO) {
             Optional<MediaDateTime> dateWithGuessedOffset = getOffsetFromFileModifyDate(metadata)
-                    .map(offset -> {
-                        // transform local time
+                    .map(fileModifyMediaDateTime -> {
+                        ZoneOffset offsetToUse;
+                        // check if the day is the same as the creation date
+                        if (dateWithoutOffset.get().getLocalDateTime().toLocalDate().equals(fileModifyMediaDateTime.getLocalDateTime().toLocalDate())) {
+                            // now we can trust the fileModifyMediaDateTime and extract the offset
+                            offsetToUse = fileModifyMediaDateTime.getZoneOffset();
+                        } else {
+                            // othewise we cannot trust the fileModifyMediaDateTime and we must use system timezone default offset
+                            // now we can trust the fileModifyMediaDateTime and extract the offset
+                            offsetToUse = ZoneOffset.systemDefault().getRules().getOffset(dateWithoutOffset.get().getLocalDateTime());
+                        }
+
                         var localDateTime = dateWithoutOffset.get().getLocalDateTime();
                         var utcDateTime = localDateTime.atOffset(ZoneOffset.UTC);
-                        var localTimeAtOffsetSameInstant = utcDateTime.withOffsetSameInstant(offset).toLocalDateTime();
-                        return new MediaDateTime(localTimeAtOffsetSameInstant, offset);
+                        var localTimeAtOffsetSameInstant = utcDateTime.withOffsetSameInstant(offsetToUse).toLocalDateTime();
+                        return new MediaDateTime(localTimeAtOffsetSameInstant, offsetToUse);
                     });
             if (dateWithGuessedOffset.isPresent()) {
                 return dateWithGuessedOffset;
@@ -101,13 +111,12 @@ public class MediaDateExtractor {
         }
     }
 
-    private Optional<ZoneOffset> getOffsetFromFileModifyDate(Map<String, String> metadata) {
+    private Optional<MediaDateTime> getOffsetFromFileModifyDate(Map<String, String> metadata) {
         var fileModifyDateString = metadata.get("FileModifyDate");
         if (StringUtils.isBlank(fileModifyDateString)) {
             return Optional.empty();
         }
-        return ExifDateParser.parseExifDate(fileModifyDateString, null)
-                .map(MediaDateTime::getZoneOffset);
+        return ExifDateParser.parseExifDate(fileModifyDateString, null);
     }
 
     record OffsetDateTimeField(String dateField, String offsetField) {

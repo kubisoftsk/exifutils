@@ -7,6 +7,10 @@ import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaType;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -130,7 +134,7 @@ class MediaDateExtractorTest {
     void extractCreationDateForVideo4() {
         // This is video taken with probably OnePlus Nord 2T, but there is no offset in metadata
         // This video was actualy taken at 18:43:21 local time in Slovakia, but unfortunately the offset is missing in metadata
-        // and is guessed from file modify date
+        // and is guessed from file modify date and can be trusted, because the file modify date is the same day as creation date
         Map<String, String> metaData = loadMetaData("/exifdata/video_4.json");
 
         Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
@@ -144,7 +148,7 @@ class MediaDateExtractorTest {
     void extractCreationDateForVideo5() {
         // This is video taken with OnePlus 9 Pro, but there is no offset in metadata
         // This video was actualy taken at 17:52:18 local time in Slovakia, but unfortunately the offset is missing in metadata
-        // and is guessed from file modify date
+        // and is guessed from file modify date and can be trusted, because the file modify date is the same day as creation date
         Map<String, String> metaData = loadMetaData("/exifdata/video_5.json");
 
         Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
@@ -158,7 +162,7 @@ class MediaDateExtractorTest {
     void extractCreationDateForVideo6() {
         // This is video taken with OnePlus 12, but there is no offset in metadata
         // This video was actualy taken at 16:58:01 local time in Slovakia, but unfortunately the offset is missing in metadata
-        // and is guessed from file modify date
+        // and is guessed from file modify date and can be trusted, because the file modify date is the same day as creation date
         Map<String, String> metaData = loadMetaData("/exifdata/video_6.json");
 
         Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
@@ -166,6 +170,22 @@ class MediaDateExtractorTest {
         assertTrue(creationDate.isPresent());
         assertEquals("2025-01-04T16:58:01", creationDate.get().getLocalDateTime().toString());
         assertEquals("+01:00", creationDate.get().getZoneOffset().toString());
+    }
+
+    @Test
+    void extractCreationDateForVideo7() {
+        // This is video taken with OnePlus phone, but there is no offset in metadata
+        // This video was actualy taken at 16:25:06 +0100 local time in Slovakia
+        // but cannot be guessed from file modify date, because file modify date is different day then creation date
+        // then the offset is just guessed from current system timezone
+        Map<String, String> metaData = loadMetaData("/exifdata/video_7.json");
+
+        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
+
+        assertTrue(creationDate.isPresent());
+        assertEquals(LocalDateTime.of(2022,2,21,15,25,6).atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime(),
+                creationDate.get().getLocalDateTime());
+        assertEquals(ZonedDateTime.now().getOffset(), creationDate.get().getZoneOffset());
     }
 
     private Map<String, String> loadMetaData(String resourceName) {
