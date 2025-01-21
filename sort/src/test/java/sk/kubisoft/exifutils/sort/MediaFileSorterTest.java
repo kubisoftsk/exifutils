@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import sk.kubisoft.exifutils.core.file.MoveAction;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
@@ -12,6 +13,7 @@ import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,14 +46,13 @@ class MediaFileSorterTest {
         input.put(mediaFile, dateTime);
 
         // When
-        Map<Path, Path> result = sorter.sort(input, targetRoot, false);
+        List<MoveAction> result = sorter.sort(input, targetRoot, false);
 
         // Then
         assertEquals(1, result.size());
-        assertEquals(
-                targetRoot.resolve("2024/07/IMG7277.JPG"),
-                result.get(sourceRoot.resolve("IMG7277.JPG"))
-        );
+        var moveAction = result.get(0);
+        assertEquals(sourceRoot.resolve("IMG7277.JPG"), moveAction.source());
+        assertEquals(targetRoot.resolve("2024/07/IMG7277.JPG"), moveAction.target());
     }
 
     @Test
@@ -66,18 +67,16 @@ class MediaFileSorterTest {
         input.put(file2, date);
 
         // When
-        Map<Path, Path> result = sorter.sort(input, targetRoot, false);
+        List<MoveAction> result = sorter.sort(input, targetRoot, false);
 
         // Then
         assertEquals(2, result.size());
-        assertEquals(
-                targetRoot.resolve("2024/07/IMG7277.JPG"),
-                result.get(sourceRoot.resolve("IMG7277.JPG"))
-        );
-        assertEquals(
-                targetRoot.resolve("2024/07/IMG7278.JPG"),
-                result.get(sourceRoot.resolve("IMG7278.JPG"))
-        );
+        var moveAction1 = result.get(0);
+        assertEquals(sourceRoot.resolve("IMG7277.JPG"), moveAction1.source());
+        assertEquals(targetRoot.resolve("2024/07/IMG7277.JPG"), moveAction1.target());
+        var moveAction2 = result.get(1);
+        assertEquals(sourceRoot.resolve("IMG7278.JPG"), moveAction2.source());
+        assertEquals(targetRoot.resolve("2024/07/IMG7278.JPG"), moveAction2.target());
     }
 
     @Test
@@ -93,18 +92,16 @@ class MediaFileSorterTest {
         input.put(augustFile, augustDate);
 
         // When
-        Map<Path, Path> result = sorter.sort(input, targetRoot, false);
+        List<MoveAction> result = sorter.sort(input, targetRoot, false);
 
         // Then
         assertEquals(2, result.size());
-        assertEquals(
-                targetRoot.resolve("2024/07/IMG7277.JPG"),
-                result.get(sourceRoot.resolve("IMG7277.JPG"))
-        );
-        assertEquals(
-                targetRoot.resolve("2024/08/IMG7278.JPG"),
-                result.get(sourceRoot.resolve("IMG7278.JPG"))
-        );
+        var moveAction1 = result.get(0);
+        assertEquals(sourceRoot.resolve("IMG7277.JPG"), moveAction1.source());
+        assertEquals(targetRoot.resolve("2024/07/IMG7277.JPG"), moveAction1.target());
+        var moveAction2 = result.get(1);
+        assertEquals(sourceRoot.resolve("IMG7278.JPG"), moveAction2.source());
+        assertEquals(targetRoot.resolve("2024/08/IMG7278.JPG"), moveAction2.target());
     }
 
     @Test
@@ -120,18 +117,16 @@ class MediaFileSorterTest {
         input.put(file2023, date2023);
 
         // When
-        Map<Path, Path> result = sorter.sort(input, targetRoot, false);
+        List<MoveAction> result = sorter.sort(input, targetRoot, false);
 
         // Then
         assertEquals(2, result.size());
-        assertEquals(
-                targetRoot.resolve("2024/07/IMG7277.JPG"),
-                result.get(sourceRoot.resolve("IMG7277.JPG"))
-        );
-        assertEquals(
-                targetRoot.resolve("2023/12/IMG7278.JPG"),
-                result.get(sourceRoot.resolve("IMG7278.JPG"))
-        );
+        var moveAction1 = result.get(0);
+        assertEquals(sourceRoot.resolve("IMG7277.JPG"), moveAction1.source());
+        assertEquals(targetRoot.resolve("2024/07/IMG7277.JPG"), moveAction1.target());
+        var moveAction2 = result.get(1);
+        assertEquals(sourceRoot.resolve("IMG7278.JPG"), moveAction2.source());
+        assertEquals(targetRoot.resolve("2023/12/IMG7278.JPG"), moveAction2.target());
     }
 
     @Test
@@ -140,7 +135,7 @@ class MediaFileSorterTest {
         Map<MediaFile, MediaDateTime> input = new HashMap<>();
 
         // When
-        Map<Path, Path> result = sorter.sort(input, targetRoot, false);
+        List<MoveAction> result = sorter.sort(input, targetRoot, false);
 
         // Then
         assertTrue(result.isEmpty());
@@ -160,12 +155,11 @@ class MediaFileSorterTest {
         input.put(complexFileName, date);
 
         // When
-        Map<Path, Path> result = sorter.sort(input, targetRoot, false);
+        List<MoveAction> result = sorter.sort(input, targetRoot, false);
 
         // Then
-        assertEquals(
-                targetRoot.resolve("2024/01/IMG_20240115_123456_HDR.jpg"),
-                result.get(sourceRoot.resolve("IMG_20240115_123456_HDR.jpg"))
-        );
+        var moveAction = result.get(0);
+        assertEquals(sourceRoot.resolve("IMG_20240115_123456_HDR.jpg"), moveAction.source());
+        assertEquals(targetRoot.resolve("2024/01/IMG_20240115_123456_HDR.jpg"), moveAction.target());
     }
 }

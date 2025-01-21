@@ -1,5 +1,6 @@
 package sk.kubisoft.exifutils.sort;
 
+import sk.kubisoft.exifutils.core.file.MoveAction;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
@@ -7,6 +8,8 @@ import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Singleton
@@ -19,8 +22,8 @@ public class MediaFileSorter {
         this.fileNameUtils = fileNameUtils;
     }
 
-    public Map<Path, Path> sort(Map<MediaFile, MediaDateTime> mediaFilesWithDate, Path targetRootPath, boolean rename) {
-        Map<Path, Path> moveActions = new java.util.LinkedHashMap<>();
+    public List<MoveAction> sort(Map<MediaFile, MediaDateTime> mediaFilesWithDate, Path targetRootPath, boolean rename) {
+        var moveActions = new ArrayList<MoveAction>();
 
         for (var entry : mediaFilesWithDate.entrySet()) {
             var mediaFile = entry.getKey();
@@ -38,7 +41,7 @@ public class MediaFileSorter {
             var targetDateFolder = createTargetDateFolder(date);
             var finalTargetPath = targetRootPath.resolve(targetDateFolder).resolve(targetFileName);
 
-            moveActions.put(originalPath, finalTargetPath);
+            moveActions.add(new MoveAction(originalPath, finalTargetPath));
         }
 
         return moveActions;

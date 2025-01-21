@@ -97,6 +97,18 @@ class MediaDateExtractorTest {
     }
 
     @Test
+    void extractCreationDateForImage7() {
+        // This is full size image taken with OnePlus 6 in Slovakia
+        Map<String, String> metaData = loadMetaData("/exifdata/image_7.json");
+
+        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(IMAGE, metaData));
+
+        assertTrue(creationDate.isPresent());
+        assertEquals("2020-01-03T07:19:08", creationDate.get().getLocalDateTime().toString());
+        assertEquals("+01:00", creationDate.get().getZoneOffset().toString());
+    }
+
+    @Test
     void noDateFoundForVideo1() {
         // This is likely video sent via WhatsApp, which does not contain any EXIF metadata
         Map<String, String> metaData = loadMetaData("/exifdata/video_1.json");

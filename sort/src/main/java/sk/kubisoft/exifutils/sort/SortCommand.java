@@ -5,12 +5,14 @@ import org.slf4j.LoggerFactory;
 import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.FileMover;
+import sk.kubisoft.exifutils.core.file.MoveAction;
+import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 @Singleton
@@ -22,29 +24,31 @@ public class SortCommand {
     private final MediaAnalyzer mediaAnalyzer;
     private final MediaFileSorter mediaFileSorter;
     private final FileMover fileMover;
+    private final Console console;
 
     @Inject
     public SortCommand(FileExplorer fileExplorer, MediaAnalyzer mediaAnalyzer,
-                       MediaFileSorter mediaFileSorter, FileMover fileMover) {
+                       MediaFileSorter mediaFileSorter, FileMover fileMover, Console console) {
         this.fileExplorer = fileExplorer;
         this.mediaAnalyzer = mediaAnalyzer;
         this.mediaFileSorter = mediaFileSorter;
         this.fileMover = fileMover;
+        this.console = console;
     }
 
     public void execute(SortCommandInput input) {
-        logger.info("Running ExifUtils Sort command with input: {}", input);
+        console.verboseln("Running ExifUtils Sort command with input: {}", input);
 
+        console.println("Searching for media files...");
         var allFiles = fileExplorer.listFiles(input.sourceDirectories());
-        logger.info("Found {} files", allFiles.size());
+        console.println("Found %d files.", allFiles.size());
 
         Map<MediaFile, MediaDateTime> mediaFilesWithDate = mediaAnalyzer.analyzeCreationDate(allFiles);
+        console.println("Found %d media files with valid dates.", mediaFilesWithDate.size());
 
-        logger.info("Found {} media files with valid dates", mediaFilesWithDate.size());
-
-        Map<Path, Path> moveActions = mediaFileSorter.sort(mediaFilesWithDate, input.destinationDirectory(), input.rename());
-        logger.info("Files should be sorted as follows:");
-        moveActions.forEach((source, target) -> logger.info("Move {} to {}", source, target));
+        List<MoveAction> moveActions = mediaFileSorter.sort(mediaFilesWithDate, input.destinationDirectory(), input.rename());
+        console.println("Total %d files will be moved:", moveActions.size());
+        moveActions.forEach((moveAction) -> console.println("Move %s", moveAction));
 
         if (input.dryRun()) {
             logger.info("Dry run, not moving files");

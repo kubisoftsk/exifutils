@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.FileMover;
+import sk.kubisoft.exifutils.core.file.MoveAction;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
@@ -12,7 +13,8 @@ import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Singleton
@@ -37,19 +39,18 @@ public class RenameCommand {
     }
 
     public void execute(RenameCommandInput input) {
-        console.verbose("Running ExifUtils Rename command with input: %s", input);
+        console.verboseln("Running ExifUtils Rename command with input: %s", input);
 
         console.println("Searching for media files...");
         var allFiles = fileExplorer.listFiles(input.sourceDirectories());
         console.println("Found %d files.", allFiles.size());
 
         Map<MediaFile, MediaDateTime> mediaFilesWithDate = mediaAnalyzer.analyzeCreationDate(allFiles);
-
         console.println("Found %d media files with valid dates.", mediaFilesWithDate.size());
 
-        Map<Path, Path> moveActions = createMoveActions(mediaFilesWithDate);
+        List<MoveAction> moveActions = createMoveActions(mediaFilesWithDate);
         console.println("Total %d files will be renamed:", moveActions.size());
-        moveActions.forEach((source, target) -> console.println("%s -> %s", source, target.getFileName()));
+        moveActions.forEach((action) -> console.println("Rename %s", action));
 
         if (input.dryRun()) {
             console.println("Dry run, not renaming any files.");
@@ -63,8 +64,8 @@ public class RenameCommand {
         }
     }
 
-    private Map<Path, Path> createMoveActions(Map<MediaFile, MediaDateTime> mediaFilesWithDate) {
-        Map<Path, Path> moveActions = new java.util.LinkedHashMap<>();
+    private List<MoveAction> createMoveActions(Map<MediaFile, MediaDateTime> mediaFilesWithDate) {
+        List<MoveAction> moveActions = new ArrayList<>();
 
         for (var entry : mediaFilesWithDate.entrySet()) {
             var mediaFile = entry.getKey();
@@ -79,7 +80,7 @@ public class RenameCommand {
                 continue;
             }
             logger.debug("Created move action {} to {}", originalPath, targetPath);
-            moveActions.put(originalPath, targetPath);
+            moveActions.add(new MoveAction(originalPath, targetPath));
         }
 
         return moveActions;

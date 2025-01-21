@@ -11,8 +11,7 @@ import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Map;
-import java.util.Objects;
+import java.util.List;
 
 @Singleton
 public class FileMover {
@@ -27,12 +26,12 @@ public class FileMover {
         this.duplicateHandler = duplicateHandler;
     }
 
-    public void moveFiles(Map<Path, Path> moveActions) {
+    public void moveFiles(List<MoveAction> moveActions) {
         int successCount = 0;
 
-        for (Map.Entry<Path, Path> action : moveActions.entrySet()) {
-            Path source = action.getKey();
-            Path target = action.getValue();
+        for (var action : moveActions) {
+            Path source = action.source();
+            Path target = action.target();
 
             try {
                 // Basic validation
@@ -73,12 +72,8 @@ public class FileMover {
                     continue;
                 }
 
+                console.println("Moving %s", action);
                 // Perform atomic move
-                if (Objects.equals(target.getParent(), source.getParent())) {
-                    console.println("Moving %s to %s", source, target.getFileName());
-                } else {
-                    console.println("Moving %s to %s", source, target);
-                }
                 try {
                     Files.move(source, target, StandardCopyOption.ATOMIC_MOVE);
                     successCount++;

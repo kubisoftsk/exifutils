@@ -9,6 +9,7 @@ import sk.kubisoft.exifutils.core.media.MediaType;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
@@ -77,48 +78,65 @@ public class MediaDateExtractor {
         }
 
         // If no valid date with offset found, return the first valid date without offset
-        var dateWithoutOffset = dateFieldsWithDate.values().stream()
+        var dateWithoutOffsetOptional = dateFieldsWithDate.values().stream()
                 .findFirst();
 
-        // If the media is video, try to guess the offset from file modify date, because OnePlus videos do not contain offset
-        // and store the CreationDate in UTC time, which is not useful for correct naming of the files
-        if (dateWithoutOffset.isPresent() && mediaType == MediaType.VIDEO) {
-            Optional<MediaDateTime> dateWithGuessedOffset = getOffsetFromFileModifyDate(metadata)
-                    .map(fileModifyMediaDateTime -> {
-                        ZoneOffset offsetToUse;
-                        // check if the day is the same as the creation date
-                        if (dateWithoutOffset.get().getLocalDateTime().toLocalDate().equals(fileModifyMediaDateTime.getLocalDateTime().toLocalDate())) {
-                            // now we can trust the fileModifyMediaDateTime and extract the offset
-                            offsetToUse = fileModifyMediaDateTime.getZoneOffset();
-                        } else {
-                            // othewise we cannot trust the fileModifyMediaDateTime and we must use system timezone default offset
-                            // now we can trust the fileModifyMediaDateTime and extract the offset
-                            offsetToUse = ZoneOffset.systemDefault().getRules().getOffset(dateWithoutOffset.get().getLocalDateTime());
-                        }
+        // Return immediately if no date found
+        if (dateWithoutOffsetOptional.isEmpty()) {
+            return Optional.empty();
+        }
 
-                        var localDateTime = dateWithoutOffset.get().getLocalDateTime();
-                        var utcDateTime = localDateTime.atOffset(ZoneOffset.UTC);
-                        var localTimeAtOffsetSameInstant = utcDateTime.withOffsetSameInstant(offsetToUse).toLocalDateTime();
-                        return new MediaDateTime(localTimeAtOffsetSameInstant, offsetToUse);
-                    });
-            if (dateWithGuessedOffset.isPresent()) {
-                return dateWithGuessedOffset;
-            } else {
-                return dateWithoutOffset;
-            }
+        // Now some guesswork for zone offset for incomplete metadata
+        var dateWithoutOffset = dateWithoutOffsetOptional.get();
+        var localDateWithoutOffset = dateWithoutOffset.getLocalDateTime();
+        Optional<ZoneOffset> dateWithGuessedOffset = getOffsetFromFileModifyDate(dateWithoutOffset, metadata);
+        ZoneOffset offsetToUse = determineOffsetToUse(dateWithoutOffset, dateWithGuessedOffset);
+        if (mediaType == MediaType.VIDEO) {
+            // assume the video date is in UTC time, this is important for videos, because historically
+            // quick time videos has the date in UTC time, so we must convert it to local time with guessed offset
+            OffsetDateTime utcDateTime = localDateWithoutOffset.atOffset(ZoneOffset.UTC);
+            var localTimeAtOffsetSameInstant = utcDateTime.withOffsetSameInstant(offsetToUse).toLocalDateTime();
+            return Optional.of(new MediaDateTime(localTimeAtOffsetSameInstant, offsetToUse));
+        } else if (mediaType == MediaType.IMAGE) {
+            // similar to video, but we assume the image date is in local time, so we don't need to convert it, just use it
+            return Optional.of(new MediaDateTime(localDateWithoutOffset, offsetToUse));
+        } else {
+            throw new IllegalArgumentException("Unknown media type: " + mediaType);
+        }
+    }
+
+    private Optional<ZoneOffset> getOffsetFromFileModifyDate(MediaDateTime dateWithoutOffset, Map<String, String> metadata) {
+        var fileModifyDateString = metadata.get("FileModifyDate");
+        if (StringUtils.isBlank(fileModifyDateString)) {
+            return Optional.empty();
+        }
+        var modifyFileDateOptional = ExifDateParser.parseExifDate(fileModifyDateString, null);
+        if (modifyFileDateOptional.isEmpty()) {
+            return Optional.empty();
+        }
+        // check if the day is the same as the creation date
+        var fileModifyMediaDateTime = modifyFileDateOptional.get();
+        if (dateWithoutOffset.getLocalDateTime().toLocalDate().equals(fileModifyMediaDateTime.getLocalDateTime().toLocalDate())) {
+            // now we can trust the fileModifyMediaDateTime and extract the offset
+            return Optional.of(fileModifyMediaDateTime.getZoneOffset());
         } else {
             return Optional.empty();
         }
     }
 
-    private Optional<MediaDateTime> getOffsetFromFileModifyDate(Map<String, String> metadata) {
-        var fileModifyDateString = metadata.get("FileModifyDate");
-        if (StringUtils.isBlank(fileModifyDateString)) {
-            return Optional.empty();
+    private ZoneOffset determineOffsetToUse(MediaDateTime dateWithoutOffset, Optional<ZoneOffset> dateWithGuessedOffset) {
+        ZoneOffset offsetToUse;
+        if (dateWithGuessedOffset.isPresent()) {
+            // if we have guessed offset, use it
+            offsetToUse = dateWithGuessedOffset.get();
+        } else {
+            // othewise we must use system timezone default offset
+            offsetToUse = ZoneOffset.systemDefault().getRules().getOffset(dateWithoutOffset.getLocalDateTime());
         }
-        return ExifDateParser.parseExifDate(fileModifyDateString, null);
+        return offsetToUse;
     }
 
     record OffsetDateTimeField(String dateField, String offsetField) {
     }
 }
+
