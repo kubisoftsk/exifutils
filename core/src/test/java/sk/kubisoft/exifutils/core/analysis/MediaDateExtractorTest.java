@@ -109,6 +109,18 @@ class MediaDateExtractorTest {
     }
 
     @Test
+    void extractCreationDateForImage8() {
+        // This is full size image taken with older OnePlus phone One E1003 in Slovakia
+        Map<String, String> metaData = loadMetaData("/exifdata/image_8.json");
+
+        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(IMAGE, metaData));
+
+        assertTrue(creationDate.isPresent());
+        assertEquals("2016-12-23T11:05:28", creationDate.get().getLocalDateTime().toString());
+        assertEquals("+01:00", creationDate.get().getZoneOffset().toString());
+    }
+
+    @Test
     void noDateFoundForVideo1() {
         // This is likely video sent via WhatsApp, which does not contain any EXIF metadata
         Map<String, String> metaData = loadMetaData("/exifdata/video_1.json");
@@ -198,6 +210,20 @@ class MediaDateExtractorTest {
         assertEquals(LocalDateTime.of(2022,2,21,15,25,6).atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime(),
                 creationDate.get().getLocalDateTime());
         assertEquals(ZonedDateTime.now().getOffset(), creationDate.get().getZoneOffset());
+    }
+
+    @Test
+    void extractCreationDateForVideo8() {
+        // This is video taken with OnePlus phone, but CreateDate is actually in local time zone, not convetionally in UTC.
+        // It's unbelievable how inconsistent the metadata can be.
+        // This video was actualy taken at 2023-02-27 18:02:36 +0100 local time in Slovakia
+        // the time can be guessed from file modify date because it's exactly the same day and hour and minute as creation date
+        Map<String, String> metaData = loadMetaData("/exifdata/video_8.json");
+
+        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
+
+        assertEquals("2023-02-27T18:02:36", creationDate.get().getLocalDateTime().toString());
+        assertEquals("+01:00", creationDate.get().getZoneOffset().toString());
     }
 
     private Map<String, String> loadMetaData(String resourceName) {

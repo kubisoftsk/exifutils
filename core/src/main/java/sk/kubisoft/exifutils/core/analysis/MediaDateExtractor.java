@@ -43,9 +43,9 @@ public class MediaDateExtractor {
 
         // Order of precedence for date fields
         OffsetDateTimeField[] dateFields = {
+                new OffsetDateTimeField("DateTimeOriginal", "OffsetTimeOriginal"),
                 new OffsetDateTimeField("CreationDate", "OffsetTime"),
                 new OffsetDateTimeField("CreateDate", "OffsetTime"),
-                new OffsetDateTimeField("DateTimeOriginal", "OffsetTimeOriginal"),
                 new OffsetDateTimeField("MediaCreateDate", null),
         };
 
@@ -89,10 +89,17 @@ public class MediaDateExtractor {
         // Now some guesswork for zone offset for incomplete metadata
         var dateWithoutOffset = dateWithoutOffsetOptional.get();
         var localDateWithoutOffset = dateWithoutOffset.getLocalDateTime();
-        Optional<ZoneOffset> dateWithGuessedOffset = getOffsetFromFileModifyDate(dateWithoutOffset, metadata);
-        ZoneOffset offsetToUse = determineOffsetToUse(dateWithoutOffset, dateWithGuessedOffset);
+        var fileModifyDateTimeOptional = getMediaDateFromFileModifyDate(dateWithoutOffset, metadata);
+        ZoneOffset offsetToUse = determineOffsetToUse(dateWithoutOffset, fileModifyDateTimeOptional);
         if (mediaType == MediaType.VIDEO) {
-            // assume the video date is in UTC time, this is important for videos, because historically
+            // first check, if file modify time is exactly the same as the creation time, then we can trust it fully
+            if (fileModifyDateTimeOptional.isPresent()) {
+                var fileModifyLocalTime = fileModifyDateTimeOptional.get().getLocalDateTime();
+                if (localDateWithoutOffset.equals(fileModifyLocalTime)) {
+                    return fileModifyDateTimeOptional;
+                }
+            }
+            // else assume the video date is in UTC time, this is important for videos, because historically
             // quick time videos has the date in UTC time, so we must convert it to local time with guessed offset
             OffsetDateTime utcDateTime = localDateWithoutOffset.atOffset(ZoneOffset.UTC);
             var localTimeAtOffsetSameInstant = utcDateTime.withOffsetSameInstant(offsetToUse).toLocalDateTime();
@@ -105,7 +112,7 @@ public class MediaDateExtractor {
         }
     }
 
-    private Optional<ZoneOffset> getOffsetFromFileModifyDate(MediaDateTime dateWithoutOffset, Map<String, String> metadata) {
+    private Optional<MediaDateTime> getMediaDateFromFileModifyDate(MediaDateTime dateWithoutOffset, Map<String, String> metadata) {
         var fileModifyDateString = metadata.get("FileModifyDate");
         if (StringUtils.isBlank(fileModifyDateString)) {
             return Optional.empty();
@@ -118,17 +125,17 @@ public class MediaDateExtractor {
         var fileModifyMediaDateTime = modifyFileDateOptional.get();
         if (dateWithoutOffset.getLocalDateTime().toLocalDate().equals(fileModifyMediaDateTime.getLocalDateTime().toLocalDate())) {
             // now we can trust the fileModifyMediaDateTime and extract the offset
-            return Optional.of(fileModifyMediaDateTime.getZoneOffset());
+            return Optional.of(fileModifyMediaDateTime);
         } else {
             return Optional.empty();
         }
     }
 
-    private ZoneOffset determineOffsetToUse(MediaDateTime dateWithoutOffset, Optional<ZoneOffset> dateWithGuessedOffset) {
+    private ZoneOffset determineOffsetToUse(MediaDateTime dateWithoutOffset, Optional<MediaDateTime> dateWithGuessedOffset) {
         ZoneOffset offsetToUse;
         if (dateWithGuessedOffset.isPresent()) {
             // if we have guessed offset, use it
-            offsetToUse = dateWithGuessedOffset.get();
+            offsetToUse = dateWithGuessedOffset.get().getZoneOffset();
         } else {
             // othewise we must use system timezone default offset
             offsetToUse = ZoneOffset.systemDefault().getRules().getOffset(dateWithoutOffset.getLocalDateTime());
