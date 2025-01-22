@@ -53,8 +53,12 @@ public class SortCommand {
         if (input.dryRun()) {
             logger.info("Dry run, not moving files");
         } else {
-            logger.info("Moving files...");
-            fileMover.moveFiles(moveActions);
+            if (console.confirmAction("Do you want to continue?")) {
+                console.println("Moving files...");
+                fileMover.moveFiles(moveActions);
+            } else {
+                console.println("Aborted.");
+            }
         }
     }
 
