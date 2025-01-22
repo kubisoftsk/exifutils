@@ -6,6 +6,7 @@ import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
+import sk.kubisoft.exifutils.core.metadata.MetaDataExtractor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

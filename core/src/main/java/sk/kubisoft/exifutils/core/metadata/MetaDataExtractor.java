@@ -1,4 +1,4 @@
-package sk.kubisoft.exifutils.core.analysis;
+package sk.kubisoft.exifutils.core.metadata;
 
 import com.thebuzzmedia.exiftool.ExifTool;
 import com.thebuzzmedia.exiftool.ExifToolBuilder;
@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
-class MetaDataExtractor implements AutoCloseable {
+public class MetaDataExtractor implements AutoCloseable {
 
     private static final Logger logger = LoggerFactory.getLogger(MetaDataExtractor.class);
 
@@ -30,14 +30,14 @@ class MetaDataExtractor implements AutoCloseable {
 
     private final ExifTool exifTool;
 
-    MetaDataExtractor(String exifToolPath) {
+    public MetaDataExtractor(String exifToolPath) {
         this.exifTool = new ExifToolBuilder()
                 .withPath(exifToolPath)
                 .enableStayOpen()  // Performance optimization for multiple files
                 .build();
     }
 
-    Optional<MediaFile> extractMetaData(Path file) {
+    public Optional<MediaFile> extractMetaData(Path file) {
         try {
             var mediaType = getMediaType(file);
             if (mediaType == null) {
