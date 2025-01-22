@@ -6,7 +6,10 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 public record SetDateCommandInput(
-        List<Path> sourceFiles,
+
+        List<Path> sourcePaths,
+
+        String pattern,
 
         LocalDateTime dateTime,
 

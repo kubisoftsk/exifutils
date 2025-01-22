@@ -4,6 +4,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.StringUtils;
 import sk.kubisoft.exifutils.core.CommandArgument;
 import sk.kubisoft.exifutils.core.CommandRunner;
 
@@ -14,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,20 +24,25 @@ public class SetDateCommandRunner implements CommandRunner {
 
     private final SetDateCommand setDateCommand;
 
+    private static final Option PATTERN = Option.builder()
+            .option("p")
+            .longOpt("pattern")
+            .desc("Parse date and time from file name using given pattern (see java.time.format.DateTimeFormatter)")
+            .hasArg()
+            .build();
+
     private static final Option DATE_TIME = Option.builder()
             .option("d")
             .longOpt("date-time")
-            .desc("Set local date and time in ISO format (yyyy-MM-ddTHH:mm:ss)")
+            .desc("Manually set local date and time for given files in ISO format (yyyy-MM-ddTHH:mm:ss)")
             .hasArg()
-            .required()
             .build();
 
     private static final Option ZONE_OFFSET = Option.builder()
             .option("z")
             .longOpt("zone-offset")
-            .desc("Set zone offset in ISO format (e.g. +02:00)")
+            .desc("Manually set zone offset for given files in ISO format (e.g. +02:00)")
             .hasArg()
-            .required()
             .build();
 
     @Inject
@@ -64,32 +71,43 @@ public class SetDateCommandRunner implements CommandRunner {
         for (String sourceArg : args) {
             Path sourceFile = Paths.get(sourceArg);
             if (!Files.exists(sourceFile)) {
-                throw new ParseException("Source file does not exist: " + sourceArg);
-            }
-            if (!Files.isRegularFile(sourceFile)) {
-                throw new ParseException("Source file is not a regular file: " + sourceArg);
+                throw new ParseException("Source file/directory does not exist: " + sourceArg);
             }
             if (!Files.isReadable(sourceFile)) {
                 throw new ParseException("Cannot read source file: " + sourceArg);
             }
             sourceFiles.add(sourceFile);
         }
-        String dateTimeStr = cmd.getOptionValue(DATE_TIME.getOpt());
-        LocalDateTime dateTime;
-        try {
-            dateTime = LocalDateTime.parse(dateTimeStr);
-        } catch (Exception e) {
-            throw new ParseException("Invalid date-time format: " + e.getMessage());
-        }
-        String zoneOffsetStr = cmd.getOptionValue(ZONE_OFFSET.getOpt());
-        ZoneOffset zoneOffset;
-        try {
-            zoneOffset = ZoneOffset.of(zoneOffsetStr);
-        } catch (Exception e) {
-            throw new ParseException("Invalid zone offset format: " + e.getMessage());
+        String patternStr = cmd.getOptionValue(PATTERN.getOpt());
+        if (StringUtils.isNotBlank(patternStr)) {
+            try {
+                DateTimeFormatter.ofPattern(patternStr);
+            } catch (Exception e) {
+                throw new ParseException("Invalid date-time pattern: " + e.getMessage());
+            }
         }
 
-        return new SetDateCommandInput(sourceFiles, dateTime, zoneOffset);
+        LocalDateTime dateTime = null;
+        if (cmd.hasOption(DATE_TIME)) {
+            try {
+                String dateTimeStr = cmd.getOptionValue(DATE_TIME.getOpt());
+                dateTime = LocalDateTime.parse(dateTimeStr);
+            } catch (Exception e) {
+                throw new ParseException("Invalid date-time format: " + e.getMessage());
+            }
+        }
+
+        ZoneOffset zoneOffset = null;
+        if (cmd.hasOption(ZONE_OFFSET)) {
+            try {
+                String zoneOffsetStr = cmd.getOptionValue(ZONE_OFFSET.getOpt());
+                zoneOffset = ZoneOffset.of(zoneOffsetStr);
+            } catch (Exception e) {
+                throw new ParseException("Invalid zone offset format: " + e.getMessage());
+            }
+        }
+
+        return new SetDateCommandInput(sourceFiles, patternStr, dateTime, zoneOffset);
     }
 
     @Override
@@ -99,12 +117,13 @@ public class SetDateCommandRunner implements CommandRunner {
 
     @Override
     public String getCommandDescription() {
-        return "Sets created date of media files";
+        return "Sets created date of media files. If not specified pattern or manual date time, it will try to parse date from file name by common patterns.";
     }
 
     @Override
     public Options getOptions() {
         var options = new Options();
+        options.addOption(PATTERN);
         options.addOption(DATE_TIME);
         options.addOption(ZONE_OFFSET);
         return options;
@@ -113,7 +132,7 @@ public class SetDateCommandRunner implements CommandRunner {
     @Override
     public List<CommandArgument> getCommandArguments() {
         return  List.of(
-                new CommandArgument.Builder("FILE")
+                new CommandArgument.Builder("FILE|DIR")
                         .multiple()
                         .build()
         );

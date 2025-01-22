@@ -1,22 +1,38 @@
 package sk.kubisoft.exifutils.setdate;
 
 import sk.kubisoft.exifutils.core.config.ConfigService;
+import sk.kubisoft.exifutils.core.config.model.ExifToolConfig;
+import sk.kubisoft.exifutils.core.file.FileExplorer;
+import sk.kubisoft.exifutils.core.file.FileNameAnalyzer;
+import sk.kubisoft.exifutils.core.file.SetDateAction;
 import sk.kubisoft.exifutils.core.logging.Console;
+import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.metadata.MetaDataSetter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Singleton
 public class SetDateCommand {
 
     private final Console console;
     private final ConfigService configService;
+    private final FileExplorer fileExplorer;
+    private final FileNameAnalyzer fileNameAnalyzer;
 
     @Inject
-    public SetDateCommand(Console console, ConfigService configService) {
+    public SetDateCommand(Console console, ConfigService configService,
+                          FileNameAnalyzer fileNameAnalyzer, FileExplorer fileExplorer) {
         this.console = console;
         this.configService = configService;
+        this.fileNameAnalyzer = fileNameAnalyzer;
+        this.fileExplorer = fileExplorer;
     }
 
     public void execute(SetDateCommandInput input) {
@@ -24,13 +40,79 @@ public class SetDateCommand {
         if (exifToolConfig == null || exifToolConfig.getPath() == null) {
             throw new IllegalArgumentException("ExifTool path not configured");
         }
+
+        console.verboseln("Running ExifUtils Rename command with input: %s", input);
+
+        console.println("Searching for media files...");
+        List<Path> allFiles = traverseDirectories(input.sourcePaths());
+        console.println("Found %d files.", allFiles.size());
+
+        List<SetDateAction> setDateActionList;
+        if (input.dateTime() != null) {
+            setDateActionList = setDateTimeManually(allFiles, input.dateTime(), input.zoneOffset());
+        } else {
+            setDateActionList = listAndParseFromFileNames(allFiles, input.pattern());
+        }
+
+        console.println("Total %d files will have date set:", setDateActionList.size());
+        setDateActionList.forEach((action) -> console.println("%s", action));
+
+        if (console.confirmAction("Do you want to continue?")) {
+            console.println("Setting datetime to files...");
+           performSetDateTime(setDateActionList, exifToolConfig);
+        } else {
+            console.println("Aborted.");
+        }
+    }
+
+    private void performSetDateTime(List<SetDateAction> setDateActionList, ExifToolConfig exifToolConfig) {
         try (var metaDataSetter = new MetaDataSetter(exifToolConfig.getPath())) {
-            for (var file : input.sourceFiles()) {
-                console.println("Setting date and time for file: %s", file);
-                metaDataSetter.setDateTime(file, input.dateTime(), input.zoneOffset());
+            for (var action : setDateActionList) {
+                console.println("Setting date and time for file: %s", action.file());
+
+                var file = action.file();
+                var mediaDate = action.dateTime();
+                metaDataSetter.setDateTime(file, mediaDate.getLocalDateTime(), mediaDate.getZoneOffset());
             }
         } catch (Exception e) {
             throw new RuntimeException("Error processing files", e);
         }
+    }
+
+    private List<Path> traverseDirectories(List<Path> inputPath) {
+        List<Path> allPaths = new ArrayList<>();
+        for (var path : inputPath) {
+            if (path.toFile().isDirectory()) {
+                allPaths.addAll(fileExplorer.listFiles(List.of(path)));
+            } else {
+                allPaths.add(path);
+            }
+        }
+        return allPaths;
+    }
+
+    private List<SetDateAction> setDateTimeManually(List<Path> allFiles, LocalDateTime localDateTime, ZoneOffset zoneOffset) {
+        console.println("Setting date and time for files to: %s %s", localDateTime, zoneOffset);
+
+        // todo fix
+        return Collections.emptyList();
+    }
+
+
+    private List<SetDateAction> listAndParseFromFileNames(List<Path> allFiles, String userPattern) {
+        // TODO implement also user pattern parsing
+        console.println("Setting date and time for files using pattern guessed from file names");
+
+        List<SetDateAction> actions = new ArrayList<>();
+        for (var file : allFiles) {
+            var dateTimeOptional = fileNameAnalyzer.analyzeFileName(file.getFileName().toString());
+            dateTimeOptional.ifPresent(localDateTime -> {
+                var offsetToUse = ZoneOffset.systemDefault().getRules().getOffset(localDateTime);
+                var mediaDate = new MediaDateTime(localDateTime, offsetToUse);
+                actions.add(new SetDateAction(file, mediaDate));
+            });
+        }
+
+        return actions;
     }
 }
