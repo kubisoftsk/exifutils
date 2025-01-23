@@ -38,7 +38,8 @@ public class FileNameAnalyzer {
                 createFormatter("uu-MM-dd HH-mm-ss"),
 
                 // Other
-                createFormatter("'download_'yyyyMMdd'_'HHmmss")
+                createFormatter("'download_'yyyyMMdd'_'HHmmss"),
+                createFormatter("'IMG_'yyyy'_'MM'_'dd'_'HH'_'mm'_'ss")
         );
     }
 

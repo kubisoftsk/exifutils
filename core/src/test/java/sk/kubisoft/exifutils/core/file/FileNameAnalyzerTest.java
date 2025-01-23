@@ -72,6 +72,18 @@ class FileNameAnalyzerTest {
     }
 
     @Test
+    void shouldParseOlderFormat() {
+        var result = analyzer.analyzeFileName("IMG_2008_01_17_11_13_00.jpg");
+
+        assertTrue(result.isPresent());
+        var date = result.get();
+        assertEquals(
+                LocalDateTime.of(2008, 1, 17, 11, 13, 0),
+                date
+        );
+    }
+
+    @Test
     void shouldReturnEmptyForInvalidFormat() {
         var result = analyzer.analyzeFileName("invalid_filename.jpg");
 
