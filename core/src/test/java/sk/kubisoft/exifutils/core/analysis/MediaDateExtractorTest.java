@@ -158,7 +158,6 @@ class MediaDateExtractorTest {
     void extractCreationDateForVideo4() {
         // This is video taken with probably OnePlus Nord 2T, but there is no offset in metadata
         // This video was actualy taken at 18:43:21 local time in Slovakia, but unfortunately the offset is missing in metadata
-        // and is guessed from file modify date and can be trusted, because the file modify date is the same day as creation date
         Map<String, String> metaData = loadMetaData("/exifdata/video_4.json");
 
         Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
@@ -172,7 +171,7 @@ class MediaDateExtractorTest {
     void extractCreationDateForVideo5() {
         // This is video taken with OnePlus 9 Pro, but there is no offset in metadata
         // This video was actualy taken at 17:52:18 local time in Slovakia, but unfortunately the offset is missing in metadata
-        // and is guessed from file modify date and can be trusted, because the file modify date is the same day as creation date
+		// so the summer time has offset +02:00
         Map<String, String> metaData = loadMetaData("/exifdata/video_5.json");
 
         Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
@@ -186,7 +185,6 @@ class MediaDateExtractorTest {
     void extractCreationDateForVideo6() {
         // This is video taken with OnePlus 12, but there is no offset in metadata
         // This video was actualy taken at 16:58:01 local time in Slovakia, but unfortunately the offset is missing in metadata
-        // and is guessed from file modify date and can be trusted, because the file modify date is the same day as creation date
         Map<String, String> metaData = loadMetaData("/exifdata/video_6.json");
 
         Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
@@ -214,7 +212,7 @@ class MediaDateExtractorTest {
 
     @Test
     void extractCreationDateForVideo8() {
-        // This is video taken with OnePlus phone, but CreateDate is actually in local time zone, not convetionally in UTC.
+        // This is video taken with OnePlus phone, but CreateDate is actually in local time zone, not conventionally in UTC.
         // It's unbelievable how inconsistent the metadata can be.
         // This video was actualy taken at 2023-02-27 18:02:36 +0100 local time in Slovakia
         // the time can be guessed from file modify date because it's exactly the same day and hour and minute as creation date
