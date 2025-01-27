@@ -1,5 +1,6 @@
 package sk.kubisoft.exifutils.cli;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
@@ -9,6 +10,7 @@ import sk.kubisoft.exifutils.cli.logging.SystemConsole;
 import sk.kubisoft.exifutils.core.CommandRunner;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.dedupe.DeDupeCommandRunner;
+import sk.kubisoft.exifutils.info.InfoCommandRunner;
 import sk.kubisoft.exifutils.rename.RenameCommandRunner;
 import sk.kubisoft.exifutils.setdate.SetDateCommandRunner;
 import sk.kubisoft.exifutils.sort.SortCommandRunner;
@@ -23,6 +25,20 @@ public class ExifUtilsModule {
     @Singleton
     Console provideConsole() {
         return new SystemConsole();
+    }
+
+    @Provides
+    @Singleton
+    ObjectMapper provideObjectMapper() {
+        return new ObjectMapper();
+    }
+
+    @Provides
+    @Singleton
+    @IntoMap
+    @StringKey("info")
+    CommandRunner provideInfoCommandRunner(InfoCommandRunner infoCommandRunner) {
+        return infoCommandRunner;
     }
 
     @Provides

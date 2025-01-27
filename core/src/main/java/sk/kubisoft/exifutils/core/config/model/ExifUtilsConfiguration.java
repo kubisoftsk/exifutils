@@ -4,6 +4,8 @@ public class ExifUtilsConfiguration {
 
 	private ExifToolConfig exifTool;
 
+	private DateTimeConfig dateTime;
+
 	private RenameConfig rename;
 
 	public ExifToolConfig getExifTool() {
@@ -12,6 +14,14 @@ public class ExifUtilsConfiguration {
 
 	public void setExifTool(ExifToolConfig exifTool) {
 		this.exifTool = exifTool;
+	}
+
+	public DateTimeConfig getDateTime() {
+		return dateTime;
+	}
+
+	public void setDateTime(DateTimeConfig dateTime) {
+		this.dateTime = dateTime;
 	}
 
 	public RenameConfig getRename() {

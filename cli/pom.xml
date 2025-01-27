@@ -17,6 +17,10 @@
     <dependencies>
         <dependency>
             <groupId>sk.kubisoft.exifutils</groupId>
+            <artifactId>exifutils-info</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>sk.kubisoft.exifutils</groupId>
             <artifactId>exifutils-core</artifactId>
         </dependency>
         <dependency>

@@ -14,6 +14,7 @@
         <module>cli</module>
         <module>core</module>
         <module>dedupe</module>
+        <module>info</module>
         <module>rename</module>
         <module>set-date</module>
         <module>sort</module>
@@ -35,6 +36,7 @@
         <jackson-databind.version>2.17.2</jackson-databind.version>
         <snakeyaml.version>2.2</snakeyaml.version>
         <guava.version>33.4.0-jre</guava.version>
+        <timeshape.version>2024a.24</timeshape.version>
 
         <dagger.version>2.51.1</dagger.version>
         <junit-jupiter.version>5.11.4</junit-jupiter.version>
@@ -44,6 +46,11 @@
     <dependencyManagement>
         <dependencies>
             <!-- Project dependencies -->
+            <dependency>
+                <groupId>sk.kubisoft.exifutils</groupId>
+                <artifactId>exifutils-info</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>sk.kubisoft.exifutils</groupId>
                 <artifactId>exifutils-core</artifactId>
@@ -125,6 +132,11 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.iakovlev</groupId>
+                <artifactId>timeshape</artifactId>
+                <version>${timeshape.version}</version>
             </dependency>
 
         </dependencies>

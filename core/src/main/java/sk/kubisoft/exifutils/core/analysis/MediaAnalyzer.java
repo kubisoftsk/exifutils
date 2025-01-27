@@ -11,6 +11,7 @@ import sk.kubisoft.exifutils.core.metadata.MetaDataExtractor;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,13 +33,12 @@ public class MediaAnalyzer {
         this.mediaDateExtractor = mediaDateExtractor;
     }
 
-    public Map<MediaFile, MediaDateTime> analyzeCreationDate(List<Path> files) {
-        Map<MediaFile, MediaDateTime> mediaFilesWithDate = new LinkedHashMap<>();
-
+    public List<MediaFile> getMetaData(List<Path> files) {
         var exifToolConfig = configService.getConfig().getExifTool();
         if (exifToolConfig == null || exifToolConfig.getPath() == null) {
             throw new IllegalArgumentException("ExifTool path not configured");
         }
+        List<MediaFile> mediaFiles = new ArrayList<>();
         try (var metaDataExtractor = new MetaDataExtractor(exifToolConfig.getPath())) {
             console.println("Starting analysis of media files...", files.size());
             for (int i = 0; i < files.size(); i++) {
@@ -56,15 +56,7 @@ public class MediaAnalyzer {
                         continue;
                     }
 
-                    var mediaFile = mediaFileOptional.get();
-                    var dateOptional = mediaDateExtractor.extractCreationDate(mediaFile);
-                    if (dateOptional.isPresent()) {
-                        var date = dateOptional.get();
-                        console.verbose("Found creation date: %s", date);
-                        mediaFilesWithDate.put(mediaFile, date);
-                    } else {
-                        console.verbose("No valid date found");
-                    }
+                    mediaFiles.add(mediaFileOptional.get());
                 } catch (Exception e) {
                     console.error("Error processing file: %s", e, file);
                 }
@@ -76,7 +68,24 @@ public class MediaAnalyzer {
         } catch (Exception e) {
             throw new RuntimeException("Error processing files", e);
         }
+        return mediaFiles;
+    }
 
+    public Map<MediaFile, MediaDateTime> analyzeCreationDate(List<Path> files) {
+        Map<MediaFile, MediaDateTime> mediaFilesWithDate = new LinkedHashMap<>();
+
+        List<MediaFile> mediaFiles = getMetaData(files);
+        for (var mediaFile : mediaFiles) {
+            var dateOptional = mediaDateExtractor.extractCreationDate(mediaFile);
+            if (dateOptional.isPresent()) {
+                var date = dateOptional.get();
+                console.verbose("Found creation date: %s", date);
+                mediaFilesWithDate.put(mediaFile, date);
+            } else {
+                console.verbose("No valid date found");
+            }
+        }
         return mediaFilesWithDate;
     }
+
 }

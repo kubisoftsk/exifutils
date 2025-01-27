@@ -1,15 +1,19 @@
 package sk.kubisoft.exifutils.core.analysis;
 
+import net.iakovlev.timeshape.TimeZoneEngine;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaType;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
@@ -19,22 +23,16 @@ import java.util.Optional;
 @Singleton
 public class MediaDateExtractor {
 
-    /*
-       Tip for improvement: OnePlus videos does not contain offset in exif data. However, it can be guessed
-       from the file name. For example, the file name "VID_20210101_120000.mp4" can be parsed to extract the
-         date and time, and the offset can be guessed from the file name.
-       Second guess can be from file modify date, where the offset is present. However this is dangerous and
-       it shoudl be checked if it is the same minute / second as in Created date. Then it can be used as offset.
-
-       Another thing I found is that older oneplus phones do not have offset in exif data in PHOTOS, however
-       they have it in local time, so it is still useful for sorting. Problem is in videos, because there the date
-       is for some reason stored in UTC time, so it may cause problems when photos are taken around midnight.
-     */
-
     private static final Logger logger = LoggerFactory.getLogger(MediaDateExtractor.class);
 
+    private static final String GPS_LATITUDE_TAG = "GPSLatitude";
+    private static final String GPS_LONGITUDE_TAG = "GPSLongitude";
+
+    private final ConfigService configService;
+
     @Inject
-    public MediaDateExtractor() {
+    public MediaDateExtractor(ConfigService configService) {
+        this.configService = configService;
     }
 
     public Optional<MediaDateTime> extractCreationDate(MediaFile mediaFile) {
@@ -89,8 +87,10 @@ public class MediaDateExtractor {
         // Now some guesswork for zone offset for incomplete metadata
         var dateWithoutOffset = dateWithoutOffsetOptional.get();
         var localDateWithoutOffset = dateWithoutOffset.getLocalDateTime();
-		// use system default offset as a guess
-        ZoneOffset offsetToUse = ZoneOffset.systemDefault().getRules().getOffset(dateWithoutOffset.getLocalDateTime());
+        // use system default offset as a guess
+        ZoneOffset offsetToUse;
+        var gpsZoneOffsetOptional = getGpsZoneOffset(dateWithoutOffset.getLocalDateTime(), metadata);
+        offsetToUse = gpsZoneOffsetOptional.orElseGet(() -> getDefaultZoneOffset(localDateWithoutOffset));
         if (mediaType == MediaType.VIDEO) {
             // assume the video date is in UTC time, this is important for videos, because historically
             // quick time videos has the date in UTC time, so we must convert it to local time with guessed offset
@@ -102,6 +102,33 @@ public class MediaDateExtractor {
             return Optional.of(new MediaDateTime(localDateWithoutOffset, offsetToUse));
         } else {
             throw new IllegalArgumentException("Unknown media type: " + mediaType);
+        }
+    }
+
+    private ZoneOffset getDefaultZoneOffset(LocalDateTime localDateWithoutOffset) {
+        var config = configService.getConfig();
+        var dateTimeConfig = config.getDateTime();
+        if (dateTimeConfig != null && dateTimeConfig.getTimeZone() != null) {
+            ZoneId zoneId = ZoneId.of(dateTimeConfig.getTimeZone());
+            return zoneId.getRules().getOffset(localDateWithoutOffset);
+        }
+        // fallback to system default
+        return ZoneOffset.systemDefault().getRules().getOffset(localDateWithoutOffset);
+    }
+
+    private Optional<ZoneOffset> getGpsZoneOffset(LocalDateTime localDateTime, Map<String, String> metadata) {
+        String gpsLatitude = metadata.get(GPS_LATITUDE_TAG);
+        String gpsLongitude = metadata.get(GPS_LONGITUDE_TAG);
+
+        if (StringUtils.isNotBlank(gpsLatitude) && StringUtils.isNotBlank(gpsLongitude)) {
+            TimeZoneEngine engine = TimeZoneEngine.initialize();
+            Optional<ZoneId> maybeZoneId = engine.query(Double.parseDouble(gpsLatitude), Double.parseDouble(gpsLongitude));
+            return maybeZoneId.map(zoneId -> {
+                logger.debug("Found zoneId from GPS coordinates: {}", zoneId);
+                return zoneId.getRules().getOffset(localDateTime);
+            });
+        } else {
+            return Optional.empty();
         }
     }
 

@@ -2,7 +2,12 @@ package sk.kubisoft.exifutils.core.analysis;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaType;
@@ -19,10 +24,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static sk.kubisoft.exifutils.core.media.MediaType.IMAGE;
 import static sk.kubisoft.exifutils.core.media.MediaType.VIDEO;
 
+@ExtendWith(MockitoExtension.class)
 class MediaDateExtractorTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final MediaDateExtractor mediaDateExtractor = new MediaDateExtractor();
+
+    @Mock
+    private ConfigService configServiceMock;
+
+    private MediaDateExtractor mediaDateExtractor;
+
+    @BeforeEach
+    void setUp() {
+        mediaDateExtractor = new MediaDateExtractor(configServiceMock);
+    }
 
     @Test
     void noDateFoundForImage1() {
