@@ -10,9 +10,7 @@ import sk.kubisoft.exifutils.core.media.MediaType;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
@@ -37,13 +35,9 @@ public class InfoCommand {
     public void execute(InfoCommandInput input) {
         console.verboseln("Running ExifUtils Info command with input: %s", input);
 
-        List<Path> allFiles = input.paths();
-        if (allFiles.stream().anyMatch(Files::isDirectory)) {
-            console.println("Searching for media files...");
-            // todo extract to FileExplorer
-            allFiles = traverseDirectories(input.paths());
-            console.println("Found %d files.", allFiles.size());
-        }
+        console.println("Searching for media files...");
+        List<Path> allFiles = fileExplorer.listFiles(input.paths());
+        console.println("Found %d files.", allFiles.size());
 
         List<MediaFile> mediaFiles = mediaAnalyzer.getMetaData(allFiles);
 
@@ -71,15 +65,4 @@ public class InfoCommand {
         }
     }
 
-    private List<Path> traverseDirectories(List<Path> inputPath) {
-        List<Path> allPaths = new ArrayList<>();
-        for (var path : inputPath) {
-            if (path.toFile().isDirectory()) {
-                allPaths.addAll(fileExplorer.listFiles(List.of(path)));
-            } else {
-                allPaths.add(path);
-            }
-        }
-        return allPaths;
-    }
 }

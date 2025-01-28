@@ -7,7 +7,7 @@ public record RenameCommandInput(
 
         List<Path> sourceDirectories,
 
-        boolean dryRun
+        boolean writeDate
 
 ) {
 }

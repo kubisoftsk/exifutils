@@ -17,22 +17,32 @@ public class FileExplorer {
     public FileExplorer() {
     }
 
-    public List<Path> listFiles(List<Path> inputDirs) {
+    public List<Path> listFiles(List<Path> inputPaths) {
         Set<Path> allPaths = new HashSet<>();
-        for (var inputDir : inputDirs) {
-
-            try (var filesStream = Files.walk(inputDir)) {
-                var inputDirFiles = filesStream
-                        .filter(path -> path.toFile().isFile())
-                        .toList();
-                allPaths.addAll(inputDirFiles);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
+        for (var path : inputPaths) {
+            if (path.toFile().isDirectory()) {
+                allPaths.addAll(walk(path));
+            } else {
+                allPaths.add(path);
             }
         }
+
         return allPaths.stream()
                 .sorted()
                 .toList();
+    }
+
+    private Set<Path> walk(Path inputDir) {
+        Set<Path> allPaths = new HashSet<>();
+        try (var filesStream = Files.walk(inputDir)) {
+            var inputDirFiles = filesStream
+                    .filter(path -> path.toFile().isFile())
+                    .toList();
+            allPaths.addAll(inputDirFiles);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return allPaths;
     }
 
 }

@@ -1,6 +1,7 @@
 package sk.kubisoft.exifutils.core.file;
 
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
+import sk.kubisoft.exifutils.core.media.MediaType;
 
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
@@ -8,6 +9,8 @@ import java.time.format.DateTimeFormatter;
 public record SetDateAction(
 
         Path file,
+
+        MediaType mediaType,
 
         MediaDateTime dateTime
 ) {

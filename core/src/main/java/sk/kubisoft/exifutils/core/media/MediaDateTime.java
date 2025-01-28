@@ -20,6 +20,11 @@ public class MediaDateTime {
         this.zoneOffset = zoneOffset;
     }
 
+    public MediaDateTime(OffsetDateTime offsetDateTime) {
+        this.localDateTime = offsetDateTime.toLocalDateTime();
+        this.zoneOffset = offsetDateTime.getOffset();
+    }
+
     public LocalDateTime getLocalDateTime() {
         return localDateTime;
     }
@@ -39,10 +44,15 @@ public class MediaDateTime {
         return localDateTime.atOffset(zoneOffset);
     }
 
+    public LocalDateTime toUTCDateTime() {
+        return toOffsetDateTime().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+    }
+
     @Override
     public String toString() {
         return "MediaDateTime{" +
-                "localDateTime=" + localDateTime +
+                "utcDateTime=" + toUTCDateTime() +
+                ", localDateTime=" + localDateTime +
                 ", zoneOffset=" + zoneOffset +
                 '}';
     }

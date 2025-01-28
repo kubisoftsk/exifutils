@@ -6,6 +6,7 @@ import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
+import sk.kubisoft.exifutils.core.metadata.MediaTypeDetector;
 import sk.kubisoft.exifutils.core.metadata.MetaDataExtractor;
 
 import javax.inject.Inject;
@@ -23,13 +24,15 @@ public class MediaAnalyzer {
 
     private final Console console;
     private final ConfigService configService;
+    private final MediaTypeDetector mediaTypeDetector;
     private final MediaDateExtractor mediaDateExtractor;
 
     @Inject
     public MediaAnalyzer(Console console, ConfigService configService,
-                         MediaDateExtractor mediaDateExtractor) {
+                         MediaDateExtractor mediaDateExtractor, MediaTypeDetector mediaTypeDetector) {
         this.console = console;
         this.configService = configService;
+        this.mediaTypeDetector = mediaTypeDetector;
         this.mediaDateExtractor = mediaDateExtractor;
     }
 
@@ -39,7 +42,7 @@ public class MediaAnalyzer {
             throw new IllegalArgumentException("ExifTool path not configured");
         }
         List<MediaFile> mediaFiles = new ArrayList<>();
-        try (var metaDataExtractor = new MetaDataExtractor(exifToolConfig.getPath())) {
+        try (var metaDataExtractor = new MetaDataExtractor(exifToolConfig.getPath(), mediaTypeDetector)) {
             console.println("Starting analysis of media files...", files.size());
             for (int i = 0; i < files.size(); i++) {
                 var file = files.get(i);

@@ -52,15 +52,13 @@ public class RenameCommand {
         console.println("Total %d files will be renamed:", moveActions.size());
         moveActions.forEach((action) -> console.println("Rename %s", action));
 
-        if (input.dryRun()) {
-            console.println("Dry run, not renaming any files.");
+        // Confirm action or abort
+        if (console.confirmAction("Do you want to continue?")) {
+            console.println("Renaming files...");
+            fileMover.moveFiles(moveActions);
+
         } else {
-            if (console.confirmAction("Do you want to continue?")) {
-                console.println("Moving files...");
-                fileMover.moveFiles(moveActions);
-            } else {
-                console.println("Aborted.");
-            }
+            console.println("Aborted.");
         }
     }
 
@@ -76,7 +74,7 @@ public class RenameCommand {
 
             var targetPath = originalPath.getParent().resolve(newName);
             if (originalPath.equals(targetPath)) {
-                logger.debug("Skipping move action, source and target are the same: {}", originalPath);
+                logger.debug("Skipping rename action, source and target are the same: {}", originalPath);
                 continue;
             }
             logger.debug("Created move action {} to {}", originalPath, targetPath);

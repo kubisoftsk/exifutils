@@ -13,8 +13,7 @@ import javax.inject.Singleton;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,15 +33,14 @@ public class SetDateCommandRunner implements CommandRunner {
     private static final Option DATE_TIME = Option.builder()
             .option("d")
             .longOpt("date-time")
-            .desc("Manually set local date and time for given files in ISO format (yyyy-MM-ddTHH:mm:ss)")
+            .desc("Manually set local date and time for given files in format 'yyyy-MM-dd HH:mm:ss XXX' - for example '2021-01-01 12:00:00 +02:00'")
             .hasArg()
             .build();
 
-    private static final Option ZONE_OFFSET = Option.builder()
-            .option("z")
-            .longOpt("zone-offset")
-            .desc("Manually set zone offset for given files in ISO format (e.g. +02:00)")
-            .hasArg()
+    private static final Option WRITE = Option.builder()
+            .option("w")
+            .longOpt("write-date")
+            .desc("Write analyzed date to file metadata.")
             .build();
 
     @Inject
@@ -87,27 +85,18 @@ public class SetDateCommandRunner implements CommandRunner {
             }
         }
 
-        LocalDateTime dateTime = null;
+        OffsetDateTime dateTime = null;
         if (cmd.hasOption(DATE_TIME)) {
             try {
                 String dateTimeStr = cmd.getOptionValue(DATE_TIME.getOpt());
-                dateTime = LocalDateTime.parse(dateTimeStr);
+                dateTime = OffsetDateTime.parse(dateTimeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss XXX"));
             } catch (Exception e) {
                 throw new ParseException("Invalid date-time format: " + e.getMessage());
             }
         }
 
-        ZoneOffset zoneOffset = null;
-        if (cmd.hasOption(ZONE_OFFSET)) {
-            try {
-                String zoneOffsetStr = cmd.getOptionValue(ZONE_OFFSET.getOpt());
-                zoneOffset = ZoneOffset.of(zoneOffsetStr);
-            } catch (Exception e) {
-                throw new ParseException("Invalid zone offset format: " + e.getMessage());
-            }
-        }
-
-        return new SetDateCommandInput(sourceFiles, patternStr, dateTime, zoneOffset);
+        boolean writeDate = cmd.hasOption(WRITE.getOpt());
+        return new SetDateCommandInput(sourceFiles, patternStr, dateTime, writeDate);
     }
 
     @Override
@@ -125,7 +114,7 @@ public class SetDateCommandRunner implements CommandRunner {
         var options = new Options();
         options.addOption(PATTERN);
         options.addOption(DATE_TIME);
-        options.addOption(ZONE_OFFSET);
+        options.addOption(WRITE);
         return options;
     }
 

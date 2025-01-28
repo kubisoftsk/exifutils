@@ -7,15 +7,15 @@ import sk.kubisoft.exifutils.core.file.FileNameAnalyzer;
 import sk.kubisoft.exifutils.core.file.SetDateAction;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
+import sk.kubisoft.exifutils.core.metadata.MediaTypeDetector;
 import sk.kubisoft.exifutils.core.metadata.MetaDataSetter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Singleton
@@ -25,14 +25,16 @@ public class SetDateCommand {
     private final ConfigService configService;
     private final FileExplorer fileExplorer;
     private final FileNameAnalyzer fileNameAnalyzer;
+    private final MediaTypeDetector mediaTypeDetector;
 
     @Inject
-    public SetDateCommand(Console console, ConfigService configService,
-                          FileNameAnalyzer fileNameAnalyzer, FileExplorer fileExplorer) {
+    public SetDateCommand(Console console, ConfigService configService, FileNameAnalyzer fileNameAnalyzer,
+                          FileExplorer fileExplorer, MediaTypeDetector mediaTypeDetector) {
         this.console = console;
         this.configService = configService;
         this.fileNameAnalyzer = fileNameAnalyzer;
         this.fileExplorer = fileExplorer;
+        this.mediaTypeDetector = mediaTypeDetector;
     }
 
     public void execute(SetDateCommandInput input) {
@@ -44,12 +46,12 @@ public class SetDateCommand {
         console.verboseln("Running ExifUtils Rename command with input: %s", input);
 
         console.println("Searching for media files...");
-        List<Path> allFiles = traverseDirectories(input.sourcePaths());
+        List<Path> allFiles = fileExplorer.listFiles(input.sourcePaths());
         console.println("Found %d files.", allFiles.size());
 
         List<SetDateAction> setDateActionList;
         if (input.dateTime() != null) {
-            setDateActionList = setDateTimeManually(allFiles, input.dateTime(), input.zoneOffset());
+            setDateActionList = setDateTimeManually(allFiles, input.dateTime());
         } else {
             setDateActionList = listAndParseFromFileNames(allFiles, input.pattern());
         }
@@ -70,34 +72,24 @@ public class SetDateCommand {
             for (var action : setDateActionList) {
                 console.println("Setting date and time for file: %s", action.file());
 
-                var file = action.file();
-                var mediaDate = action.dateTime();
-                metaDataSetter.setDateTime(file, mediaDate.getLocalDateTime(), mediaDate.getZoneOffset());
+                metaDataSetter.setDateTime(action.file(), action.mediaType(), action.dateTime());
             }
         } catch (Exception e) {
             throw new RuntimeException("Error processing files", e);
         }
     }
 
-    private List<Path> traverseDirectories(List<Path> inputPath) {
-        List<Path> allPaths = new ArrayList<>();
-        for (var path : inputPath) {
-            if (path.toFile().isDirectory()) {
-                allPaths.addAll(fileExplorer.listFiles(List.of(path)));
-            } else {
-                allPaths.add(path);
-            }
+    private List<SetDateAction> setDateTimeManually(List<Path> allFiles, OffsetDateTime offsetDateTime) {
+        console.println("Setting date and time for files to: %s", offsetDateTime);
+
+        List<SetDateAction> actions = new ArrayList<>();
+        for (var file : allFiles) {
+            var mediaDate = new MediaDateTime(offsetDateTime);
+            var mediaType = mediaTypeDetector.getMediaType(file);
+            actions.add(new SetDateAction(file, mediaType, mediaDate));
         }
-        return allPaths;
+        return actions;
     }
-
-    private List<SetDateAction> setDateTimeManually(List<Path> allFiles, LocalDateTime localDateTime, ZoneOffset zoneOffset) {
-        console.println("Setting date and time for files to: %s %s", localDateTime, zoneOffset);
-
-        // todo fix
-        return Collections.emptyList();
-    }
-
 
     private List<SetDateAction> listAndParseFromFileNames(List<Path> allFiles, String userPattern) {
         // TODO implement also user pattern parsing
@@ -109,7 +101,8 @@ public class SetDateCommand {
             dateTimeOptional.ifPresent(localDateTime -> {
                 var offsetToUse = ZoneOffset.systemDefault().getRules().getOffset(localDateTime);
                 var mediaDate = new MediaDateTime(localDateTime, offsetToUse);
-                actions.add(new SetDateAction(file, mediaDate));
+                var mediaType = mediaTypeDetector.getMediaType(file);
+                actions.add(new SetDateAction(file, mediaType, mediaDate));
             });
         }
 

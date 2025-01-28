@@ -6,6 +6,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import dagger.multibindings.StringKey;
+import org.apache.tika.Tika;
 import sk.kubisoft.exifutils.cli.logging.SystemConsole;
 import sk.kubisoft.exifutils.core.CommandRunner;
 import sk.kubisoft.exifutils.core.logging.Console;
@@ -31,6 +32,12 @@ public class ExifUtilsModule {
     @Singleton
     ObjectMapper provideObjectMapper() {
         return new ObjectMapper();
+    }
+
+    @Provides
+    @Singleton
+    Tika provideTika() {
+        return new Tika();
     }
 
     @Provides

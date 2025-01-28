@@ -20,10 +20,10 @@ public class RenameCommandRunner implements CommandRunner {
 
     private final RenameCommand renameCommand;
 
-    private static final Option DRY_RUN = Option.builder()
-            .option("n")
-            .longOpt("dry-run")
-            .desc("Show what would be done, without making any changes.")
+    private static final Option WRITE = Option.builder()
+            .option("w")
+            .longOpt("write-date")
+            .desc("Write analyzed date to file metadata.")
             .build();
 
     @Inject
@@ -58,9 +58,6 @@ public class RenameCommandRunner implements CommandRunner {
                 if (!Files.exists(sourceDir)) {
                     throw new ParseException("Source directory does not exist: " + sourceArg);
                 }
-                if (!Files.isDirectory(sourceDir)) {
-                    throw new ParseException("Source path is not a directory: " + sourceArg);
-                }
                 if (!Files.isReadable(sourceDir)) {
                     throw new ParseException("Cannot read source directory: " + sourceArg);
                 }
@@ -68,9 +65,9 @@ public class RenameCommandRunner implements CommandRunner {
             }
         }
 
-        boolean dryRun = cmd.hasOption(DRY_RUN.getOpt());
+        boolean writeDate = cmd.hasOption(WRITE.getOpt());
 
-        return new RenameCommandInput(sourceDirs, dryRun);
+        return new RenameCommandInput(sourceDirs, writeDate);
     }
 
     @Override
@@ -86,7 +83,7 @@ public class RenameCommandRunner implements CommandRunner {
     @Override
     public Options getOptions() {
         var options = new Options();
-        options.addOption(DRY_RUN);
+        options.addOption(WRITE);
         return options;
     }
 

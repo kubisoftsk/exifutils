@@ -1,8 +1,7 @@
 package sk.kubisoft.exifutils.setdate;
 
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public record SetDateCommandInput(
@@ -11,7 +10,7 @@ public record SetDateCommandInput(
 
         String pattern,
 
-        LocalDateTime dateTime,
+        OffsetDateTime dateTime,
 
-        ZoneOffset zoneOffset) {
+        boolean writeDate) {
 }
