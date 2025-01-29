@@ -55,7 +55,7 @@ public class InfoCommand {
                         var extractedDate = extractedDateOptional.get();
                         console.println("Extracted date: %s", extractedDate);
                     } else {
-                        console.println("No date extracted.");
+                        console.println("No date found.");
                     }
                 }
             } catch (Exception e) {

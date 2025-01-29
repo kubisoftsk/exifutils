@@ -1,5 +1,7 @@
 package sk.kubisoft.exifutils.core.media;
 
+import sk.kubisoft.exifutils.core.utils.DateTimeUtils;
+
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -50,10 +52,12 @@ public class MediaDateTime {
 
     @Override
     public String toString() {
-        return "MediaDateTime{" +
-                "utcDateTime=" + toUTCDateTime() +
-                ", localDateTime=" + localDateTime +
-                ", zoneOffset=" + zoneOffset +
-                '}';
+        if (zoneOffset == null) {
+            return DateTimeUtils.formatLocalDateTime(localDateTime);
+        } else {
+            var offsetFormatted = DateTimeUtils.formatOffsetDateTime(toOffsetDateTime());
+            var utcFormatted = DateTimeUtils.formatLocalDateTime(toUTCDateTime());
+            return String.format("%s (%s UTC)", offsetFormatted, utcFormatted);
+        }
     }
 }

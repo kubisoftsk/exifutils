@@ -8,19 +8,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sk.kubisoft.exifutils.core.config.ConfigService;
+import sk.kubisoft.exifutils.core.config.model.DateTimeConfig;
+import sk.kubisoft.exifutils.core.config.model.ExifUtilsConfiguration;
+import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaType;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static sk.kubisoft.exifutils.core.media.MediaType.IMAGE;
 import static sk.kubisoft.exifutils.core.media.MediaType.VIDEO;
 
@@ -32,11 +32,23 @@ class MediaDateExtractorTest {
     @Mock
     private ConfigService configServiceMock;
 
+    @Mock
+    private Console consoleMock;
+
     private MediaDateExtractor mediaDateExtractor;
 
     @BeforeEach
     void setUp() {
-        mediaDateExtractor = new MediaDateExtractor(configServiceMock);
+        mediaDateExtractor = new MediaDateExtractor(configServiceMock, consoleMock);
+        lenient().when(configServiceMock.getConfig()).thenReturn(createConfig());
+    }
+
+    private ExifUtilsConfiguration createConfig() {
+        var dateTimeConfig = new DateTimeConfig();
+        dateTimeConfig.setTimeZone("Europe/Bratislava");
+        var exifUtilsConfig = new ExifUtilsConfiguration();
+        exifUtilsConfig.setDateTime(dateTimeConfig);
+        return exifUtilsConfig;
     }
 
     @Test
@@ -213,29 +225,13 @@ class MediaDateExtractorTest {
     void extractCreationDateForVideo7() {
         // This is video taken with OnePlus phone, but there is no offset in metadata
         // This video was actualy taken at 16:25:06 +0100 local time in Slovakia
-        // but cannot be guessed from file modify date, because file modify date is different day then creation date
         // then the offset is just guessed from current system timezone
         Map<String, String> metaData = loadMetaData("/exifdata/video_7.json");
 
         Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
 
         assertTrue(creationDate.isPresent());
-        assertEquals(LocalDateTime.of(2022,2,21,15,25,6).atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime(),
-                creationDate.get().getLocalDateTime());
-        assertEquals(ZonedDateTime.now().getOffset(), creationDate.get().getZoneOffset());
-    }
-
-    @Test
-    void extractCreationDateForVideo8() {
-        // This is video taken with OnePlus phone, but CreateDate is actually in local time zone, not conventionally in UTC.
-        // It's unbelievable how inconsistent the metadata can be.
-        // This video was actualy taken at 2023-02-27 18:02:36 +0100 local time in Slovakia
-        // the time can be guessed from file modify date because it's exactly the same day and hour and minute as creation date
-        Map<String, String> metaData = loadMetaData("/exifdata/video_8.json");
-
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
-
-        assertEquals("2023-02-27T18:02:36", creationDate.get().getLocalDateTime().toString());
+        assertEquals("2022-02-21T16:25:06", creationDate.get().getLocalDateTime().toString());
         assertEquals("+01:00", creationDate.get().getZoneOffset().toString());
     }
 

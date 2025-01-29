@@ -21,6 +21,12 @@ public class ExifUtilsCli {
             .desc("Print verbose output.")
             .build();
 
+    private static final Option HELP = Option.builder()
+            .option("h")
+            .longOpt("help")
+            .desc("Print help message.")
+            .build();
+
     @Inject
     public ExifUtilsCli(Map<String, CommandRunner> commands, Console console) {
         this.commands = commands;
@@ -46,10 +52,16 @@ public class ExifUtilsCli {
         CommandLineParser parser = new DefaultParser();
         var options = runner.getOptions();
         options.addOption(VERBOSE);
+        options.addOption(HELP);
         try {
             CommandLine cmd = parser.parse(options, commandArgs);
 
-            if (cmd.hasOption("verbose") && console instanceof sk.kubisoft.exifutils.cli.logging.SystemConsole systemConsole) {
+            if (cmd.hasOption(HELP)) {
+                printCommandHelp(runner);
+                System.exit(0);
+            }
+
+            if (cmd.hasOption(VERBOSE) && console instanceof sk.kubisoft.exifutils.cli.logging.SystemConsole systemConsole) {
                 systemConsole.setVerbose(true);
             }
 
@@ -60,13 +72,7 @@ public class ExifUtilsCli {
             System.exit(runner.runCommand(cmd));
         } catch (ParseException e) {
             System.err.println("Error parsing command arguments: " + e.getMessage());
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp(
-                    "exifutils " + commandName + " " + OptionsFormatter.generateUsageSyntax(options, runner.getCommandArguments()),
-                    runner.getCommandDescription(),
-                    options,
-                    null
-            );
+            printCommandHelp(runner);
             System.exit(1);
         }
     }
@@ -78,6 +84,16 @@ public class ExifUtilsCli {
                 System.out.printf("  %-15s %s%n",
                         cmd.getCommandName(),
                         cmd.getCommandDescription()));
+    }
+
+    private void printCommandHelp(CommandRunner runner) {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp(
+                "exifutils " + runner.getCommandName() + " " + OptionsFormatter.generateUsageSyntax(runner.getOptions(), runner.getCommandArguments()),
+                runner.getCommandDescription(),
+                runner.getOptions(),
+                null
+        );
     }
 
 }

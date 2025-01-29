@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sk.kubisoft.exifutils.core.config.ConfigService;
+import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaType;
@@ -29,9 +30,11 @@ public class MediaDateExtractor {
     private static final String GPS_LONGITUDE_TAG = "GPSLongitude";
 
     private final ConfigService configService;
+    private final Console console;
 
     @Inject
-    public MediaDateExtractor(ConfigService configService) {
+    public MediaDateExtractor(ConfigService configService, Console console) {
+        this.console = console;
         this.configService = configService;
     }
 
@@ -66,12 +69,24 @@ public class MediaDateExtractor {
             }
         }
 
+        // Verbose and debug logging
+        console.verboseln("Found dates in following EXIF fields:");
+        int maxFieldLength = dateFieldsWithDate.keySet().stream()
+                .mapToInt(field -> field.toString().length())
+                .max()
+                .orElse(0);
+        dateFieldsWithDate.forEach((field, date) -> {
+            var paddedField = StringUtils.rightPad(field.toString(), maxFieldLength);
+            console.verboseln("  %s: %s", paddedField, date);
+        });
+
         // Check parsed dates and return the first valid one with offset present
         Optional<MediaDateTime> firstWithOffset = dateFieldsWithDate.values().stream()
                 .filter(MediaDateTime::hasZoneOffset)
                 .findFirst();
 
         if (firstWithOffset.isPresent()) {
+            console.verboseln("Found date with offset within EXIF tags: %s", firstWithOffset.get());
             return firstWithOffset;
         }
 
@@ -85,35 +100,43 @@ public class MediaDateExtractor {
         }
 
         // Now some guesswork for zone offset for incomplete metadata
-        var dateWithoutOffset = dateWithoutOffsetOptional.get();
-        var localDateWithoutOffset = dateWithoutOffset.getLocalDateTime();
-        // use system default offset as a guess
+        console.verboseln("No date with offset found, guessing offset...");
+        var localDateTime = dateWithoutOffsetOptional.get().getLocalDateTime();
         ZoneOffset offsetToUse;
-        var gpsZoneOffsetOptional = getGpsZoneOffset(dateWithoutOffset.getLocalDateTime(), metadata);
-        offsetToUse = gpsZoneOffsetOptional.orElseGet(() -> getDefaultZoneOffset(localDateWithoutOffset));
+        var gpsZoneOffsetOptional = getGpsZoneOffset(localDateTime, metadata);
+        var defaultTimeZone = getDefaultZoneOffset(localDateTime);
+        if (gpsZoneOffsetOptional.isPresent()) {
+            var gpsOffset = gpsZoneOffsetOptional.get();
+            console.verboseln("Using GPS coordinates to get time offset: %s", gpsOffset);
+            offsetToUse = gpsOffset;
+        } else {
+            console.verboseln("Using system default time zone offset: %s", defaultTimeZone);
+            offsetToUse = defaultTimeZone;
+        }
+
         if (mediaType == MediaType.VIDEO) {
             // assume the video date is in UTC time, this is important for videos, because historically
             // quick time videos has the date in UTC time, so we must convert it to local time with guessed offset
-            OffsetDateTime utcDateTime = localDateWithoutOffset.atOffset(ZoneOffset.UTC);
+            OffsetDateTime utcDateTime = localDateTime.atOffset(ZoneOffset.UTC);
             var localTimeAtOffsetSameInstant = utcDateTime.withOffsetSameInstant(offsetToUse).toLocalDateTime();
             return Optional.of(new MediaDateTime(localTimeAtOffsetSameInstant, offsetToUse));
         } else if (mediaType == MediaType.IMAGE) {
             // similar to video, but we assume the image date is in local time, so we don't need to convert it, just use it
-            return Optional.of(new MediaDateTime(localDateWithoutOffset, offsetToUse));
+            return Optional.of(new MediaDateTime(localDateTime, offsetToUse));
         } else {
             throw new IllegalArgumentException("Unknown media type: " + mediaType);
         }
     }
 
-    private ZoneOffset getDefaultZoneOffset(LocalDateTime localDateWithoutOffset) {
+    private ZoneOffset getDefaultZoneOffset(LocalDateTime localDateTime) {
         var config = configService.getConfig();
         var dateTimeConfig = config.getDateTime();
         if (dateTimeConfig != null && dateTimeConfig.getTimeZone() != null) {
             ZoneId zoneId = ZoneId.of(dateTimeConfig.getTimeZone());
-            return zoneId.getRules().getOffset(localDateWithoutOffset);
+            return zoneId.getRules().getOffset(localDateTime);
         }
         // fallback to system default
-        return ZoneOffset.systemDefault().getRules().getOffset(localDateWithoutOffset);
+        return ZoneOffset.systemDefault().getRules().getOffset(localDateTime);
     }
 
     private Optional<ZoneOffset> getGpsZoneOffset(LocalDateTime localDateTime, Map<String, String> metadata) {
@@ -124,7 +147,7 @@ public class MediaDateExtractor {
             TimeZoneEngine engine = TimeZoneEngine.initialize();
             Optional<ZoneId> maybeZoneId = engine.query(Double.parseDouble(gpsLatitude), Double.parseDouble(gpsLongitude));
             return maybeZoneId.map(zoneId -> {
-                logger.debug("Found zoneId from GPS coordinates: {}", zoneId);
+                console.verboseln("Found zoneId from GPS coordinates: %s", zoneId);
                 return zoneId.getRules().getOffset(localDateTime);
             });
         } else {
@@ -133,6 +156,14 @@ public class MediaDateExtractor {
     }
 
     record OffsetDateTimeField(String dateField, String offsetField) {
+        @Override
+        public String toString() {
+            if (offsetField == null) {
+                return dateField;
+            } else {
+                return dateField + "+" + offsetField;
+            }
+        }
     }
 }
 
