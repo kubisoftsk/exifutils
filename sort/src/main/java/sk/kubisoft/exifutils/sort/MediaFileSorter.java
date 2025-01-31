@@ -43,7 +43,7 @@ public class MediaFileSorter {
 
             moveActions.add(new MoveAction(originalPath, finalTargetPath));
         }
-
+        moveActions.sort(MoveAction::compareTo);
         return moveActions;
     }
 

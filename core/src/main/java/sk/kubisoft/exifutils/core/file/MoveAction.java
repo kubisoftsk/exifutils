@@ -3,11 +3,13 @@ package sk.kubisoft.exifutils.core.file;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public record MoveAction(
+public record MoveAction (
+
         Path source,
 
         Path target
-) {
+
+) implements Comparable<MoveAction> {
 
     public MoveAction {
         if (source == null) {
@@ -16,6 +18,11 @@ public record MoveAction(
         if (target == null) {
             throw new IllegalArgumentException("Target path cannot be null.");
         }
+    }
+
+    @Override
+    public int compareTo(MoveAction o) {
+        return this.source().compareTo(o.source());
     }
 
     @Override
