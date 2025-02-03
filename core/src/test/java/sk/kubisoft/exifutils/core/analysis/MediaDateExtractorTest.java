@@ -245,6 +245,6 @@ class MediaDateExtractorTest {
     }
 
     private MediaFile mediaFile(MediaType mediaType, Map<String, String> metaData) {
-        return new MediaFile(null, mediaType, metaData);
+        return new MediaFile(null, mediaType, metaData, null);
     }
 }

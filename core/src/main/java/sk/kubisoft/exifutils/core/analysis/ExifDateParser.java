@@ -2,7 +2,6 @@ package sk.kubisoft.exifutils.core.analysis;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sk.kubisoft.exifutils.core.media.MediaDateTime;
 
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
@@ -37,7 +36,7 @@ public final class ExifDateParser {
      * @return Optional containing the parsed OffsetDateTime, or empty if input is invalid
      * @throws DateTimeParseException if the date string cannot be parsed
      */
-    public static Optional<MediaDateTime> parseExifDate(String dateStr, String offsetStr)
+    public static Optional<ExifDateTime> parseExifDate(String dateStr, String offsetStr)
             throws DateTimeParseException {
         // Check for blank or invalid date string
         if (dateStr == null || dateStr.isBlank() || "0000:00:00 00:00:00".equals(dateStr.trim())) {
@@ -75,6 +74,6 @@ public final class ExifDateParser {
             // If offset parsing fails, keep offset null
         }
 
-        return Optional.of(new MediaDateTime(dateTime, offset));
+        return Optional.of(new ExifDateTime(dateTime, offset));
     }
 }

@@ -1,5 +1,6 @@
 package sk.kubisoft.exifutils.setdate;
 
+import sk.kubisoft.exifutils.core.analysis.MediaTypeDetector;
 import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.config.model.ExifToolConfig;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
@@ -7,7 +8,6 @@ import sk.kubisoft.exifutils.core.file.FileNameAnalyzer;
 import sk.kubisoft.exifutils.core.file.SetDateAction;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
-import sk.kubisoft.exifutils.core.metadata.MediaTypeDetector;
 import sk.kubisoft.exifutils.core.metadata.MetaDataSetter;
 
 import javax.inject.Inject;

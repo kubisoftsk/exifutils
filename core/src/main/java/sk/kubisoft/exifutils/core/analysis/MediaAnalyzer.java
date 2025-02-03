@@ -1,21 +1,24 @@
 package sk.kubisoft.exifutils.core.analysis;
 
+import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
-import sk.kubisoft.exifutils.core.metadata.MediaTypeDetector;
-import sk.kubisoft.exifutils.core.metadata.MetaDataExtractor;
+import sk.kubisoft.exifutils.core.media.MediaType;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Singleton
 public class MediaAnalyzer {
@@ -25,27 +28,28 @@ public class MediaAnalyzer {
     private final Console console;
     private final ConfigService configService;
     private final MediaTypeDetector mediaTypeDetector;
-    private final MediaDateExtractor mediaDateExtractor;
+    private final ExifDateExtractor exifDateExtractor;
 
     @Inject
-    public MediaAnalyzer(Console console, ConfigService configService,
-                         MediaDateExtractor mediaDateExtractor, MediaTypeDetector mediaTypeDetector) {
+    public MediaAnalyzer(Console console, ConfigService configService, Tika tika) {
         this.console = console;
         this.configService = configService;
-        this.mediaTypeDetector = mediaTypeDetector;
-        this.mediaDateExtractor = mediaDateExtractor;
+        this.mediaTypeDetector = new MediaTypeDetector(tika);
+        this.exifDateExtractor = new ExifDateExtractor(console);
     }
 
-    public List<MediaFile> getMetaData(List<Path> files) {
+    public List<MediaFile> analyze(List<Path> files) {
         var exifToolConfig = configService.getConfig().getExifTool();
         if (exifToolConfig == null || exifToolConfig.getPath() == null) {
             throw new IllegalArgumentException("ExifTool path not configured");
         }
         List<MediaFile> mediaFiles = new ArrayList<>();
-        try (var metaDataExtractor = new MetaDataExtractor(exifToolConfig.getPath(), mediaTypeDetector)) {
-            console.println("Starting analysis of media files...", files.size());
+        console.println("Starting analysis of media files...", files.size());
+        var gpsZoneExtractor = new GpsZoneExtractor();
+        try (var metaDataExtractor = new MetaDataExtractor(exifToolConfig.getPath())) {
             for (int i = 0; i < files.size(); i++) {
                 var file = files.get(i);
+
                 if (console.isVerbose()) {
                     console.println("Analyzing file %d of %d: %s", i + 1, files.size(), file);
                 } else {
@@ -53,13 +57,8 @@ public class MediaAnalyzer {
                 }
 
                 try {
-                    var mediaFileOptional = metaDataExtractor.extractMetaData(file);
-                    if (mediaFileOptional.isEmpty()) {
-                        console.verbose("No metadata found, skipping file");
-                        continue;
-                    }
-
-                    mediaFiles.add(mediaFileOptional.get());
+                    MediaFile mediaFile = analyze(file, metaDataExtractor, gpsZoneExtractor);
+                    mediaFiles.add(mediaFile);
                 } catch (Exception e) {
                     console.error("Error processing file: %s", e, file);
                 }
@@ -74,21 +73,52 @@ public class MediaAnalyzer {
         return mediaFiles;
     }
 
-    public Map<MediaFile, MediaDateTime> analyzeCreationDate(List<Path> files) {
-        Map<MediaFile, MediaDateTime> mediaFilesWithDate = new LinkedHashMap<>();
-
-        List<MediaFile> mediaFiles = getMetaData(files);
-        for (var mediaFile : mediaFiles) {
-            var dateOptional = mediaDateExtractor.extractCreationDate(mediaFile);
-            if (dateOptional.isPresent()) {
-                var date = dateOptional.get();
-                console.verbose("Found creation date: %s", date);
-                mediaFilesWithDate.put(mediaFile, date);
-            } else {
-                console.verbose("No valid date found");
-            }
+    private MediaFile analyze(Path file, MetaDataExtractor metaDataExtractor, GpsZoneExtractor gpsZoneExtractor) {
+        MediaType mediaType = mediaTypeDetector.detectMediaType(file);
+        Map<String, String> metadata = metaDataExtractor.extractMetaData(file);
+        Optional<ExifDateTime> extractedDateOptional = exifDateExtractor.extractCreationDate(mediaType, metadata);
+        if (extractedDateOptional.isEmpty()) {
+            console.verboseln("No date found in metadata");
+            return new MediaFile(file, mediaType, null);
         }
-        return mediaFilesWithDate;
+        ExifDateTime extractedDate = extractedDateOptional.get();
+        if (extractedDate.zoneOffset() == null) {
+            console.verboseln("No date with offset found, guessing offset...");
+            var localDateTime = extractedDate.localDateTime();
+            ZoneOffset offsetToUse = guessZoneOffset(file, localDateTime, metadata, gpsZoneExtractor);
+            extractedDate = new ExifDateTime(localDateTime, offsetToUse);
+        }
+        MediaDateTime mediaDateTime = new MediaDateTime(extractedDate.localDateTime(), extractedDate.zoneOffset());
+        return new MediaFile(file, mediaType, mediaDateTime);
+    }
+
+    private ZoneOffset guessZoneOffset(Path file, LocalDateTime localDateTime, Map<String, String> metadata, GpsZoneExtractor gpsZoneExtractor) {
+        var gpsZoneOffsetOptional = getGpsZoneOffset(file, gpsZoneExtractor, localDateTime, metadata);
+        var defaultTimeZone = getDefaultZoneOffset(localDateTime);
+
+        return gpsZoneOffsetOptional.orElse(defaultTimeZone);
+    }
+
+    private Optional<ZoneOffset> getGpsZoneOffset(Path file, GpsZoneExtractor gpsZoneExtractor, LocalDateTime localDateTime, Map<String, String> metadata) {
+        var zoneIdOptional = gpsZoneExtractor.extractGpsZone(file, metadata);
+
+        return zoneIdOptional.map(zoneId -> {
+            console.verboseln("Found zoneId from GPS coordinates: %s", zoneId);
+            return zoneId.getRules().getOffset(localDateTime);
+        });
+    }
+
+    private ZoneOffset getDefaultZoneOffset(LocalDateTime localDateTime) {
+        var config = configService.getConfig();
+        var dateTimeConfig = config.getDateTime();
+        if (dateTimeConfig != null && dateTimeConfig.getTimeZone() != null) {
+            console.verboseln("Using configured time zone: %s", dateTimeConfig.getTimeZone());
+            ZoneId zoneId = ZoneId.of(dateTimeConfig.getTimeZone());
+            return zoneId.getRules().getOffset(localDateTime);
+        }
+        // fallback to system default
+        console.verboseln("Using system default time zone: %s", ZoneOffset.systemDefault());
+        return ZoneOffset.systemDefault().getRules().getOffset(localDateTime);
     }
 
 }

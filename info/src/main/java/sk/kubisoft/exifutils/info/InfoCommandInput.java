@@ -5,9 +5,7 @@ import java.util.List;
 
 public record InfoCommandInput(
 
-        List<Path> paths,
-
-        boolean extractDate
+        List<Path> paths
 
 ) {
 }

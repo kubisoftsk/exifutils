@@ -1,7 +1,6 @@
 package sk.kubisoft.exifutils.info;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import sk.kubisoft.exifutils.core.CommandArgument;
@@ -19,12 +18,6 @@ import java.util.List;
 public class InfoCommandRunner implements CommandRunner  {
 
     private final InfoCommand infoCommand;
-
-    private static final Option EXTRACT_DATE = Option.builder()
-            .option("d")
-            .longOpt("extract-date")
-            .desc("Flag to also print extracted date information from given files.")
-            .build();
 
     @Inject
     public InfoCommandRunner(InfoCommand infoCommand) {
@@ -65,9 +58,7 @@ public class InfoCommandRunner implements CommandRunner  {
             }
         }
 
-        boolean extractDate = cmd.hasOption(EXTRACT_DATE.getOpt());
-
-        return new InfoCommandInput(sourceDirs, extractDate);
+        return new InfoCommandInput(sourceDirs);
     }
 
     @Override
@@ -82,9 +73,7 @@ public class InfoCommandRunner implements CommandRunner  {
 
     @Override
     public Options getOptions() {
-        var options = new Options();
-        options.addOption(EXTRACT_DATE);
-        return options;
+        return new Options();
     }
 
     @Override

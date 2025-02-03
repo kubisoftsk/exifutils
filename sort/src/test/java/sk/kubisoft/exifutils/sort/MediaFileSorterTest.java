@@ -39,7 +39,7 @@ class MediaFileSorterTest {
     @Test
     void testSortSingleFile() {
         // Given
-        var mediaFile = new MediaFile(sourceRoot.resolve("IMG7277.JPG"), null, null);
+        var mediaFile = new MediaFile(sourceRoot.resolve("IMG7277.JPG"), null, null, null);
         var dateTime = new MediaDateTime(LocalDateTime.of(2024, 7, 15, 10, 30));
 
         Map<MediaFile, MediaDateTime> input = new HashMap<>();
@@ -58,8 +58,8 @@ class MediaFileSorterTest {
     @Test
     void testSortMultipleFilesFromSameMonth() {
         // Given
-        var file1 = new MediaFile(sourceRoot.resolve("IMG7277.JPG"), null, null);
-        var file2 = new MediaFile(sourceRoot.resolve("IMG7278.JPG"), null, null);
+        var file1 = new MediaFile(sourceRoot.resolve("IMG7277.JPG"), null, null, null);
+        var file2 = new MediaFile(sourceRoot.resolve("IMG7278.JPG"), null, null, null);
         var date = new MediaDateTime(LocalDateTime.of(2024, 7, 15, 10, 30));
 
         Map<MediaFile, MediaDateTime> input = new HashMap<>();
@@ -82,8 +82,8 @@ class MediaFileSorterTest {
     @Test
     void testSortFilesFromDifferentMonths() {
         // Given
-        var julyFile = new MediaFile(sourceRoot.resolve("IMG7277.JPG"), null, null);
-        var augustFile = new MediaFile(sourceRoot.resolve("IMG7278.JPG"), null, null);
+        var julyFile = new MediaFile(sourceRoot.resolve("IMG7277.JPG"), null, null, null);
+        var augustFile = new MediaFile(sourceRoot.resolve("IMG7278.JPG"), null, null, null);
         var julyDate = new MediaDateTime(LocalDateTime.of(2024, 7, 15, 10, 30));
         var augustDate = new MediaDateTime(LocalDateTime.of(2024, 8, 1, 10, 30));
 
@@ -107,8 +107,8 @@ class MediaFileSorterTest {
     @Test
     void testSortFilesFromDifferentYears() {
         // Given
-        var file2024 = new MediaFile(sourceRoot.resolve("IMG7277.JPG"), null, null);
-        var file2023 = new MediaFile(sourceRoot.resolve("IMG7278.JPG"), null, null);
+        var file2024 = new MediaFile(sourceRoot.resolve("IMG7277.JPG"), null, null, null);
+        var file2023 = new MediaFile(sourceRoot.resolve("IMG7278.JPG"), null, null, null);
         var date2024 = new MediaDateTime(LocalDateTime.of(2024, 7, 15, 10, 30));
         var date2023 = new MediaDateTime(LocalDateTime.of(2023, 12, 31, 23, 59));
 
@@ -146,6 +146,7 @@ class MediaFileSorterTest {
         // Given
         var complexFileName = new MediaFile(
                 sourceRoot.resolve("IMG_20240115_123456_HDR.jpg"),
+                null,
                 null,
                 null
         );
