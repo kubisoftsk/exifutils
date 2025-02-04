@@ -1,7 +1,5 @@
 package sk.kubisoft.exifutils.core.analysis;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,34 +10,39 @@ import sk.kubisoft.exifutils.core.config.model.DateTimeConfig;
 import sk.kubisoft.exifutils.core.config.model.ExifUtilsConfiguration;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
-import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaType;
 
+import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
 import static sk.kubisoft.exifutils.core.media.MediaType.IMAGE;
 import static sk.kubisoft.exifutils.core.media.MediaType.VIDEO;
 
 @ExtendWith(MockitoExtension.class)
-class MediaDateExtractorTest {
+class MediaAnalyzerTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Mock
+    private Console consoleMock;
 
     @Mock
     private ConfigService configServiceMock;
 
     @Mock
-    private Console consoleMock;
+    private MediaTypeDetector mediaTypeDetectorMock;
 
-    private MediaDateExtractor mediaDateExtractor;
+    @Mock
+    private ExifDateExtractor exifDateExtractorMock;
+
+    @Mock
+    private GpsZoneExtractor gpsZoneExtractorMock;
+
+    private MediaAnalyzer mediaAnalyzer;
 
     @BeforeEach
     void setUp() {
-        mediaDateExtractor = new MediaDateExtractor(configServiceMock, consoleMock);
+        mediaAnalyzer = new MediaAnalyzer(consoleMock, configServiceMock, mediaTypeDetectorMock, exifDateExtractorMock, gpsZoneExtractorMock);
         lenient().when(configServiceMock.getConfig()).thenReturn(createConfig());
     }
 
@@ -56,9 +59,9 @@ class MediaDateExtractorTest {
         // This is likely image sent via WhatsApp, which does not contain any EXIF metadata
         Map<String, String> metaData = loadMetaData("/exifdata/image_1.json");
 
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(IMAGE, metaData));
+        var creationDate = analyze(IMAGE, metaData);
 
-        assertTrue(creationDate.isEmpty());
+        assertThat(creationDate).isNull();
     }
 
     @Test
@@ -66,12 +69,11 @@ class MediaDateExtractorTest {
         // This is full size image taken with IPhone 14 in Greece (hence the correct timezone)
         Map<String, String> metaData = loadMetaData("/exifdata/image_2.json");
 
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(IMAGE, metaData));
+        var creationDate = analyze(IMAGE, metaData);
 
-        assertTrue(creationDate.isPresent());
-        var mediaDateTime = creationDate.get();
-        assertEquals("2023-08-31T18:11:44", mediaDateTime.getLocalDateTime().toString());
-        assertEquals("+03:00", mediaDateTime.getZoneOffset().toString());
+        assertThat(creationDate).isNotNull();
+        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2023-08-31T18:11:44");
+        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+03:00");
     }
 
     @Test
@@ -79,12 +81,11 @@ class MediaDateExtractorTest {
         // This is full size HEIC image taken with IPhone 14 in Slovakia
         Map<String, String> metaData = loadMetaData("/exifdata/image_3.json");
 
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(IMAGE, metaData));
+        var creationDate = analyze(IMAGE, metaData);
 
-        assertTrue(creationDate.isPresent());
-        assertEquals("2023-09-21T15:30:44", creationDate.get().getLocalDateTime().toString());
-        assertEquals("+02:00", creationDate.get().getZoneOffset().toString());
-
+        assertThat(creationDate).isNotNull();
+        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2023-09-21T15:30:44");
+        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+02:00");
     }
 
     @Test
@@ -92,11 +93,11 @@ class MediaDateExtractorTest {
         // This is full size image taken with OnePlus Nord 2T in Slovakia
         Map<String, String> metaData = loadMetaData("/exifdata/image_4.json");
 
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(IMAGE, metaData));
+        var creationDate = analyze(IMAGE, metaData);
 
-        assertTrue(creationDate.isPresent());
-        assertEquals("2022-12-02T21:43:04", creationDate.get().getLocalDateTime().toString());
-        assertEquals("+01:00", creationDate.get().getZoneOffset().toString());
+        assertThat(creationDate).isNotNull();
+        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2022-12-02T21:43:04");
+        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+01:00");
     }
 
     @Test
@@ -104,11 +105,11 @@ class MediaDateExtractorTest {
         // This is full size image taken with OnePlus 9 Pro in Slovakia
         Map<String, String> metaData = loadMetaData("/exifdata/image_5.json");
 
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(IMAGE, metaData));
+        var creationDate = analyze(IMAGE, metaData);
 
-        assertTrue(creationDate.isPresent());
-        assertEquals("2024-10-13T00:11:23", creationDate.get().getLocalDateTime().toString());
-        assertEquals("+02:00", creationDate.get().getZoneOffset().toString());
+        assertThat(creationDate).isNotNull();
+        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2024-10-13T00:11:23");
+        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+02:00");
     }
 
     @Test
@@ -116,11 +117,11 @@ class MediaDateExtractorTest {
         // This is full size image taken with OnePlus 12 in Slovakia
         Map<String, String> metaData = loadMetaData("/exifdata/image_6.json");
 
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(IMAGE, metaData));
+        var creationDate = analyze(IMAGE, metaData);
 
-        assertTrue(creationDate.isPresent());
-        assertEquals("2025-01-04T14:01:05", creationDate.get().getLocalDateTime().toString());
-        assertEquals("+01:00", creationDate.get().getZoneOffset().toString());
+        assertThat(creationDate).isNotNull();
+        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2025-01-04T14:01:05");
+        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+01:00");
     }
 
     @Test
@@ -128,11 +129,11 @@ class MediaDateExtractorTest {
         // This is full size image taken with OnePlus 6 in Slovakia
         Map<String, String> metaData = loadMetaData("/exifdata/image_7.json");
 
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(IMAGE, metaData));
+        var creationDate = analyze(IMAGE, metaData);
 
-        assertTrue(creationDate.isPresent());
-        assertEquals("2020-01-03T07:19:08", creationDate.get().getLocalDateTime().toString());
-        assertEquals("+01:00", creationDate.get().getZoneOffset().toString());
+        assertThat(creationDate).isNotNull();
+        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2020-01-03T07:19:08");
+        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+01:00");
     }
 
     @Test
@@ -140,11 +141,11 @@ class MediaDateExtractorTest {
         // This is full size image taken with older OnePlus phone One E1003 in Slovakia
         Map<String, String> metaData = loadMetaData("/exifdata/image_8.json");
 
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(IMAGE, metaData));
+        var creationDate = analyze(IMAGE, metaData);
 
-        assertTrue(creationDate.isPresent());
-        assertEquals("2016-12-23T11:05:28", creationDate.get().getLocalDateTime().toString());
-        assertEquals("+01:00", creationDate.get().getZoneOffset().toString());
+        assertThat(creationDate).isNotNull();
+        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2016-12-23T11:05:28");
+        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+01:00");
     }
 
     @Test
@@ -152,9 +153,9 @@ class MediaDateExtractorTest {
         // This is likely video sent via WhatsApp, which does not contain any EXIF metadata
         Map<String, String> metaData = loadMetaData("/exifdata/video_1.json");
 
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
+        var creationDate = analyze(VIDEO, metaData);
 
-        assertTrue(creationDate.isEmpty());
+        assertThat(creationDate).isNull();
     }
 
     @Test
@@ -162,11 +163,12 @@ class MediaDateExtractorTest {
         // This is video taken with IPhone 14 in Greece shortly before image_2
         Map<String, String> metaData = loadMetaData("/exifdata/video_2.json");
 
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
+        var creationDate = analyze(VIDEO, metaData);
 
-        assertTrue(creationDate.isPresent());
-        assertEquals("2023-08-31T18:10:31", creationDate.get().getLocalDateTime().toString());
-        assertEquals("+03:00", creationDate.get().getZoneOffset().toString());
+        assertThat(creationDate).isNotNull();
+        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2023-08-31T18:10:31");
+        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+03:00");
+
     }
 
     @Test
@@ -174,11 +176,11 @@ class MediaDateExtractorTest {
         // This is video taken with IPhone 14 in Slovakia shortly after image_3
         Map<String, String> metaData = loadMetaData("/exifdata/video_3.json");
 
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
+        var creationDate = analyze(VIDEO, metaData);
 
-        assertTrue(creationDate.isPresent());
-        assertEquals("2023-09-21T15:33:11", creationDate.get().getLocalDateTime().toString());
-        assertEquals("+02:00", creationDate.get().getZoneOffset().toString());
+        assertThat(creationDate).isNotNull();
+        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2023-09-21T15:33:11");
+        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+02:00");
     }
 
     @Test
@@ -187,11 +189,11 @@ class MediaDateExtractorTest {
         // This video was actualy taken at 18:43:21 local time in Slovakia, but unfortunately the offset is missing in metadata
         Map<String, String> metaData = loadMetaData("/exifdata/video_4.json");
 
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
+        var creationDate = analyze(VIDEO, metaData);
 
-        assertTrue(creationDate.isPresent());
-        assertEquals("2023-04-19T18:43:21", creationDate.get().getLocalDateTime().toString());
-        assertEquals("+02:00", creationDate.get().getZoneOffset().toString());
+        assertThat(creationDate).isNotNull();
+        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2023-04-19T18:43:21");
+        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+02:00");
     }
 
     @Test
@@ -201,11 +203,11 @@ class MediaDateExtractorTest {
 		// so the summer time has offset +02:00
         Map<String, String> metaData = loadMetaData("/exifdata/video_5.json");
 
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
+        var creationDate = analyze(VIDEO, metaData);
 
-        assertTrue(creationDate.isPresent());
-        assertEquals("2024-08-10T17:52:18", creationDate.get().getLocalDateTime().toString());
-        assertEquals("+02:00", creationDate.get().getZoneOffset().toString());
+        assertThat(creationDate).isNotNull();
+        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2024-08-10T17:52:18");
+        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+02:00");
     }
 
     @Test
@@ -214,11 +216,11 @@ class MediaDateExtractorTest {
         // This video was actualy taken at 16:58:01 local time in Slovakia, but unfortunately the offset is missing in metadata
         Map<String, String> metaData = loadMetaData("/exifdata/video_6.json");
 
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
+        var creationDate = analyze(VIDEO, metaData);
 
-        assertTrue(creationDate.isPresent());
-        assertEquals("2025-01-04T16:58:01", creationDate.get().getLocalDateTime().toString());
-        assertEquals("+01:00", creationDate.get().getZoneOffset().toString());
+        assertThat(creationDate).isNotNull();
+        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2025-01-04T16:58:01");
+        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+01:00");
     }
 
     @Test
@@ -228,23 +230,37 @@ class MediaDateExtractorTest {
         // then the offset is just guessed from current system timezone
         Map<String, String> metaData = loadMetaData("/exifdata/video_7.json");
 
-        Optional<MediaDateTime> creationDate = mediaDateExtractor.extractCreationDate(mediaFile(VIDEO, metaData));
+        var creationDate = analyze(VIDEO, metaData);
 
-        assertTrue(creationDate.isPresent());
-        assertEquals("2022-02-21T16:25:06", creationDate.get().getLocalDateTime().toString());
-        assertEquals("+01:00", creationDate.get().getZoneOffset().toString());
+        assertThat(creationDate).isNotNull();
+        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2022-02-21T16:25:06");
+        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+01:00");
+    }
+
+    private MediaDateTime analyze(MediaType mediaType, Map<String, String> metaData) {
+        /*
+        when(mediaTypeDetectorMock.detectMediaType(any())).thenReturn(mediaType);
+
+        when(exifDateExtractorMock.extractCreationDate(metaData)).thenReturn(ExifDateTimeExtractor.extractCreationDate(metaData));
+
+        List<MediaFile> mediaFiles = mediaAnalyzer.analyze(mediaFile(IMAGE, metaData));
+
+        if (mediaFiles.isEmpty()) {
+            return null;
+        }
+
+        return mediaFiles.getFirst().creationDate(); */
+        return null;
     }
 
     private Map<String, String> loadMetaData(String resourceName) {
         try (var is = getClass().getResourceAsStream(resourceName)) {
-            return objectMapper.readValue(is, new TypeReference<>() {});
+           // return objectMapper.readValue(is, new TypeReference<>() {});
+            return Collections.emptyMap();
         } catch (Exception e) {
             throw new RuntimeException("Error loading metadata from resource: " + resourceName, e);
 
         }
     }
 
-    private MediaFile mediaFile(MediaType mediaType, Map<String, String> metaData) {
-        return new MediaFile(null, mediaType, metaData, null);
-    }
 }

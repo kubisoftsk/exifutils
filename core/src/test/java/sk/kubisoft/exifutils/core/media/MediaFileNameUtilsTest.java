@@ -11,7 +11,7 @@ import sk.kubisoft.exifutils.core.config.model.RenameConfig;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -38,12 +38,11 @@ class MediaFileNameUtilsTest {
     @Test
     void shouldCreateNewNameIPhoneImage() {
         // given
-        LocalDateTime dateTime = LocalDateTime.of(2024, 1, 18, 15, 30, 45);
-        MediaDateTime mediaDateTime = new MediaDateTime(dateTime);
+        LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 18, 15, 30, 45);
+        MediaDateTime mediaDateTime = mediaDateTime(localDateTime);
         MediaFile mediaFile = new MediaFile(
                 Path.of("IMG_7456.JPG"),
                 MediaType.IMAGE,
-                Collections.emptyMap(),
                 null
         );
 
@@ -57,12 +56,11 @@ class MediaFileNameUtilsTest {
     @Test
     void shouldCreateNewNameIPhoneVideo() {
         // given
-        LocalDateTime dateTime = LocalDateTime.of(2024, 1, 18, 15, 30, 45);
-        MediaDateTime mediaDateTime = new MediaDateTime(dateTime);
+        LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 18, 15, 30, 45);
+        MediaDateTime mediaDateTime = mediaDateTime(localDateTime);
         MediaFile mediaFile = new MediaFile(
                 Path.of("IMG_7456.MOV"),
                 MediaType.VIDEO,
-                Collections.emptyMap(),
                 null
         );
 
@@ -76,12 +74,11 @@ class MediaFileNameUtilsTest {
     @Test
     void shouldCreateNewNameAndroidImage() {
         // given
-        LocalDateTime dateTime = LocalDateTime.of(2024, 1, 18, 15, 30, 45);
-        MediaDateTime mediaDateTime = new MediaDateTime(dateTime);
+        LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 18, 15, 30, 45);
+        MediaDateTime mediaDateTime = mediaDateTime(localDateTime);
         MediaFile mediaFile = new MediaFile(
                 Path.of("IMG20240118153045.JPG"),
                 MediaType.IMAGE,
-                Collections.emptyMap(),
                 null
         );
 
@@ -95,12 +92,11 @@ class MediaFileNameUtilsTest {
     @Test
     void shouldHandleHeicFormat() {
         // given
-        LocalDateTime dateTime = LocalDateTime.of(2024, 1, 18, 15, 30, 45);
-        MediaDateTime mediaDateTime = new MediaDateTime(dateTime);
+        LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 18, 15, 30, 45);
+        MediaDateTime mediaDateTime = mediaDateTime(localDateTime);
         MediaFile mediaFile = new MediaFile(
                 Path.of("IMG_7456.HEIC"),
                 MediaType.IMAGE,
-                Collections.emptyMap(),
                 null
         );
 
@@ -110,4 +106,9 @@ class MediaFileNameUtilsTest {
         // then
         assertEquals("IMG_20240118_153045.heic", result);
     }
+
+    private MediaDateTime mediaDateTime(LocalDateTime localDateTime) {
+        return new MediaDateTime(localDateTime, ZoneOffset.UTC);
+    }
+
 }

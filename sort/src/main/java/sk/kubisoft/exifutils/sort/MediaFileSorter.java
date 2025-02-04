@@ -10,7 +10,6 @@ import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Singleton
 public class MediaFileSorter {
@@ -22,23 +21,20 @@ public class MediaFileSorter {
         this.fileNameUtils = fileNameUtils;
     }
 
-    public List<MoveAction> sort(Map<MediaFile, MediaDateTime> mediaFilesWithDate, Path targetRootPath, boolean rename) {
+    public List<MoveAction> sort(List<MediaFile> mediaFiles, Path targetRootPath, boolean rename) {
         var moveActions = new ArrayList<MoveAction>();
 
-        for (var entry : mediaFilesWithDate.entrySet()) {
-            var mediaFile = entry.getKey();
-            var date = entry.getValue();
-
+        for (var mediaFile : mediaFiles) {
             var originalPath = mediaFile.originalPath();
             var originalFileName = originalPath.getFileName().toString();
 
             String targetFileName;
             if (rename) {
-                targetFileName = fileNameUtils.createNewName(mediaFile, date);
+                targetFileName = fileNameUtils.createNewName(mediaFile, mediaFile.creationDate());
             } else {
                 targetFileName = originalFileName;
             }
-            var targetDateFolder = createTargetDateFolder(date);
+            var targetDateFolder = createTargetDateFolder(mediaFile.creationDate());
             var finalTargetPath = targetRootPath.resolve(targetDateFolder).resolve(targetFileName);
 
             moveActions.add(new MoveAction(originalPath, finalTargetPath));

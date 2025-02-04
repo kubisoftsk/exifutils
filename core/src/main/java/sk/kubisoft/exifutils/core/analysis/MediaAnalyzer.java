@@ -1,6 +1,5 @@
 package sk.kubisoft.exifutils.core.analysis;
 
-import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sk.kubisoft.exifutils.core.config.ConfigService;
@@ -29,13 +28,16 @@ public class MediaAnalyzer {
     private final ConfigService configService;
     private final MediaTypeDetector mediaTypeDetector;
     private final ExifDateExtractor exifDateExtractor;
+    private final GpsZoneExtractor gpsZoneExtractor;
 
     @Inject
-    public MediaAnalyzer(Console console, ConfigService configService, Tika tika) {
+    public MediaAnalyzer(Console console, ConfigService configService, MediaTypeDetector mediaTypeDetector,
+                         ExifDateExtractor exifDateExtractor, GpsZoneExtractor gpsZoneExtractor) {
         this.console = console;
         this.configService = configService;
-        this.mediaTypeDetector = new MediaTypeDetector(tika);
-        this.exifDateExtractor = new ExifDateExtractor(console);
+        this.mediaTypeDetector = mediaTypeDetector;
+        this.exifDateExtractor = exifDateExtractor;
+        this.gpsZoneExtractor = gpsZoneExtractor;
     }
 
     public List<MediaFile> analyze(List<Path> files) {
@@ -45,7 +47,6 @@ public class MediaAnalyzer {
         }
         List<MediaFile> mediaFiles = new ArrayList<>();
         console.println("Starting analysis of media files...", files.size());
-        var gpsZoneExtractor = new GpsZoneExtractor();
         try (var metaDataExtractor = new MetaDataExtractor(exifToolConfig.getPath())) {
             for (int i = 0; i < files.size(); i++) {
                 var file = files.get(i);
@@ -76,10 +77,10 @@ public class MediaAnalyzer {
     private MediaFile analyze(Path file, MetaDataExtractor metaDataExtractor, GpsZoneExtractor gpsZoneExtractor) {
         MediaType mediaType = mediaTypeDetector.detectMediaType(file);
         Map<String, String> metadata = metaDataExtractor.extractMetaData(file);
-        Optional<ExifDateTime> extractedDateOptional = exifDateExtractor.extractCreationDate(mediaType, metadata);
+        Optional<ExifDateTime> extractedDateOptional = exifDateExtractor.extractCreationDate(metadata);
         if (extractedDateOptional.isEmpty()) {
             console.verboseln("No date found in metadata");
-            return new MediaFile(file, mediaType, null);
+            return new MediaFile(file, mediaType, metadata, null);
         }
         ExifDateTime extractedDate = extractedDateOptional.get();
         if (extractedDate.zoneOffset() == null) {
@@ -88,8 +89,24 @@ public class MediaAnalyzer {
             ZoneOffset offsetToUse = guessZoneOffset(file, localDateTime, metadata, gpsZoneExtractor);
             extractedDate = new ExifDateTime(localDateTime, offsetToUse);
         }
+
+        /*
+        if (mediaType == MediaType.VIDEO) {
+            // assume the video date is in UTC time, this is important for videos, because historically
+            // quick time videos has the date in UTC time, so we must convert it to local time with guessed offset
+            OffsetDateTime utcDateTime = localDateTime.atOffset(ZoneOffset.UTC);
+            var localTimeAtOffsetSameInstant = utcDateTime.withOffsetSameInstant(offsetToUse).toLocalDateTime();
+            return Optional.of(new MediaDateTime(localTimeAtOffsetSameInstant, offsetToUse));
+        } else if (mediaType == MediaType.IMAGE) {
+            // similar to video, but we assume the image date is in local time, so we don't need to convert it, just use it
+            return Optional.of(new MediaDateTime(localDateTime, offsetToUse));
+        } else {
+            throw new IllegalArgumentException("Unknown media type: " + mediaType);
+        }
+
+*/
         MediaDateTime mediaDateTime = new MediaDateTime(extractedDate.localDateTime(), extractedDate.zoneOffset());
-        return new MediaFile(file, mediaType, mediaDateTime);
+        return new MediaFile(file, mediaType, metadata, mediaDateTime);
     }
 
     private ZoneOffset guessZoneOffset(Path file, LocalDateTime localDateTime, Map<String, String> metadata, GpsZoneExtractor gpsZoneExtractor) {

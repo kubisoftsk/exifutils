@@ -4,21 +4,27 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sk.kubisoft.exifutils.core.logging.Console;
-import sk.kubisoft.exifutils.core.media.MediaType;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-class ExifDateExtractor {
+@Singleton
+public class ExifDateExtractor {
 
-    private static final Logger logger = LoggerFactory.getLogger(MediaDateExtractor.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExifDateExtractor.class);
 
     private final Console console;
 
-    public ExifDateExtractor(Console console) {
+    private final ExifDateParser exifDateParser;
+
+    @Inject
+    public ExifDateExtractor(Console console, ExifDateParser exifDateParser) {
         this.console = console;
+        this.exifDateParser = exifDateParser;
     }
 
     // Order of precedence for date fields
@@ -29,7 +35,7 @@ class ExifDateExtractor {
             new OffsetDateTimeField("MediaCreateDate", null),
     };
 
-    public Optional<ExifDateTime> extractCreationDate(MediaType mediaType, Map<String, String> metadata) {
+    public Optional<ExifDateTime> extractCreationDate(Map<String, String> metadata) {
         Map<OffsetDateTimeField, ExifDateTime> dateFieldsWithDate = new LinkedHashMap<>();
         for (var dateField : DATE_TIME_FIELDS) {
             String dateStr = metadata.get(dateField.dateField());
@@ -40,7 +46,7 @@ class ExifDateExtractor {
             }
 
             try {
-                var exifDateTime = ExifDateParser.parseExifDate(dateStr, offsetStr);
+                var exifDateTime = exifDateParser.parseExifDate(dateStr, offsetStr);
                 exifDateTime.ifPresent(dateTime -> dateFieldsWithDate.put(dateField, dateTime));
             } catch (DateTimeParseException e) {
                 logger.warn("Could not parse date from {} field: '{}': {}", dateField.dateField(), dateStr, e.getMessage());

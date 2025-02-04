@@ -7,13 +7,11 @@ import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.FileMover;
 import sk.kubisoft.exifutils.core.file.MoveAction;
 import sk.kubisoft.exifutils.core.logging.Console;
-import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.List;
-import java.util.Map;
 
 @Singleton
 public class SortCommand {
@@ -43,8 +41,7 @@ public class SortCommand {
         var allFiles = fileExplorer.listFiles(input.sourceDirectories());
         console.println("Found %d files.", allFiles.size());
 
-        Map<MediaFile, MediaDateTime> mediaFilesWithDate = mediaAnalyzer.analyzeCreationDate(allFiles);
-        console.println("Found %d media files with valid dates.", mediaFilesWithDate.size());
+        List<MediaFile> mediaFilesWithDate = mediaAnalyzer.analyze(allFiles);
 
         List<MoveAction> moveActions = mediaFileSorter.sort(mediaFilesWithDate, input.destinationDirectory(), input.rename());
         console.println("Total %d files will be moved:", moveActions.size());

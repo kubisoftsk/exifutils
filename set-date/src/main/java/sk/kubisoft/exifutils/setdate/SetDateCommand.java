@@ -84,8 +84,8 @@ public class SetDateCommand {
 
         List<SetDateAction> actions = new ArrayList<>();
         for (var file : allFiles) {
-            var mediaDate = new MediaDateTime(offsetDateTime);
-            var mediaType = mediaTypeDetector.getMediaType(file);
+            var mediaDate = new MediaDateTime(offsetDateTime.toLocalDateTime(), offsetDateTime.getOffset());
+            var mediaType = mediaTypeDetector.detectMediaType(file);
             actions.add(new SetDateAction(file, mediaType, mediaDate));
         }
         return actions;
@@ -99,9 +99,10 @@ public class SetDateCommand {
         for (var file : allFiles) {
             var dateTimeOptional = fileNameAnalyzer.analyzeFileName(file.getFileName().toString());
             dateTimeOptional.ifPresent(localDateTime -> {
+                // TODO take from config service
                 var offsetToUse = ZoneOffset.systemDefault().getRules().getOffset(localDateTime);
                 var mediaDate = new MediaDateTime(localDateTime, offsetToUse);
-                var mediaType = mediaTypeDetector.getMediaType(file);
+                var mediaType = mediaTypeDetector.detectMediaType(file);
                 actions.add(new SetDateAction(file, mediaType, mediaDate));
             });
         }

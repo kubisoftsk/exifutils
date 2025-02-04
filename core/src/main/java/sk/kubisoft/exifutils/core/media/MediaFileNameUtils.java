@@ -24,6 +24,7 @@ public class MediaFileNameUtils {
         this.configService = configService;
     }
 
+    // TODO take date from mediaFile itself
     public String createNewName(MediaFile mediaFile, MediaDateTime date) {
         String result = getPattern();
         LocalDateTime dateTime = date.getLocalDateTime();

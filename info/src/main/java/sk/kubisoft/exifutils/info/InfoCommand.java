@@ -2,7 +2,6 @@ package sk.kubisoft.exifutils.info;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
-import sk.kubisoft.exifutils.core.analysis.MediaDateExtractor;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaFile;
@@ -18,15 +17,13 @@ public class InfoCommand {
 
     private final FileExplorer fileExplorer;
     private final MediaAnalyzer mediaAnalyzer;
-    private final MediaDateExtractor mediaDateExtractor;
     private final Console console;
     private final ObjectMapper objectMapper;
 
     @Inject
     public InfoCommand(FileExplorer fileExplorer, MediaAnalyzer mediaAnalyzer,
-                       MediaDateExtractor mediaDateExtractor, Console console, ObjectMapper objectMapper) {
+                       Console console, ObjectMapper objectMapper) {
         this.fileExplorer = fileExplorer;
-        this.mediaDateExtractor = mediaDateExtractor;
         this.mediaAnalyzer = mediaAnalyzer;
         this.console = console;
         this.objectMapper = objectMapper;
@@ -39,7 +36,7 @@ public class InfoCommand {
         List<Path> allFiles = fileExplorer.listFiles(input.paths());
         console.println("Found %d files.", allFiles.size());
 
-        List<MediaFile> mediaFiles = mediaAnalyzer.getMetaData(allFiles);
+        List<MediaFile> mediaFiles = mediaAnalyzer.analyze(allFiles);
 
         for (MediaFile mediaFile : mediaFiles) {
             MediaType mediaType = mediaFile.mediaType();
@@ -49,14 +46,11 @@ public class InfoCommand {
             try {
                 String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(metaData);
                 console.println(json);
-                if (input.extractDate()) {
-                    var extractedDateOptional = mediaDateExtractor.extractCreationDate(mediaFile);
-                    if (extractedDateOptional.isPresent()) {
-                        var extractedDate = extractedDateOptional.get();
-                        console.println("Extracted date: %s", extractedDate);
-                    } else {
-                        console.println("No date found.");
-                    }
+
+                if (mediaFile.creationDate() != null) {
+                    console.println("Extracted created date: %s", mediaFile.creationDate());
+                } else {
+                    console.println("No date found.");
                 }
             } catch (Exception e) {
                 console.error("Error serializing metadata to JSON: %s", e.getMessage());
