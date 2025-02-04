@@ -10,20 +10,20 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.TreeMap;
 
-class MetaDataExtractor implements AutoCloseable {
+public class MetaDataExtractor implements AutoCloseable {
 
     private static final Logger logger = LoggerFactory.getLogger(MetaDataExtractor.class);
 
     private final ExifTool exifTool;
 
-    MetaDataExtractor(String exifToolPath) {
+    public MetaDataExtractor(String exifToolPath) {
         this.exifTool = new ExifToolBuilder()
                 .withPath(exifToolPath)
                 .enableStayOpen()  // Performance optimization for multiple files
                 .build();
     }
 
-    Map<String, String> extractMetaData(Path file) {
+    public Map<String, String> extractMetaData(Path file) {
         try {
             var metadata = exifTool.getImageMeta(file.toFile());
             return convertMetadataToStrings(metadata);

@@ -27,27 +27,25 @@ public class MediaAnalyzer {
     private final Console console;
     private final ConfigService configService;
     private final MediaTypeDetector mediaTypeDetector;
+	private final MetaDataExtractorFactory metaDataExtractorFactory;
     private final ExifDateExtractor exifDateExtractor;
     private final GpsZoneExtractor gpsZoneExtractor;
 
     @Inject
     public MediaAnalyzer(Console console, ConfigService configService, MediaTypeDetector mediaTypeDetector,
-                         ExifDateExtractor exifDateExtractor, GpsZoneExtractor gpsZoneExtractor) {
+						 MetaDataExtractorFactory metaDataExtractorFactory, ExifDateExtractor exifDateExtractor, GpsZoneExtractor gpsZoneExtractor) {
         this.console = console;
         this.configService = configService;
         this.mediaTypeDetector = mediaTypeDetector;
+		this.metaDataExtractorFactory = metaDataExtractorFactory;
         this.exifDateExtractor = exifDateExtractor;
         this.gpsZoneExtractor = gpsZoneExtractor;
     }
 
     public List<MediaFile> analyze(List<Path> files) {
-        var exifToolConfig = configService.getConfig().getExifTool();
-        if (exifToolConfig == null || exifToolConfig.getPath() == null) {
-            throw new IllegalArgumentException("ExifTool path not configured");
-        }
         List<MediaFile> mediaFiles = new ArrayList<>();
         console.println("Starting analysis of media files...", files.size());
-        try (var metaDataExtractor = new MetaDataExtractor(exifToolConfig.getPath())) {
+        try (var metaDataExtractor = metaDataExtractorFactory.newMetaDataExtractor()) {
             for (int i = 0; i < files.size(); i++) {
                 var file = files.get(i);
 

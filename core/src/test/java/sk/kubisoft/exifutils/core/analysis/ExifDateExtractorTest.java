@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sk.kubisoft.exifutils.core.logging.Console;
+import sk.kubisoft.exifutils.core.logging.JUnitConsole;
 
 import java.util.Map;
 
@@ -16,8 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class ExifDateExtractorTest {
 
-    @Mock
-    private Console consoleMock;
+    private final Console console = new JUnitConsole();
 
     private ExifDateExtractor exifDateExtractor;
 
@@ -27,7 +27,7 @@ class ExifDateExtractorTest {
     void setUp() {
         // we can use real ExifDateParser here, because it is just a simple wrapper around java.time classes
         var exifDateParser = new ExifDateParser();
-        exifDateExtractor = new ExifDateExtractor(consoleMock, exifDateParser);
+        exifDateExtractor = new ExifDateExtractor(console, exifDateParser);
     }
 
     @Test
@@ -48,8 +48,8 @@ class ExifDateExtractorTest {
         var exifDateTime = extract(metaData);
 
         assertThat(exifDateTime).isNotNull();
-        assertThat(exifDateTime.localDateTime().toString()).isEqualTo("2023-08-31T18:11:44");
-        assertThat(exifDateTime.zoneOffset().toString()).isEqualTo("+03:00");
+        assertThat(exifDateTime.localDateTime()).hasToString("2023-08-31T18:11:44");
+        assertThat(exifDateTime.zoneOffset()).hasToString("+03:00");
     }
 
     @Test
@@ -60,8 +60,8 @@ class ExifDateExtractorTest {
         var exifDateTime = extract(metaData);
 
         assertThat(exifDateTime).isNotNull();
-        assertThat(exifDateTime.localDateTime().toString()).isEqualTo("2023-09-21T15:30:44");
-        assertThat(exifDateTime.zoneOffset().toString()).isEqualTo("+02:00");
+        assertThat(exifDateTime.localDateTime()).hasToString("2023-09-21T15:30:44");
+        assertThat(exifDateTime.zoneOffset()).hasToString("+02:00");
     }
 
     @Test
@@ -72,8 +72,8 @@ class ExifDateExtractorTest {
         var exifDateTime = extract(metaData);
 
         assertThat(exifDateTime).isNotNull();
-        assertThat(exifDateTime.localDateTime().toString()).isEqualTo("2022-12-02T21:43:04");
-        assertThat(exifDateTime.zoneOffset().toString()).isEqualTo("+01:00");
+        assertThat(exifDateTime.localDateTime()).hasToString("2022-12-02T21:43:04");
+        assertThat(exifDateTime.zoneOffset()).hasToString("+01:00");
     }
 
     @Test
@@ -84,8 +84,8 @@ class ExifDateExtractorTest {
         var exifDateTime = extract(metaData);
 
         assertThat(exifDateTime).isNotNull();
-        assertThat(exifDateTime.localDateTime().toString()).isEqualTo("2024-10-13T00:11:23");
-        assertThat(exifDateTime.zoneOffset().toString()).isEqualTo("+02:00");
+        assertThat(exifDateTime.localDateTime()).hasToString("2024-10-13T00:11:23");
+        assertThat(exifDateTime.zoneOffset()).hasToString("+02:00");
     }
 
     @Test
@@ -96,8 +96,8 @@ class ExifDateExtractorTest {
         var exifDateTime = extract(metaData);
 
         assertThat(exifDateTime).isNotNull();
-        assertThat(exifDateTime.localDateTime().toString()).isEqualTo("2025-01-04T14:01:05");
-        assertThat(exifDateTime.zoneOffset().toString()).isEqualTo("+01:00");
+        assertThat(exifDateTime.localDateTime()).hasToString("2025-01-04T14:01:05");
+        assertThat(exifDateTime.zoneOffset()).hasToString("+01:00");
     }
 
     @Test
@@ -109,7 +109,7 @@ class ExifDateExtractorTest {
         var exifDateTime = extract(metaData);
 
         assertThat(exifDateTime).isNotNull();
-        assertThat(exifDateTime.localDateTime().toString()).isEqualTo("2020-01-03T07:19:08");
+        assertThat(exifDateTime.localDateTime()).hasToString("2020-01-03T07:19:08");
         assertThat(exifDateTime.zoneOffset()).isNull();
     }
 
@@ -122,7 +122,7 @@ class ExifDateExtractorTest {
         var exifDateTime = extract(metaData);
 
         assertThat(exifDateTime).isNotNull();
-        assertThat(exifDateTime.localDateTime().toString()).isEqualTo("2016-12-23T11:05:28");
+        assertThat(exifDateTime.localDateTime()).hasToString("2016-12-23T11:05:28");
         assertThat(exifDateTime.zoneOffset()).isNull();
     }
 
@@ -144,8 +144,8 @@ class ExifDateExtractorTest {
         var exifDateTime = extract(metaData);
 
         assertThat(exifDateTime).isNotNull();
-        assertThat(exifDateTime.localDateTime().toString()).isEqualTo("2023-08-31T18:10:31");
-        assertThat(exifDateTime.zoneOffset().toString()).isEqualTo("+03:00");
+        assertThat(exifDateTime.localDateTime()).hasToString("2023-08-31T18:10:31");
+        assertThat(exifDateTime.zoneOffset()).hasToString("+03:00");
 
     }
 
@@ -157,63 +157,63 @@ class ExifDateExtractorTest {
         var exifDateTime = extract(metaData);
 
         assertThat(exifDateTime).isNotNull();
-        assertThat(exifDateTime.localDateTime().toString()).isEqualTo("2023-09-21T15:33:11");
-        assertThat(exifDateTime.zoneOffset().toString()).isEqualTo("+02:00");
+        assertThat(exifDateTime.localDateTime()).hasToString("2023-09-21T15:33:11");
+        assertThat(exifDateTime.zoneOffset()).hasToString("+02:00");
     }
 
     @Test
     void extractDateTimeForVideo4() {
-        // This is video taken with probably OnePlus Nord 2T at 18:43:21 local time in Slovakia
-        // Offset is missing in metadata and
+        // This is video taken with probably OnePlus Nord 2T at 18:43:21 local time in Slovakia (+0200)
+        // Offset is missing in metadata and video dates are stored in UTC by convention
         Map<String, String> metaData = loadMetaData("/exifdata/video_4.json");
 
         var exifDateTime = extract(metaData);
 
         assertThat(exifDateTime).isNotNull();
-        assertThat(exifDateTime.localDateTime().toString()).isEqualTo("2023-04-19T18:43:21");
+        assertThat(exifDateTime.localDateTime()).hasToString("2023-04-19T16:43:21");
         assertThat(exifDateTime.zoneOffset()).isNull();
     }
 
     @Test
     void extractDateTimeForVideo5() {
-        // This is video taken with OnePlus 9 Pro, but there is no offset in metadata
-        // This video was actualy taken at 17:52:18 local time in Slovakia, but unfortunately the offset is missing in metadata
-        // so the summer time has offset +02:00
+        // This is video taken with OnePlus 9 Pro at 17:52:18 local time in Slovakia (+0200)
+		// Offset is missing in metadata and video dates are stored in UTC by convention
         Map<String, String> metaData = loadMetaData("/exifdata/video_5.json");
 
         var exifDateTime = extract(metaData);
 
         assertThat(exifDateTime).isNotNull();
-        assertThat(exifDateTime.localDateTime().toString()).isEqualTo("2024-08-10T17:52:18");
-        assertThat(exifDateTime.zoneOffset().toString()).isEqualTo("+02:00");
+        assertThat(exifDateTime.localDateTime()).hasToString("2024-08-10T15:52:18");
+        assertThat(exifDateTime.zoneOffset()).isNull();
     }
 
     @Test
     void extractDateTimeForVideo6() {
-        // This is video taken with OnePlus 12, but there is no offset in metadata
-        // This video was actualy taken at 16:58:01 local time in Slovakia, but unfortunately the offset is missing in metadata
+        // This is video taken with OnePlus 12 at 16:58:01 local time in Slovakia (+0100)
+		// Offset is missing in metadata and video dates are stored in UTC by convention
         Map<String, String> metaData = loadMetaData("/exifdata/video_6.json");
 
         var exifDateTime = extract(metaData);
 
         assertThat(exifDateTime).isNotNull();
-        assertThat(exifDateTime.localDateTime().toString()).isEqualTo("2025-01-04T16:58:01");
-        assertThat(exifDateTime.zoneOffset().toString()).isEqualTo("+01:00");
+        assertThat(exifDateTime.localDateTime()).hasToString("2025-01-04T15:58:01");
+        assertThat(exifDateTime.zoneOffset()).isNull();
     }
 
     @Test
     void extractDateTimeForVideo7() {
-        // This is video taken with OnePlus phone, but there is no offset in metadata
-        // This video was actualy taken at 16:25:06 +0100 local time in Slovakia
-        // then the offset is just guessed from current system timezone
+        // This is video taken with OnePlus phone at 16:25:06 local time in Slovakia (+0100)
+		// Offset is missing in metadata and video dates are stored in UTC by convention
         Map<String, String> metaData = loadMetaData("/exifdata/video_7.json");
 
         var exifDateTime = extract(metaData);
 
         assertThat(exifDateTime).isNotNull();
-        assertThat(exifDateTime.localDateTime().toString()).isEqualTo("2022-02-21T16:25:06");
-        assertThat(exifDateTime.zoneOffset().toString()).isEqualTo("+01:00");
+        assertThat(exifDateTime.localDateTime()).hasToString("2022-02-21T15:25:06");
+        assertThat(exifDateTime.zoneOffset()).isNull();
     }
+
+	// TODO test with metadata that was written by this tool set-date command which stores dates in iphone like way
 
     private ExifDateTime extract(Map<String, String> metadata) {
         return exifDateExtractor.extractCreationDate(metadata)
