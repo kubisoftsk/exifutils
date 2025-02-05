@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.config.model.DateTimeConfig;
@@ -18,9 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -79,7 +78,7 @@ class MediaAnalyzerTest {
     }
 
     @Test
-    void extractCreationDateForImage2() {
+    void extractCreationDateForImageWithLocalTimeAndZoneOffset() {
         // This is full size image taken with IPhone 14 in Greece (hence the correct timezone)
 		LocalDateTime localDateTime = LocalDateTime.of(2023, 8, 31, 18, 11, 44);
 		ZoneOffset zoneOffset = ZoneOffset.ofHours(3);
@@ -92,80 +91,22 @@ class MediaAnalyzerTest {
     }
 
     @Test
-    void extractCreationDateForImage3() {
-        // This is full size HEIC image taken with IPhone 14 in Slovakia
-//        Map<String, String> metaData = loadMetaData("/exifdata/image_3.json");
-		LocalDateTime localDateTime = null;
-		ZoneOffset zoneOffset = null;
-
-        var creationDate = analyze(IMAGE, localDateTime, zoneOffset);
-
-        assertThat(creationDate).isNotNull();
-        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2023-09-21T15:30:44");
-        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+02:00");
-    }
-
-    @Test
-    void extractCreationDateForImage4() {
-        // This is full size image taken with OnePlus Nord 2T in Slovakia
-//        Map<String, String> metaData = loadMetaData("/exifdata/image_4.json");
-		LocalDateTime localDateTime = null;
-		ZoneOffset zoneOffset = null;
-
-        var creationDate = analyze(IMAGE, localDateTime, zoneOffset);
-
-        assertThat(creationDate).isNotNull();
-        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2022-12-02T21:43:04");
-        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+01:00");
-    }
-
-    @Test
-    void extractCreationDateForImage5() {
-        // This is full size image taken with OnePlus 9 Pro in Slovakia
-//        Map<String, String> metaData = loadMetaData("/exifdata/image_5.json");
-		LocalDateTime localDateTime = null;
-		ZoneOffset zoneOffset = null;
-
-        var creationDate = analyze(IMAGE, localDateTime, zoneOffset);
-
-        assertThat(creationDate).isNotNull();
-        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2024-10-13T00:11:23");
-        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+02:00");
-    }
-
-    @Test
-    void extractCreationDateForImage6() {
-        // This is full size image taken with OnePlus 12 in Slovakia
-//        Map<String, String> metaData = loadMetaData("/exifdata/image_6.json");
-		LocalDateTime localDateTime = null;
-		ZoneOffset zoneOffset = null;
-
-        var creationDate = analyze(IMAGE, localDateTime, zoneOffset);
-
-        assertThat(creationDate).isNotNull();
-        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2025-01-04T14:01:05");
-        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+01:00");
-    }
-
-    @Test
-    void extractCreationDateForImage7() {
-        // This is full size image taken with OnePlus 6 in Slovakia
-//        Map<String, String> metaData = loadMetaData("/exifdata/image_7.json");
-		LocalDateTime localDateTime = null;
+    void extractCreationDateForImageWithoutOffsetAndGpsData() {
+		LocalDateTime localDateTime = LocalDateTime.of(2020, 1, 3, 7, 19, 8);
 		ZoneOffset zoneOffset = null;
 
         var creationDate = analyze(IMAGE, localDateTime, zoneOffset);
 
         assertThat(creationDate).isNotNull();
         assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2020-01-03T07:19:08");
+        // The offset is just assumed from config file or system default timezone
         assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+01:00");
     }
 
     @Test
-    void extractCreationDateForImage8() {
+    void extractCreationDateForImageWithoutOffsetAndGpsData2() {
         // This is full size image taken with older OnePlus phone One E1003 in Slovakia
-//        Map<String, String> metaData = loadMetaData("/exifdata/image_8.json");
-		LocalDateTime localDateTime = null;
+		LocalDateTime localDateTime = LocalDateTime.of(2016, 12, 23, 11, 5, 28);
 		ZoneOffset zoneOffset = null;
 
         var creationDate = analyze(IMAGE, localDateTime, zoneOffset);
@@ -178,7 +119,6 @@ class MediaAnalyzerTest {
     @Test
     void noDateFoundForVideo1() {
         // This is likely video sent via WhatsApp, which does not contain any EXIF metadata
-//        Map<String, String> metaData = loadMetaData("/exifdata/video_1.json");
 		LocalDateTime localDateTime = null;
 		ZoneOffset zoneOffset = null;
 
@@ -188,40 +128,25 @@ class MediaAnalyzerTest {
     }
 
     @Test
-    void extractCreationDateForVideo2() {
+    void extractCreationDateForIphoneVideoThatStoresOffset() {
         // This is video taken with IPhone 14 in Greece shortly before image_2
-//        Map<String, String> metaData = loadMetaData("/exifdata/video_2.json");
-		LocalDateTime localDateTime = null;
-		ZoneOffset zoneOffset = null;
+		LocalDateTime localDateTime = LocalDateTime.of(2023, 8, 31, 18, 10, 31);
+		ZoneOffset zoneOffset = ZoneOffset.ofHours(3);
 
         var creationDate = analyze(VIDEO, localDateTime, zoneOffset);
 
         assertThat(creationDate).isNotNull();
         assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2023-08-31T18:10:31");
+        // Iphone videos actually does contain the offset in metadata tag CreationDate
         assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+03:00");
-
     }
 
     @Test
-    void extractCreationDateForVideo3() {
-        // This is video taken with IPhone 14 in Slovakia shortly after image_3
-//        Map<String, String> metaData = loadMetaData("/exifdata/video_3.json");
-		LocalDateTime localDateTime = null;
-		ZoneOffset zoneOffset = null;
-
-        var creationDate = analyze(VIDEO, localDateTime, zoneOffset);
-
-        assertThat(creationDate).isNotNull();
-        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2023-09-21T15:33:11");
-        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+02:00");
-    }
-
-    @Test
-    void extractCreationDateForVideo4() {
+    void extractCreationDateForVideoCreateDateStoredInUTCWithoutOffsetSummer() {
         // This is video taken with probably OnePlus Nord 2T, but there is no offset in metadata
         // This video was actualy taken at 18:43:21 local time in Slovakia, but unfortunately the offset is missing in metadata
-//        Map<String, String> metaData = loadMetaData("/exifdata/video_4.json");
-		LocalDateTime localDateTime = null;
+        // Notice this mocked time is in UTC time and in that time of year there is offset +02:00
+		LocalDateTime localDateTime = LocalDateTime.of(2023, 4, 19, 16, 43, 21);
 		ZoneOffset zoneOffset = null;
 
         var creationDate = analyze(VIDEO, localDateTime, zoneOffset);
@@ -232,27 +157,11 @@ class MediaAnalyzerTest {
     }
 
     @Test
-    void extractCreationDateForVideo5() {
-        // This is video taken with OnePlus 9 Pro, but there is no offset in metadata
-        // This video was actualy taken at 17:52:18 local time in Slovakia, but unfortunately the offset is missing in metadata
-		// so the summer time has offset +02:00
-//        Map<String, String> metaData = loadMetaData("/exifdata/video_5.json");
-		LocalDateTime localDateTime = null;
-		ZoneOffset zoneOffset = null;
-
-        var creationDate = analyze(VIDEO, localDateTime, zoneOffset);
-
-        assertThat(creationDate).isNotNull();
-        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2024-08-10T17:52:18");
-        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+02:00");
-    }
-
-    @Test
-    void extractCreationDateForVideo6() {
+    void extractCreationDateForVideoCreateDateStoredInUTCWithoutOffsetWinter() {
         // This is video taken with OnePlus 12, but there is no offset in metadata
         // This video was actualy taken at 16:58:01 local time in Slovakia, but unfortunately the offset is missing in metadata
-//        Map<String, String> metaData = loadMetaData("/exifdata/video_6.json");
-		LocalDateTime localDateTime = null;
+        // Notice this mocked time is in UTC time and in that time of year there is offset +01:00
+		LocalDateTime localDateTime = LocalDateTime.of(2025, 1, 4, 15, 58, 1);
 		ZoneOffset zoneOffset = null;
 
         var creationDate = analyze(VIDEO, localDateTime, zoneOffset);
@@ -262,29 +171,17 @@ class MediaAnalyzerTest {
         assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+01:00");
     }
 
-    @Test
-    void extractCreationDateForVideo7() {
-        // This is video taken with OnePlus phone, but there is no offset in metadata
-        // This video was actualy taken at 16:25:06 +0100 local time in Slovakia
-        // then the offset is just guessed from current system timezone
-//        Map<String, String> metaData = loadMetaData("/exifdata/video_7.json");
-		LocalDateTime localDateTime = null;
-		ZoneOffset zoneOffset = null;
-
-        var creationDate = analyze(VIDEO, localDateTime, zoneOffset);
-
-        assertThat(creationDate).isNotNull();
-        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2022-02-21T16:25:06");
-        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+01:00");
-    }
+// TODO tests for videos with GPS data and images with GPS data but missing offset
 
     private MediaDateTime analyze(MediaType mediaType, LocalDateTime localDateTime, ZoneOffset zoneOffset) {
         when(mediaTypeDetectorMock.detectMediaType(any()))
 				.thenReturn(mediaType);
-		if (localDateTime != null && zoneOffset != null) {
+		if (localDateTime != null) {
 			when(exifDateExtractorMock.extractCreationDate(any()))
 					.thenReturn(Optional.of(new ExifDateTime(localDateTime, zoneOffset)));
 		}
+        when(metaDataExtractorFactoryMock.newMetaDataExtractor())
+                .thenReturn(Mockito.mock(MetaDataExtractor.class));
 
 		Path testFilePath = Paths.get("dummy");
 

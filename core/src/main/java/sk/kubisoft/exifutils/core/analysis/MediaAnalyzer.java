@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -85,24 +86,21 @@ public class MediaAnalyzer {
             console.verboseln("No date with offset found, guessing offset...");
             var localDateTime = extractedDate.localDateTime();
             ZoneOffset offsetToUse = guessZoneOffset(file, localDateTime, metadata, gpsZoneExtractor);
-            extractedDate = new ExifDateTime(localDateTime, offsetToUse);
+
+            if (mediaType == MediaType.IMAGE) {
+                // assume the image local date is in local time, so we don't need to convert it, just assign it
+                extractedDate = new ExifDateTime(localDateTime, offsetToUse);
+            } else if (mediaType == MediaType.VIDEO) {
+                // assume the video local date without offset is in UTC time, this is important for videos, because historically
+                // quick time videos has the date in UTC time, so we must convert it to local time with guessed offset
+                OffsetDateTime utcDateTime = localDateTime.atOffset(ZoneOffset.UTC);
+                var localTimeAtOffsetSameInstant = utcDateTime.withOffsetSameInstant(offsetToUse).toLocalDateTime();
+                extractedDate = new ExifDateTime(localTimeAtOffsetSameInstant, offsetToUse);
+            } else {
+                throw new IllegalArgumentException("Unknown media type: " + mediaType);
+            }
         }
 
-        /*
-        if (mediaType == MediaType.VIDEO) {
-            // assume the video date is in UTC time, this is important for videos, because historically
-            // quick time videos has the date in UTC time, so we must convert it to local time with guessed offset
-            OffsetDateTime utcDateTime = localDateTime.atOffset(ZoneOffset.UTC);
-            var localTimeAtOffsetSameInstant = utcDateTime.withOffsetSameInstant(offsetToUse).toLocalDateTime();
-            return Optional.of(new MediaDateTime(localTimeAtOffsetSameInstant, offsetToUse));
-        } else if (mediaType == MediaType.IMAGE) {
-            // similar to video, but we assume the image date is in local time, so we don't need to convert it, just use it
-            return Optional.of(new MediaDateTime(localDateTime, offsetToUse));
-        } else {
-            throw new IllegalArgumentException("Unknown media type: " + mediaType);
-        }
-
-*/
         MediaDateTime mediaDateTime = new MediaDateTime(extractedDate.localDateTime(), extractedDate.zoneOffset());
         return new MediaFile(file, mediaType, metadata, mediaDateTime);
     }
