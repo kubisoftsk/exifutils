@@ -36,20 +36,13 @@ public class FileMover {
             try {
                 // Basic validation
                 if (!Files.exists(source)) {
-                    console.error("Source file does not exist: %s", source);
+                    console.errorln("Source file does not exist: %s", source);
                     continue;
                 }
 
                 if (!Files.isRegularFile(source)) {
-                    console.error("Source is not a regular file: %s", source);
+                    console.errorln("Source is not a regular file: %s", source);
                     continue;
-                }
-
-                // Handle potential file conflicts
-                Path resolvedTarget = duplicateHandler.resolveConflict(source, target);
-                if (!resolvedTarget.equals(target)) {
-                    console.verbose("Resolved file conflict: %s -> %s", target, resolvedTarget);
-                    target = resolvedTarget;
                 }
 
                 // Create target directories
@@ -57,18 +50,23 @@ public class FileMover {
                 try {
                     Files.createDirectories(targetDir);
                 } catch (IOException e) {
-                    console.error("Failed to create target directory %s: %s", targetDir, e.getMessage());
+                    console.errorln("Failed to create target directory %s: %s", targetDir, e.getMessage());
                     continue;
                 }
 
                 // Rest of the existing move logic...
                 if (!Files.isWritable(source)) {
-                    console.error("Source file is not writable: %s", source);
+                    console.errorln("Source file is not writable: %s", source);
                     continue;
                 }
 
-                if (targetDir != null && !Files.isWritable(targetDir)) {
-                    console.error("Target directory is not writable: %s", targetDir);
+                if (!Files.isWritable(targetDir)) {
+                    console.errorln("Target directory is not writable: %s", targetDir);
+                    continue;
+                }
+                // Fail if target file already exists
+                if (Files.exists(target)) {
+                    console.errorln("Target file already exists, skipping: %s", target);
                     continue;
                 }
 
@@ -80,17 +78,16 @@ public class FileMover {
                     logger.debug("Successfully moved {} to {}", source, target);
                 } catch (AtomicMoveNotSupportedException e) {
                     // Fallback to non-atomic move if atomic is not supported
-                    Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+                    Files.move(source, target);
                     successCount++;
                     logger.debug("Successfully moved (non-atomic) {} to {}", source, target);
                 }
-
             } catch (SecurityException e) {
-                console.error("Security violation moving %s to %s: %s", source, target, e.getMessage());
+                console.errorln("Security violation moving %s to %s: %s", source, target, e.getMessage());
             } catch (IOException e) {
-                console.error("IO error moving %s to %s: %s", source, target, e.getMessage());
+                console.errorln("IO error moving %s to %s: %s", source, target, e.getMessage());
             } catch (Exception e) {
-                console.error("Unexpected error moving %s to %s: %s", source, target, e.getMessage());
+                console.errorln("Unexpected error moving %s to %s: %s", source, target, e.getMessage());
             }
         }
 
