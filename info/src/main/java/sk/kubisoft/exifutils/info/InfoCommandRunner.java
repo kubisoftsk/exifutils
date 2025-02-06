@@ -1,6 +1,7 @@
 package sk.kubisoft.exifutils.info;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import sk.kubisoft.exifutils.core.CommandArgument;
@@ -16,6 +17,12 @@ import java.util.List;
 
 @Singleton
 public class InfoCommandRunner implements CommandRunner  {
+
+	private static final Option PRINT_ALL = Option.builder()
+			.option("a")
+			.longOpt("all")
+			.desc("Print all available metadata information.")
+			.build();
 
     private final InfoCommand infoCommand;
 
@@ -58,7 +65,9 @@ public class InfoCommandRunner implements CommandRunner  {
             }
         }
 
-        return new InfoCommandInput(sourceDirs);
+		var printAll = cmd.hasOption(PRINT_ALL.getOpt());
+
+        return new InfoCommandInput(sourceDirs, printAll);
     }
 
     @Override
@@ -73,7 +82,9 @@ public class InfoCommandRunner implements CommandRunner  {
 
     @Override
     public Options getOptions() {
-        return new Options();
+        var options = new Options();
+		options.addOption(PRINT_ALL);
+		return options;
     }
 
     @Override
