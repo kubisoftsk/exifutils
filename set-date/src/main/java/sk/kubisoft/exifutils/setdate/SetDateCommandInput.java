@@ -12,5 +12,7 @@ public record SetDateCommandInput(
 
         OffsetDateTime dateTime,
 
-        boolean writeDate) {
+        boolean writeDate
+
+) {
 }

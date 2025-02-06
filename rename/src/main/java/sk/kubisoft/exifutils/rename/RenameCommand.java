@@ -46,6 +46,11 @@ public class RenameCommand {
         List<MediaFile> mediaFilesWithDate = mediaAnalyzer.analyze(allFiles);
 
         List<MoveAction> moveActions = createMoveActions(mediaFilesWithDate);
+
+        if (moveActions.isEmpty()) {
+            console.println("No files to rename.");
+            return;
+        }
         console.println("Total %d files will be renamed:", moveActions.size());
         moveActions.forEach((action) -> console.println("Rename %s", action));
 

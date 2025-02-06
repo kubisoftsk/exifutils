@@ -35,10 +35,10 @@ public class SortCommandRunner implements CommandRunner {
             .desc("Rename files according to their original date and time.")
             .build();
 
-    private static final Option DRY_RUN = Option.builder()
-            .option("n")
-            .longOpt("dry-run")
-            .desc("Show what would be done, without making any changes.")
+    private static final Option WRITE = Option.builder()
+            .option("w")
+            .longOpt("write-date")
+            .desc("Write analyzed date to file metadata.")
             .build();
 
     @Inject
@@ -66,21 +66,20 @@ public class SortCommandRunner implements CommandRunner {
         List<Path> sourceDirs = new ArrayList<>();
         String[] args = cmd.getArgs();
         if (args.length == 0) {
-            sourceDirs.add(Paths.get("."));
-        } else {
-            for (String sourceArg : args) {
-                Path sourceDir = Paths.get(sourceArg);
-                if (!Files.exists(sourceDir)) {
-                    throw new ParseException("Source directory does not exist: " + sourceArg);
-                }
-                if (!Files.isDirectory(sourceDir)) {
-                    throw new ParseException("Source path is not a directory: " + sourceArg);
-                }
-                if (!Files.isReadable(sourceDir)) {
-                    throw new ParseException("Cannot read source directory: " + sourceArg);
-                }
-                sourceDirs.add(sourceDir);
+            throw new ParseException("No source file / directory provided.");
+        }
+        for (String sourceArg : args) {
+            Path sourceDir = Paths.get(sourceArg);
+            if (!Files.exists(sourceDir)) {
+                throw new ParseException("Source directory does not exist: " + sourceArg);
             }
+            if (!Files.isDirectory(sourceDir)) {
+                throw new ParseException("Source path is not a directory: " + sourceArg);
+            }
+            if (!Files.isReadable(sourceDir)) {
+                throw new ParseException("Cannot read source directory: " + sourceArg);
+            }
+            sourceDirs.add(sourceDir);
         }
 
         // Parse destination directory (already validated as required by Options setup)
@@ -90,33 +89,31 @@ public class SortCommandRunner implements CommandRunner {
         boolean renameFiles = cmd.hasOption(RENAME.getOpt());
 
         // Check if destination exists and is a directory
-        // If not dry run, perform directory checks
-        boolean dryRun = cmd.hasOption(DRY_RUN.getOpt());
-        if (!dryRun) {
-            if (Files.exists(destinationDir)) {
-                if (!Files.isDirectory(destinationDir)) {
-                    throw new ParseException("Destination path exists but is not a directory: " + destPath);
-                }
+        if (Files.exists(destinationDir)) {
+            if (!Files.isDirectory(destinationDir)) {
+                throw new ParseException("Destination path exists but is not a directory: " + destPath);
+            }
 
-                try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(destinationDir)) {
-                    // TODO Make this check configurable via an option
-                    //if (dirStream.iterator().hasNext()) {
-                    //	throw new ParseException("Destination directory is not empty: " + destPath);
-                    //}
+            try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(destinationDir)) {
+                // TODO Make this check configurable via an option
+                //if (dirStream.iterator().hasNext()) {
+                //	throw new ParseException("Destination directory is not empty: " + destPath);
+                //}
 
-                } catch (IOException e) {
-                    throw new ParseException("Cannot access destination directory: " + e.getMessage());
-                }
-            } else {
-                try {
-                    Files.createDirectories(destinationDir);
-                } catch (IOException e) {
-                    throw new ParseException("Cannot create destination directory: " + e.getMessage());
-                }
+            } catch (IOException e) {
+                throw new ParseException("Cannot access destination directory: " + e.getMessage());
+            }
+        } else {
+            try {
+                Files.createDirectories(destinationDir);
+            } catch (IOException e) {
+                throw new ParseException("Cannot create destination directory: " + e.getMessage());
             }
         }
 
-        return new SortCommandInput(sourceDirs, destinationDir, renameFiles, dryRun);
+        boolean writeDate = cmd.hasOption(WRITE.getOpt());
+
+        return new SortCommandInput(sourceDirs, destinationDir, renameFiles, writeDate);
     }
 
     @Override
@@ -134,15 +131,14 @@ public class SortCommandRunner implements CommandRunner {
         Options options = new Options();
         options.addOption(DESTINATION);
         options.addOption(RENAME);
-        options.addOption(DRY_RUN);
+        options.addOption(WRITE);
         return options;
     }
 
     @Override
     public List<CommandArgument> getCommandArguments() {
-        return  List.of(
+        return List.of(
                 new CommandArgument.Builder("DIR")
-                        .optional()
                         .multiple()
                         .build()
         );

@@ -44,18 +44,19 @@ public class SortCommand {
         List<MediaFile> mediaFilesWithDate = mediaAnalyzer.analyze(allFiles);
 
         List<MoveAction> moveActions = mediaFileSorter.sort(mediaFilesWithDate, input.destinationDirectory(), input.rename());
+
+        if (moveActions.isEmpty()) {
+            console.println("No files to move.");
+        }
+
         console.println("Total %d files will be moved:", moveActions.size());
         moveActions.forEach((moveAction) -> console.println("Move %s", moveAction));
 
-        if (input.dryRun()) {
-            logger.info("Dry run, not moving files");
+        if (console.confirmAction("Do you want to continue?")) {
+            console.println("Moving files...");
+            fileMover.moveFiles(moveActions);
         } else {
-            if (console.confirmAction("Do you want to continue?")) {
-                console.println("Moving files...");
-                fileMover.moveFiles(moveActions);
-            } else {
-                console.println("Aborted.");
-            }
+            console.println("Aborted.");
         }
     }
 

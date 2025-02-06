@@ -16,13 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
-public class InfoCommandRunner implements CommandRunner  {
+public class InfoCommandRunner implements CommandRunner {
 
-	private static final Option PRINT_ALL = Option.builder()
-			.option("a")
-			.longOpt("all")
-			.desc("Print all available metadata information.")
-			.build();
+    private static final Option PRINT_ALL = Option.builder()
+            .option("a")
+            .longOpt("all")
+            .desc("Print all available metadata information.")
+            .build();
 
     private final InfoCommand infoCommand;
 
@@ -51,21 +51,21 @@ public class InfoCommandRunner implements CommandRunner  {
         List<Path> sourceDirs = new ArrayList<>();
         String[] args = cmd.getArgs();
         if (args.length == 0) {
-            sourceDirs.add(Paths.get("."));
-        } else {
-            for (String sourceArg : args) {
-                Path sourceDir = Paths.get(sourceArg);
-                if (!Files.exists(sourceDir)) {
-                    throw new ParseException("Source file / directory does not exist: " + sourceArg);
-                }
-                if (!Files.isReadable(sourceDir)) {
-                    throw new ParseException("Cannot read source file / directory: " + sourceArg);
-                }
-                sourceDirs.add(sourceDir);
+            throw new ParseException("No source file / directory provided.");
+        }
+        for (String sourceArg : args) {
+            Path sourceDir = Paths.get(sourceArg);
+            if (!Files.exists(sourceDir)) {
+                throw new ParseException("Source file / directory does not exist: " + sourceArg);
             }
+            if (!Files.isReadable(sourceDir)) {
+                throw new ParseException("Cannot read source file / directory: " + sourceArg);
+            }
+            sourceDirs.add(sourceDir);
         }
 
-		var printAll = cmd.hasOption(PRINT_ALL.getOpt());
+
+        var printAll = cmd.hasOption(PRINT_ALL.getOpt());
 
         return new InfoCommandInput(sourceDirs, printAll);
     }
@@ -83,15 +83,14 @@ public class InfoCommandRunner implements CommandRunner  {
     @Override
     public Options getOptions() {
         var options = new Options();
-		options.addOption(PRINT_ALL);
-		return options;
+        options.addOption(PRINT_ALL);
+        return options;
     }
 
     @Override
     public List<CommandArgument> getCommandArguments() {
-        return  List.of(
+        return List.of(
                 new CommandArgument.Builder("FILE|DIR")
-                        .optional()
                         .multiple()
                         .build()
         );
