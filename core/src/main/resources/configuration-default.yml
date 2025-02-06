@@ -2,6 +2,10 @@ exifTool:
   # Path to the exiftool executable
   path:
 
+dateTime:
+  # Default time zone for guessing date and time of creation if only local date is available
+  timeZone: Europe/Bratislava
+
 rename:
   # Pattern to new file name, where following variables are available (extension is preserved):
   # ${prefix}: IMG for VID for video files

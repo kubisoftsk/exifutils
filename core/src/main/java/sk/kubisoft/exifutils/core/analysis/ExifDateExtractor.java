@@ -67,19 +67,28 @@ public class ExifDateExtractor {
         });
 
         // Check parsed dates and return the first valid one with offset present
-        Optional<ExifDateTime> firstWithOffset = dateFieldsWithDate.values().stream()
-                .filter(exifDateTime -> exifDateTime.zoneOffset() != null)
-                .findFirst();
+        Optional<Map.Entry<OffsetDateTimeField, ExifDateTime>> firstFieldWithOffset = dateFieldsWithDate.entrySet().stream()
+																								   .filter(entry -> entry.getValue().zoneOffset() != null)
+																								   .findFirst();
 
-        if (firstWithOffset.isPresent()) {
-            console.verboseln("Found date with offset within EXIF tags: %s", firstWithOffset.get());
-            return firstWithOffset;
+        if (firstFieldWithOffset.isPresent()) {
+			var firstWithOffsetEntry = firstFieldWithOffset.get();
+            console.verboseln("Using date with offset within EXIF tag: %s: %s", firstWithOffsetEntry.getKey(), firstWithOffsetEntry.getValue());
+            return Optional.of(firstWithOffsetEntry.getValue());
         }
 
         // If no valid date with offset found, return the first valid date without offset,
         // or empty if no valid date found
-        return dateFieldsWithDate.values().stream()
-                .findFirst();
+		Optional<Map.Entry<OffsetDateTimeField, ExifDateTime>> firstField = dateFieldsWithDate.entrySet().stream()
+																								   .findFirst();
+		if (firstField.isPresent()) {
+			var firstEntry = firstField.get();
+			console.verboseln("Using date within EXIF tag: %s: %s", firstEntry.getKey(), firstEntry.getValue());
+			return Optional.of(firstEntry.getValue());
+		} else {
+			console.verboseln("No valid date found in EXIF tags");
+			return Optional.empty();
+		}
     }
 
     private record OffsetDateTimeField(String dateField, String offsetField) {

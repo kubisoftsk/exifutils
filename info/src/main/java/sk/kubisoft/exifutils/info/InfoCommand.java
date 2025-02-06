@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 
 @Singleton
 public class InfoCommand {
@@ -40,18 +41,14 @@ public class InfoCommand {
 
         for (MediaFile mediaFile : mediaFiles) {
             MediaType mediaType = mediaFile.mediaType();
-            console.println("File %s type is: %s.", mediaFile.originalPath(), mediaType);
-
+            console.println("File %s:", mediaFile.originalPath());
+			console.println("Media type: %s", mediaType);
+			console.println("Resolved created date: %s", (mediaFile.creationDate()) != null ? mediaFile.creationDate() : "N/A");
+			console.println("EXIF metadata:");
             var metaData = mediaFile.metadata();
             try {
                 String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(metaData);
                 console.println(json);
-
-                if (mediaFile.creationDate() != null) {
-                    console.println("Extracted created date: %s", mediaFile.creationDate());
-                } else {
-                    console.println("No date found.");
-                }
             } catch (Exception e) {
                 console.error("Error serializing metadata to JSON: %s", e.getMessage());
             }

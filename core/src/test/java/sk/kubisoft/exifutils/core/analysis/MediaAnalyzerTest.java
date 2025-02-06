@@ -24,6 +24,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static sk.kubisoft.exifutils.core.media.MediaType.IMAGE;
@@ -86,8 +88,8 @@ class MediaAnalyzerTest {
         var creationDate = analyze(IMAGE, localDateTime, zoneOffset);
 
         assertThat(creationDate).isNotNull();
-        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2023-08-31T18:11:44");
-        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+03:00");
+        assertThat(creationDate.getLocalDateTime()).hasToString("2023-08-31T18:11:44");
+        assertThat(creationDate.getZoneOffset()).hasToString("+03:00");
     }
 
     @Test
@@ -98,22 +100,23 @@ class MediaAnalyzerTest {
         var creationDate = analyze(IMAGE, localDateTime, zoneOffset);
 
         assertThat(creationDate).isNotNull();
-        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2020-01-03T07:19:08");
+        assertThat(creationDate.getLocalDateTime()).hasToString("2020-01-03T07:19:08");
         // The offset is just assumed from config file or system default timezone
-        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+01:00");
+        assertThat(creationDate.getZoneOffset()).hasToString("+01:00");
     }
 
     @Test
-    void extractCreationDateForImageWithoutOffsetAndGpsData2() {
-        // This is full size image taken with older OnePlus phone One E1003 in Slovakia
-		LocalDateTime localDateTime = LocalDateTime.of(2016, 12, 23, 11, 5, 28);
+    void extractCreationDateForImageWithoutOffsetButWithGpsDataPresent() {
+        // This image was taken with Samsung SM-M205FN phone in Slovakia, but the offset is missing in metadata
+		LocalDateTime localDateTime = LocalDateTime.of(2023, 1, 2, 17, 14, 56);
 		ZoneOffset zoneOffset = null;
+		ZoneOffset gpsResolvedZoneOffset = ZoneOffset.ofHours(1);
 
-        var creationDate = analyze(IMAGE, localDateTime, zoneOffset);
+        var creationDate = analyze(IMAGE, localDateTime, zoneOffset, gpsResolvedZoneOffset);
 
         assertThat(creationDate).isNotNull();
-        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2016-12-23T11:05:28");
-        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+01:00");
+        assertThat(creationDate.getLocalDateTime()).hasToString("2023-01-02T17:14:56");
+        assertThat(creationDate.getZoneOffset()).hasToString("+01:00");
     }
 
     @Test
@@ -136,10 +139,25 @@ class MediaAnalyzerTest {
         var creationDate = analyze(VIDEO, localDateTime, zoneOffset);
 
         assertThat(creationDate).isNotNull();
-        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2023-08-31T18:10:31");
+        assertThat(creationDate.getLocalDateTime()).hasToString("2023-08-31T18:10:31");
         // Iphone videos actually does contain the offset in metadata tag CreationDate
-        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+03:00");
+        assertThat(creationDate.getZoneOffset()).hasToString("+03:00");
     }
+
+	@Test
+	void extractCreationDateForVideoCreateDateStoredInUTCWithoutOffsetButWithGPSData() {
+		// This is video taken with OnePlus 12 in Greece at 11:32:51 local time (+0300), but there is no offset in metadata
+		// Fortunately there is GPS data in metadata, so we can extract the offset from that
+		LocalDateTime localDateTime = LocalDateTime.of(2023, 8, 30, 8, 32, 51);
+		ZoneOffset zoneOffset = null;
+		ZoneOffset gpsResolvedZoneOffset = ZoneOffset.ofHours(3);
+
+		var creationDate = analyze(VIDEO, localDateTime, zoneOffset, gpsResolvedZoneOffset);
+
+		assertThat(creationDate).isNotNull();
+		assertThat(creationDate.getLocalDateTime()).hasToString("2023-08-30T11:32:51");
+		assertThat(creationDate.getZoneOffset()).hasToString("+03:00");
+	}
 
     @Test
     void extractCreationDateForVideoCreateDateStoredInUTCWithoutOffsetSummer() {
@@ -152,8 +170,8 @@ class MediaAnalyzerTest {
         var creationDate = analyze(VIDEO, localDateTime, zoneOffset);
 
         assertThat(creationDate).isNotNull();
-        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2023-04-19T18:43:21");
-        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+02:00");
+        assertThat(creationDate.getLocalDateTime()).hasToString("2023-04-19T18:43:21");
+        assertThat(creationDate.getZoneOffset()).hasToString("+02:00");
     }
 
     @Test
@@ -167,13 +185,16 @@ class MediaAnalyzerTest {
         var creationDate = analyze(VIDEO, localDateTime, zoneOffset);
 
         assertThat(creationDate).isNotNull();
-        assertThat(creationDate.getLocalDateTime().toString()).isEqualTo("2025-01-04T16:58:01");
-        assertThat(creationDate.getZoneOffset().toString()).isEqualTo("+01:00");
+        assertThat(creationDate.getLocalDateTime()).hasToString("2025-01-04T16:58:01");
+        assertThat(creationDate.getZoneOffset()).hasToString("+01:00");
     }
 
-// TODO tests for videos with GPS data and images with GPS data but missing offset
+	private MediaDateTime analyze(MediaType mediaType, LocalDateTime localDateTime, ZoneOffset zoneOffset) {
+		return analyze(mediaType, localDateTime, zoneOffset, null);
+	}
 
-    private MediaDateTime analyze(MediaType mediaType, LocalDateTime localDateTime, ZoneOffset zoneOffset) {
+    private MediaDateTime analyze(MediaType mediaType, LocalDateTime localDateTime,
+								  ZoneOffset zoneOffset, ZoneOffset gpsResolvedZoneOffset) {
         when(mediaTypeDetectorMock.detectMediaType(any()))
 				.thenReturn(mediaType);
 		if (localDateTime != null) {
@@ -182,7 +203,10 @@ class MediaAnalyzerTest {
 		}
         when(metaDataExtractorFactoryMock.newMetaDataExtractor())
                 .thenReturn(Mockito.mock(MetaDataExtractor.class));
-
+		if (gpsResolvedZoneOffset != null) {
+			when(gpsZoneExtractorMock.extractGpsZone(any(Path.class), anyMap()))
+					.thenReturn(Optional.of(gpsResolvedZoneOffset));
+		}
 		Path testFilePath = Paths.get("dummy");
 
 		List<MediaFile> mediaFiles = mediaAnalyzer.analyze(List.of(testFilePath));
