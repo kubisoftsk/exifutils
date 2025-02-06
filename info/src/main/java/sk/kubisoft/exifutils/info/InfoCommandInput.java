@@ -7,7 +7,7 @@ public record InfoCommandInput(
 
         List<Path> paths,
 
-        boolean extractDate
+		boolean printAll
 
 ) {
 }

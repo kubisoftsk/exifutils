@@ -16,15 +16,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
-public class InfoCommandRunner implements CommandRunner  {
+public class InfoCommandRunner implements CommandRunner {
+
+    private static final Option PRINT_ALL = Option.builder()
+            .option("a")
+            .longOpt("all")
+            .desc("Print all available metadata information.")
+            .build();
 
     private final InfoCommand infoCommand;
-
-    private static final Option EXTRACT_DATE = Option.builder()
-            .option("d")
-            .longOpt("extract-date")
-            .desc("Flag to also print extracted date information from given files.")
-            .build();
 
     @Inject
     public InfoCommandRunner(InfoCommand infoCommand) {
@@ -51,23 +51,23 @@ public class InfoCommandRunner implements CommandRunner  {
         List<Path> sourceDirs = new ArrayList<>();
         String[] args = cmd.getArgs();
         if (args.length == 0) {
-            sourceDirs.add(Paths.get("."));
-        } else {
-            for (String sourceArg : args) {
-                Path sourceDir = Paths.get(sourceArg);
-                if (!Files.exists(sourceDir)) {
-                    throw new ParseException("Source file / directory does not exist: " + sourceArg);
-                }
-                if (!Files.isReadable(sourceDir)) {
-                    throw new ParseException("Cannot read source file / directory: " + sourceArg);
-                }
-                sourceDirs.add(sourceDir);
+            throw new ParseException("No source file / directory provided.");
+        }
+        for (String sourceArg : args) {
+            Path sourceDir = Paths.get(sourceArg);
+            if (!Files.exists(sourceDir)) {
+                throw new ParseException("Source file / directory does not exist: " + sourceArg);
             }
+            if (!Files.isReadable(sourceDir)) {
+                throw new ParseException("Cannot read source file / directory: " + sourceArg);
+            }
+            sourceDirs.add(sourceDir);
         }
 
-        boolean extractDate = cmd.hasOption(EXTRACT_DATE.getOpt());
 
-        return new InfoCommandInput(sourceDirs, extractDate);
+        var printAll = cmd.hasOption(PRINT_ALL.getOpt());
+
+        return new InfoCommandInput(sourceDirs, printAll);
     }
 
     @Override
@@ -83,15 +83,14 @@ public class InfoCommandRunner implements CommandRunner  {
     @Override
     public Options getOptions() {
         var options = new Options();
-        options.addOption(EXTRACT_DATE);
+        options.addOption(PRINT_ALL);
         return options;
     }
 
     @Override
     public List<CommandArgument> getCommandArguments() {
-        return  List.of(
+        return List.of(
                 new CommandArgument.Builder("FILE|DIR")
-                        .optional()
                         .multiple()
                         .build()
         );

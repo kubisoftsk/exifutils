@@ -64,6 +64,8 @@ public class ExifUtilsModule {
         return setDateCommandRunner;
     }
 
+	// TODO add shift command that will shift the date and time of the media files
+
     @Provides
     @Singleton
     @IntoMap

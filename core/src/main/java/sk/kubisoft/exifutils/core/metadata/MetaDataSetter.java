@@ -72,8 +72,8 @@ public class MetaDataSetter implements AutoCloseable {
         // However, the tag stores the date by convention in UTC time zone, which is tricky, because then we cannot infer the time zone easily,
         // because videos does not have the "OffsetTime" tag.
         // However, iPhones stores the full offset date and time in "CreationDate" tag, so we can use that, for example: 2023:08:31 18:10:31+03:00
-        var utcDateTime = formatToLocalExifDateTime(mediaDateTime.toUTCDateTime());
-        var offsetDateTime = formatToOffsetExifDateTime(mediaDateTime.toOffsetDateTime());
+        var utcDateTime = formatToLocalExifDateTime(mediaDateTime.getUtcDateTime().toLocalDateTime());
+        var offsetDateTime = formatToOffsetExifDateTime(mediaDateTime.getDateTime());
 
         return Map.of(
                 new UnspecifiedTag(CREATE_DATE_UTC_TAG), utcDateTime,

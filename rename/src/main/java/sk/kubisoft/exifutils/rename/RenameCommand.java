@@ -7,7 +7,6 @@ import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.FileMover;
 import sk.kubisoft.exifutils.core.file.MoveAction;
 import sk.kubisoft.exifutils.core.logging.Console;
-import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
 
@@ -15,7 +14,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Singleton
 public class RenameCommand {
@@ -45,10 +43,14 @@ public class RenameCommand {
         var allFiles = fileExplorer.listFiles(input.sourceDirectories());
         console.println("Found %d files.", allFiles.size());
 
-        Map<MediaFile, MediaDateTime> mediaFilesWithDate = mediaAnalyzer.analyzeCreationDate(allFiles);
-        console.println("Found %d media files with valid dates.", mediaFilesWithDate.size());
+        List<MediaFile> mediaFilesWithDate = mediaAnalyzer.analyze(allFiles);
 
         List<MoveAction> moveActions = createMoveActions(mediaFilesWithDate);
+
+        if (moveActions.isEmpty()) {
+            console.println("No files to rename.");
+            return;
+        }
         console.println("Total %d files will be renamed:", moveActions.size());
         moveActions.forEach((action) -> console.println("Rename %s", action));
 
@@ -62,15 +64,13 @@ public class RenameCommand {
         }
     }
 
-    private List<MoveAction> createMoveActions(Map<MediaFile, MediaDateTime> mediaFilesWithDate) {
+    private List<MoveAction> createMoveActions(List<MediaFile> mediaFiles) {
         List<MoveAction> moveActions = new ArrayList<>();
 
-        for (var entry : mediaFilesWithDate.entrySet()) {
-            var mediaFile = entry.getKey();
+        for (var mediaFile : mediaFiles) {
             var originalPath = mediaFile.originalPath();
-            var date = entry.getValue();
 
-            var newName = fileNameUtils.createNewName(mediaFile, date);
+            var newName = fileNameUtils.createNewName(mediaFile, mediaFile.creationDate());
 
             var targetPath = originalPath.getParent().resolve(newName);
             if (originalPath.equals(targetPath)) {

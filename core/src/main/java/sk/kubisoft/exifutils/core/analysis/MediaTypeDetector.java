@@ -1,4 +1,4 @@
-package sk.kubisoft.exifutils.core.metadata;
+package sk.kubisoft.exifutils.core.analysis;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -8,7 +8,6 @@ import sk.kubisoft.exifutils.core.media.MediaType;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -25,7 +24,7 @@ public class MediaTypeDetector {
         this.tika = tika;
     }
 
-    public MediaType getMediaType(Path path) {
+    public MediaType detectMediaType(Path path) {
         String extension = StringUtils.toRootLowerCase(FilenameUtils.getExtension(path.toString()));
         if (COMMON_VIDEO_EXTENSIONS.contains(extension)) {
             return MediaType.VIDEO;
@@ -45,8 +44,7 @@ public class MediaTypeDetector {
                 return null;
             }
         } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            throw new AnalysisException(path, "Error detecting media type", e);
         }
     }
 }
-

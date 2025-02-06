@@ -2,8 +2,9 @@ package sk.kubisoft.exifutils.core.analysis;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sk.kubisoft.exifutils.core.media.MediaDateTime;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -13,9 +14,11 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class ExifDateParser {
+@Singleton
+public class ExifDateParser {
 
     private static final Logger logger = LoggerFactory.getLogger(ExifDateParser.class);
+
 
     // Format for dates without offset
     private static final DateTimeFormatter EXIF_DATE_FORMAT =
@@ -25,8 +28,8 @@ public final class ExifDateParser {
     private static final Pattern OFFSET_PATTERN =
             Pattern.compile("([0-9: ]+?)(?:([+-][0-9]{2}:?[0-9]{2})|Z)?$");
 
-    private ExifDateParser() {
-        throw new UnsupportedOperationException("Utility class");
+    @Inject
+    public ExifDateParser() {
     }
 
     /**
@@ -37,8 +40,7 @@ public final class ExifDateParser {
      * @return Optional containing the parsed OffsetDateTime, or empty if input is invalid
      * @throws DateTimeParseException if the date string cannot be parsed
      */
-    public static Optional<MediaDateTime> parseExifDate(String dateStr, String offsetStr)
-            throws DateTimeParseException {
+    public Optional<ExifDateTime> parseExifDate(String dateStr, String offsetStr) throws DateTimeParseException {
         // Check for blank or invalid date string
         if (dateStr == null || dateStr.isBlank() || "0000:00:00 00:00:00".equals(dateStr.trim())) {
             return Optional.empty();
@@ -75,6 +77,6 @@ public final class ExifDateParser {
             // If offset parsing fails, keep offset null
         }
 
-        return Optional.of(new MediaDateTime(dateTime, offset));
+        return Optional.of(new ExifDateTime(dateTime, offset));
     }
 }
