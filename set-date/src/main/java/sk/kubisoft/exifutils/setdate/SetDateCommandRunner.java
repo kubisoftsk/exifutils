@@ -36,10 +36,10 @@ public class SetDateCommandRunner implements CommandRunner {
             .hasArg()
             .build();
 
-    private static final Option WRITE = Option.builder()
-            .option("w")
-            .longOpt("write-date")
-            .desc("Write analyzed date to file metadata.")
+    private static final Option RENAME = Option.builder()
+            .option("r")
+            .longOpt("rename")
+            .desc("Rename files according to their original date and time.")
             .build();
 
     private final Console console;
@@ -99,8 +99,8 @@ public class SetDateCommandRunner implements CommandRunner {
             }
         }
 
-        boolean writeDate = cmd.hasOption(WRITE.getOpt());
-        return new SetDateCommandInput(sourceFiles, patternStr, dateTime, writeDate);
+        boolean rename = cmd.hasOption(RENAME.getOpt());
+        return new SetDateCommandInput(sourceFiles, patternStr, dateTime, rename);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class SetDateCommandRunner implements CommandRunner {
         var options = new Options();
         options.addOption(PATTERN);
         options.addOption(DATE_TIME);
-        options.addOption(WRITE);
+        options.addOption(RENAME);
         return options;
     }
 
