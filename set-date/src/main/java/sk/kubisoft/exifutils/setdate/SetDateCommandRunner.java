@@ -7,6 +7,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import sk.kubisoft.exifutils.core.CommandArgument;
 import sk.kubisoft.exifutils.core.CommandRunner;
+import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -20,8 +21,6 @@ import java.util.List;
 
 @Singleton
 public class SetDateCommandRunner implements CommandRunner {
-
-    private final SetDateCommand setDateCommand;
 
     private static final Option PATTERN = Option.builder()
             .option("p")
@@ -43,8 +42,13 @@ public class SetDateCommandRunner implements CommandRunner {
             .desc("Write analyzed date to file metadata.")
             .build();
 
+    private final Console console;
+
+    private final SetDateCommand setDateCommand;
+
     @Inject
-    public SetDateCommandRunner(SetDateCommand setDateCommand) {
+    public SetDateCommandRunner(Console console, SetDateCommand setDateCommand) {
+        this.console = console;
         this.setDateCommand = setDateCommand;
     }
 
@@ -55,10 +59,10 @@ public class SetDateCommandRunner implements CommandRunner {
             setDateCommand.execute(input);
             return 0;
         } catch (ParseException e) {
-            System.err.println("Error parsing command arguments: " + e.getMessage());
+            console.errorln("Error parsing command arguments", e);
             return 1;
         } catch (RuntimeException e) {
-            System.err.println("Error executing " + getCommandName() + " command: " + e.getMessage());
+            console.errorln("Error executing " + getCommandName() + " command", e);
             return 1;
         }
     }

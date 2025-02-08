@@ -2,13 +2,12 @@ package sk.kubisoft.exifutils.setdate;
 
 import sk.kubisoft.exifutils.core.analysis.MediaTypeDetector;
 import sk.kubisoft.exifutils.core.config.ConfigService;
-import sk.kubisoft.exifutils.core.config.model.ExifToolConfig;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.FileNameAnalyzer;
 import sk.kubisoft.exifutils.core.file.SetDateAction;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
-import sk.kubisoft.exifutils.core.metadata.MetaDataSetter;
+import sk.kubisoft.exifutils.core.metadata.ExifDateSetter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -26,23 +25,20 @@ public class SetDateCommand {
     private final FileExplorer fileExplorer;
     private final FileNameAnalyzer fileNameAnalyzer;
     private final MediaTypeDetector mediaTypeDetector;
+    private final ExifDateSetter exifDateSetter;
 
     @Inject
     public SetDateCommand(Console console, ConfigService configService, FileNameAnalyzer fileNameAnalyzer,
-                          FileExplorer fileExplorer, MediaTypeDetector mediaTypeDetector) {
+                          FileExplorer fileExplorer, MediaTypeDetector mediaTypeDetector, ExifDateSetter exifDateSetter) {
         this.console = console;
         this.configService = configService;
         this.fileNameAnalyzer = fileNameAnalyzer;
         this.fileExplorer = fileExplorer;
         this.mediaTypeDetector = mediaTypeDetector;
+        this.exifDateSetter = exifDateSetter;
     }
 
     public void execute(SetDateCommandInput input) {
-        var exifToolConfig = configService.getConfig().getExifTool();
-        if (exifToolConfig == null || exifToolConfig.getPath() == null) {
-            throw new IllegalArgumentException("ExifTool path not configured");
-        }
-
         console.verboseln("Running ExifUtils Rename command with input: %s", input);
 
         console.println("Searching for media files...");
@@ -56,26 +52,13 @@ public class SetDateCommand {
             setDateActionList = listAndParseFromFileNames(allFiles, input.pattern());
         }
 
-        console.println("Total %d files will have date set:", setDateActionList.size());
+        console.println("Total %d files will have date set.", setDateActionList.size());
         setDateActionList.forEach((action) -> console.println("%s", action));
 
         if (console.confirmAction("Do you want to continue?")) {
-            console.println("Setting datetime to files...");
-           performSetDateTime(setDateActionList, exifToolConfig);
+            exifDateSetter.setDateTime(setDateActionList);
         } else {
             console.println("Aborted.");
-        }
-    }
-
-    private void performSetDateTime(List<SetDateAction> setDateActionList, ExifToolConfig exifToolConfig) {
-        try (var metaDataSetter = new MetaDataSetter(exifToolConfig.getPath())) {
-            for (var action : setDateActionList) {
-                console.println("Setting date and time for file: %s", action.file());
-
-                metaDataSetter.setDateTime(action.file(), action.mediaType(), action.dateTime());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error processing files", e);
         }
     }
 

@@ -41,7 +41,16 @@ public class SortCommand {
         var allFiles = fileExplorer.listFiles(input.sourceDirectories());
         console.println("Found %d files.", allFiles.size());
 
-        List<MediaFile> mediaFilesWithDate = mediaAnalyzer.analyze(allFiles);
+        var allMediaFiles = mediaAnalyzer.analyze(allFiles);
+        List<MediaFile> mediaFilesWithDate = allMediaFiles.stream()
+                .filter(mediaFile -> mediaFile.creationDate() != null)
+                .toList();
+        List<MediaFile> mediaFilesWithoutDate = allMediaFiles.stream()
+                .filter(mediaFile -> mediaFile.creationDate() == null)
+                .toList();
+
+        console.println("Found %d media files with date, %d media files without date.", mediaFilesWithDate.size(), mediaFilesWithoutDate.size());
+        mediaFilesWithoutDate.forEach((mediaFile) -> console.verboseln("No date found for %s", mediaFile.originalPath()));
 
         List<MoveAction> moveActions = mediaFileSorter.sort(mediaFilesWithDate, input.destinationDirectory(), input.rename());
 

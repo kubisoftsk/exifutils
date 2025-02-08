@@ -6,6 +6,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import sk.kubisoft.exifutils.core.CommandArgument;
 import sk.kubisoft.exifutils.core.CommandRunner;
+import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -18,16 +19,19 @@ import java.util.List;
 @Singleton
 public class RenameCommandRunner implements CommandRunner {
 
-    private final RenameCommand renameCommand;
-
     private static final Option WRITE = Option.builder()
             .option("w")
             .longOpt("write-date")
             .desc("Write analyzed date to file metadata.")
             .build();
 
+    private final Console console;
+
+    private final RenameCommand renameCommand;
+
     @Inject
-    public RenameCommandRunner(RenameCommand renameCommand) {
+    public RenameCommandRunner(Console console, RenameCommand renameCommand) {
+        this.console = console;
         this.renameCommand = renameCommand;
     }
 
@@ -38,10 +42,10 @@ public class RenameCommandRunner implements CommandRunner {
             renameCommand.execute(input);
             return 0;
         } catch (ParseException e) {
-            System.err.println("Error parsing command arguments: " + e.getMessage());
+            console.errorln("Error parsing command arguments", e);
             return 1;
         } catch (RuntimeException e) {
-            System.err.println("Error executing " + getCommandName() + " command: " + e.getMessage());
+            console.errorln("Error executing " + getCommandName() + " command", e);
             return 1;
         }
     }

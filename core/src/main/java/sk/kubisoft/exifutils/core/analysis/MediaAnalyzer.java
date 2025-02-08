@@ -2,12 +2,13 @@ package sk.kubisoft.exifutils.core.analysis;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaType;
+import sk.kubisoft.exifutils.core.metadata.MetaDataHandler;
+import sk.kubisoft.exifutils.core.metadata.MetaDataHandlerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -18,7 +19,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,17 +30,17 @@ public class MediaAnalyzer {
 	private final Console console;
 	private final ConfigService configService;
 	private final MediaTypeDetector mediaTypeDetector;
-	private final MetaDataExtractorFactory metaDataExtractorFactory;
+	private final MetaDataHandlerFactory metaDataHandlerFactory;
 	private final ExifDateExtractor exifDateExtractor;
 	private final GpsZoneExtractor gpsZoneExtractor;
 
 	@Inject
 	public MediaAnalyzer(Console console, ConfigService configService, MediaTypeDetector mediaTypeDetector,
-						 MetaDataExtractorFactory metaDataExtractorFactory, ExifDateExtractor exifDateExtractor, GpsZoneExtractor gpsZoneExtractor) {
+						 MetaDataHandlerFactory metaDataHandlerFactory, ExifDateExtractor exifDateExtractor, GpsZoneExtractor gpsZoneExtractor) {
 		this.console = console;
 		this.configService = configService;
 		this.mediaTypeDetector = mediaTypeDetector;
-		this.metaDataExtractorFactory = metaDataExtractorFactory;
+		this.metaDataHandlerFactory = metaDataHandlerFactory;
 		this.exifDateExtractor = exifDateExtractor;
 		this.gpsZoneExtractor = gpsZoneExtractor;
 	}
@@ -48,7 +48,7 @@ public class MediaAnalyzer {
 	public List<MediaFile> analyze(List<Path> files) {
 		List<MediaFile> mediaFiles = new ArrayList<>();
 		console.println("Starting analysis of media files...", files.size());
-		try (var metaDataExtractor = metaDataExtractorFactory.newMetaDataExtractor()) {
+		try (var metaDataHandler = metaDataHandlerFactory.create()) {
 			for (int i = 0; i < files.size(); i++) {
 				var file = files.get(i);
 
@@ -59,7 +59,7 @@ public class MediaAnalyzer {
 				}
 
 				try {
-					MediaFile mediaFile = analyze(file, metaDataExtractor, gpsZoneExtractor);
+					MediaFile mediaFile = analyze(file, metaDataHandler, gpsZoneExtractor);
 					mediaFiles.add(mediaFile);
 				} catch (Exception e) {
 					console.error("Error processing file: %s", e, file);
@@ -78,9 +78,9 @@ public class MediaAnalyzer {
 		return mediaFiles;
 	}
 
-	private MediaFile analyze(Path file, MetaDataExtractor metaDataExtractor, GpsZoneExtractor gpsZoneExtractor) {
+	private MediaFile analyze(Path file, MetaDataHandler metaDataHandler, GpsZoneExtractor gpsZoneExtractor) {
 		MediaType mediaType = mediaTypeDetector.detectMediaType(file);
-		Map<String, String> metadata = metaDataExtractor.extractMetaData(file);
+		Map<String, String> metadata = metaDataHandler.extractMetaData(file);
 		Optional<ExifDateTime> extractedDateOptional = exifDateExtractor.extractCreationDate(metadata);
 		if (extractedDateOptional.isEmpty()) {
 			console.verboseln("No date found in metadata");

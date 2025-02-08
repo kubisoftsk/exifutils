@@ -14,6 +14,8 @@ import sk.kubisoft.exifutils.core.logging.JUnitConsole;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaType;
+import sk.kubisoft.exifutils.core.metadata.MetaDataHandler;
+import sk.kubisoft.exifutils.core.metadata.MetaDataHandlerFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,7 +27,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static sk.kubisoft.exifutils.core.media.MediaType.IMAGE;
@@ -43,7 +44,7 @@ class MediaAnalyzerTest {
     private MediaTypeDetector mediaTypeDetectorMock;
 
 	@Mock
-	private MetaDataExtractorFactory metaDataExtractorFactoryMock;
+	private MetaDataHandlerFactory metaDataHandlerFactoryMock;
 
 	@Mock
     private ExifDateExtractor exifDateExtractorMock;
@@ -56,7 +57,7 @@ class MediaAnalyzerTest {
     @BeforeEach
     void setUp() {
         mediaAnalyzer = new MediaAnalyzer(console, configServiceMock, mediaTypeDetectorMock,
-										  metaDataExtractorFactoryMock, exifDateExtractorMock, gpsZoneExtractorMock);
+                metaDataHandlerFactoryMock, exifDateExtractorMock, gpsZoneExtractorMock);
         lenient().when(configServiceMock.getConfig()).thenReturn(createConfig());
     }
 
@@ -201,8 +202,8 @@ class MediaAnalyzerTest {
 			when(exifDateExtractorMock.extractCreationDate(any()))
 					.thenReturn(Optional.of(new ExifDateTime(localDateTime, zoneOffset)));
 		}
-        when(metaDataExtractorFactoryMock.newMetaDataExtractor())
-                .thenReturn(Mockito.mock(MetaDataExtractor.class));
+        when(metaDataHandlerFactoryMock.create())
+                .thenReturn(Mockito.mock(MetaDataHandler.class));
 		if (gpsResolvedZoneOffset != null) {
 			when(gpsZoneExtractorMock.extractGpsZone(any(Path.class), anyMap()))
 					.thenReturn(Optional.of(gpsResolvedZoneOffset));

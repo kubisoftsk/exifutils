@@ -6,10 +6,12 @@ import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.FileMover;
 import sk.kubisoft.exifutils.core.file.MoveAction;
+import sk.kubisoft.exifutils.core.file.SetDateAction;
 import sk.kubisoft.exifutils.core.file.conflict.DuplicatePreProcessor;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
+import sk.kubisoft.exifutils.core.metadata.ExifDateSetter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -27,16 +29,18 @@ public class RenameCommand {
     private final DuplicatePreProcessor duplicatePreProcessor;
     private final FileMover fileMover;
     private final Console console;
+    private final ExifDateSetter exifDateSetter;
 
     @Inject
-    public RenameCommand(FileExplorer fileExplorer, MediaAnalyzer mediaAnalyzer,
-                         MediaFileNameUtils fileNameUtils, DuplicatePreProcessor duplicatePreProcessor, FileMover fileMover, Console console) {
+    public RenameCommand(FileExplorer fileExplorer, MediaAnalyzer mediaAnalyzer, MediaFileNameUtils fileNameUtils,
+                         DuplicatePreProcessor duplicatePreProcessor, FileMover fileMover, Console console, ExifDateSetter exifDateSetter) {
         this.fileExplorer = fileExplorer;
         this.mediaAnalyzer = mediaAnalyzer;
         this.fileNameUtils = fileNameUtils;
         this.duplicatePreProcessor = duplicatePreProcessor;
         this.fileMover = fileMover;
         this.console = console;
+        this.exifDateSetter = exifDateSetter;
     }
 
     public void execute(RenameCommandInput input) {
@@ -44,9 +48,36 @@ public class RenameCommand {
 
         console.println("Searching for media files...");
         var allFiles = fileExplorer.listFiles(input.sourceDirectories());
-        console.println("Found %d files.", allFiles.size());
 
-        List<MediaFile> mediaFilesWithDate = mediaAnalyzer.analyze(allFiles);
+        var allMediaFiles = mediaAnalyzer.analyze(allFiles);
+        List<MediaFile> mediaFilesWithDate = allMediaFiles.stream()
+                .filter(mediaFile -> mediaFile.creationDate() != null)
+                .toList();
+        List<MediaFile> mediaFilesWithoutDate = allMediaFiles.stream()
+                .filter(mediaFile -> mediaFile.creationDate() == null)
+                .toList();
+
+        console.println("Found %d media files with date, %d media files without date.", mediaFilesWithDate.size(), mediaFilesWithoutDate.size());
+        mediaFilesWithoutDate.forEach((mediaFile) -> console.verboseln("No date found for %s", mediaFile.originalPath()));
+
+        if (input.writeDate()) {
+            var setDateActions = mediaFilesWithDate.stream()
+                    .filter(exifDateSetter::needsDateTimeSet)
+                    .map(mediaFile -> new SetDateAction(mediaFile.originalPath(), mediaFile.mediaType(), mediaFile.creationDate()))
+                    .toList();
+
+            if (setDateActions.isEmpty()) {
+                console.println("No files to set date.");
+            } else {
+                console.println("Total %d files will have date set:", setDateActions.size());
+                setDateActions.forEach((action) -> console.println("%s", action));
+                if (console.confirmAction("Do you want to continue?")) {
+                    exifDateSetter.setDateTime(setDateActions);
+                } else {
+                    console.println("Aborted.");
+                }
+            }
+        }
 
         List<MoveAction> moveActions = createMoveActions(mediaFilesWithDate);
 
@@ -61,7 +92,6 @@ public class RenameCommand {
         if (console.confirmAction("Do you want to continue?")) {
             console.println("Renaming files...");
             fileMover.moveFiles(moveActions);
-
         } else {
             console.println("Aborted.");
         }

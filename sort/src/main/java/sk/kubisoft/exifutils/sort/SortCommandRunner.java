@@ -6,6 +6,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import sk.kubisoft.exifutils.core.CommandArgument;
 import sk.kubisoft.exifutils.core.CommandRunner;
+import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,8 +20,6 @@ import java.util.List;
 
 @Singleton
 public class SortCommandRunner implements CommandRunner {
-
-    private final SortCommand sortCommand;
 
     private static final Option DESTINATION = Option.builder()
             .option("d").hasArg()
@@ -41,8 +40,13 @@ public class SortCommandRunner implements CommandRunner {
             .desc("Write analyzed date to file metadata.")
             .build();
 
+    private final SortCommand sortCommand;
+
+    private final Console console;
+
     @Inject
-    public SortCommandRunner(SortCommand sortCommand) {
+    public SortCommandRunner(Console console, SortCommand sortCommand) {
+        this.console = console;
         this.sortCommand = sortCommand;
     }
 
@@ -53,10 +57,10 @@ public class SortCommandRunner implements CommandRunner {
             sortCommand.execute(input);
             return 0;
         } catch (ParseException e) {
-            System.err.println("Error parsing command arguments: " + e.getMessage());
+            console.errorln("Error parsing command arguments", e);
             return 1;
         } catch (RuntimeException e) {
-            System.err.println("Error executing sort command: " + e.getMessage());
+            console.errorln("Error executing " + getCommandName() + " command", e);
             return 1;
         }
     }

@@ -6,6 +6,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import sk.kubisoft.exifutils.core.CommandArgument;
 import sk.kubisoft.exifutils.core.CommandRunner;
+import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,10 +25,13 @@ public class InfoCommandRunner implements CommandRunner {
             .desc("Print all available metadata information.")
             .build();
 
+    private final Console console;
+
     private final InfoCommand infoCommand;
 
     @Inject
-    public InfoCommandRunner(InfoCommand infoCommand) {
+    public InfoCommandRunner(Console console, InfoCommand infoCommand) {
+        this.console = console;
         this.infoCommand = infoCommand;
     }
 
@@ -38,10 +42,10 @@ public class InfoCommandRunner implements CommandRunner {
             infoCommand.execute(input);
             return 0;
         } catch (ParseException e) {
-            System.err.println("Error parsing command arguments: " + e.getMessage());
+            console.errorln("Error parsing command arguments", e);
             return 1;
         } catch (RuntimeException e) {
-            System.err.println("Error executing " + getCommandName() + " command: " + e.getMessage());
+            console.errorln("Error executing " + getCommandName() + " command", e);
             return 1;
         }
     }

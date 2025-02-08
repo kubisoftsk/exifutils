@@ -34,19 +34,22 @@ public class GpsZoneExtractor {
         if (StringUtils.isBlank(gpsLatitude) || StringUtils.isBlank(gpsLongitude)) {
             return Optional.empty();
         }
+        var latitude = Double.parseDouble(gpsLatitude);
+        var longitude = Double.parseDouble(gpsLongitude);
+        if (latitude == 0 && longitude == 0) {
+            return Optional.empty();
+        }
         try {
-            return extractGpsZone(gpsLatitude, gpsLongitude);
+            return extractGpsZone(latitude, longitude);
         } catch (Exception e) {
             throw new AnalysisException(path, "Error extracting GPS zone", e);
         }
     }
 
-    public Optional<ZoneId> extractGpsZone(String gpsLatitude, String gpsLongitude) {
+    public Optional<ZoneId> extractGpsZone(double latitude, double longitude) {
         TimeZoneEngine engine = engineAtomicReference.updateAndGet(engineRef ->
                 engineRef != null ? engineRef : TimeZoneEngine.initialize());
 
-        var latitude = Double.parseDouble(gpsLatitude);
-        var longitude = Double.parseDouble(gpsLongitude);
         return engine.query(latitude, longitude);
     }
 
