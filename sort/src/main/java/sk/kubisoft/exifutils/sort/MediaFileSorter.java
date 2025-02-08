@@ -1,6 +1,7 @@
 package sk.kubisoft.exifutils.sort;
 
 import sk.kubisoft.exifutils.core.file.MoveAction;
+import sk.kubisoft.exifutils.core.file.conflict.DuplicatePreProcessor;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
@@ -16,9 +17,12 @@ public class MediaFileSorter {
 
     private final MediaFileNameUtils fileNameUtils;
 
+    private final DuplicatePreProcessor duplicatePreProcessor;
+
     @Inject
-    public MediaFileSorter(MediaFileNameUtils fileNameUtils) {
+    public MediaFileSorter(MediaFileNameUtils fileNameUtils, DuplicatePreProcessor duplicatePreProcessor) {
         this.fileNameUtils = fileNameUtils;
+        this.duplicatePreProcessor = duplicatePreProcessor;
     }
 
     public List<MoveAction> sort(List<MediaFile> mediaFiles, Path targetRootPath, boolean rename) {
@@ -40,7 +44,8 @@ public class MediaFileSorter {
             moveActions.add(new MoveAction(originalPath, finalTargetPath));
         }
         moveActions.sort(MoveAction::compareTo);
-        return moveActions;
+
+        return duplicatePreProcessor.processConflicts(moveActions);
     }
 
     private Path createTargetDateFolder(MediaDateTime date) {

@@ -6,6 +6,7 @@ import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.FileMover;
 import sk.kubisoft.exifutils.core.file.MoveAction;
+import sk.kubisoft.exifutils.core.file.conflict.DuplicatePreProcessor;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
@@ -23,15 +24,17 @@ public class RenameCommand {
     private final FileExplorer fileExplorer;
     private final MediaAnalyzer mediaAnalyzer;
     private final MediaFileNameUtils fileNameUtils;
+    private final DuplicatePreProcessor duplicatePreProcessor;
     private final FileMover fileMover;
     private final Console console;
 
     @Inject
     public RenameCommand(FileExplorer fileExplorer, MediaAnalyzer mediaAnalyzer,
-                         MediaFileNameUtils fileNameUtils, FileMover fileMover, Console console) {
+                         MediaFileNameUtils fileNameUtils, DuplicatePreProcessor duplicatePreProcessor, FileMover fileMover, Console console) {
         this.fileExplorer = fileExplorer;
         this.mediaAnalyzer = mediaAnalyzer;
         this.fileNameUtils = fileNameUtils;
+        this.duplicatePreProcessor = duplicatePreProcessor;
         this.fileMover = fileMover;
         this.console = console;
     }
@@ -65,22 +68,27 @@ public class RenameCommand {
     }
 
     private List<MoveAction> createMoveActions(List<MediaFile> mediaFiles) {
-        List<MoveAction> moveActions = new ArrayList<>();
+        List<MoveAction> rawMoveActions = new ArrayList<>();
 
         for (var mediaFile : mediaFiles) {
             var originalPath = mediaFile.originalPath();
 
             var newName = fileNameUtils.createNewName(mediaFile, mediaFile.creationDate());
-
             var targetPath = originalPath.getParent().resolve(newName);
-            if (originalPath.equals(targetPath)) {
-                logger.debug("Skipping rename action, source and target are the same: {}", originalPath);
-                continue;
-            }
-            logger.debug("Created move action {} to {}", originalPath, targetPath);
-            moveActions.add(new MoveAction(originalPath, targetPath));
+
+            rawMoveActions.add(new MoveAction(originalPath, targetPath));
         }
 
-        return moveActions;
+        rawMoveActions.sort(MoveAction::compareTo);
+        var moveActions = duplicatePreProcessor.processConflicts(rawMoveActions);
+
+        return filterOutUnchangedActions(moveActions);
+    }
+
+    private List<MoveAction> filterOutUnchangedActions(List<MoveAction> moveActions) {
+        return moveActions.stream()
+                .filter(action -> !action.source().equals(action.target()))
+                .peek(action -> logger.debug("Created move action {}", action))
+                .toList();
     }
 }

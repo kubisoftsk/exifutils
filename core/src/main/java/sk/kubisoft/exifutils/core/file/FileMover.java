@@ -17,13 +17,11 @@ import java.util.List;
 public class FileMover {
 
     private static final Logger logger = LoggerFactory.getLogger(FileMover.class);
-    private final DuplicateFileHandler duplicateHandler;
     private final Console console;
 
     @Inject
-    public FileMover(Console console, DuplicateFileHandler duplicateHandler) {
+    public FileMover(Console console) {
         this.console = console;
-        this.duplicateHandler = duplicateHandler;
     }
 
     public void moveFiles(List<MoveAction> moveActions) {

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sk.kubisoft.exifutils.core.file.MoveAction;
+import sk.kubisoft.exifutils.core.file.conflict.DuplicatePreProcessor;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
@@ -17,6 +18,8 @@ import java.util.List;
 
 import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
 import static sk.kubisoft.exifutils.core.media.MediaType.IMAGE;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,13 +28,20 @@ class MediaFileSorterTest {
     @Mock
     private MediaFileNameUtils fileNameUtils;
 
+    @Mock
+    private DuplicatePreProcessor duplicatePreProcessor;
+
     private MediaFileSorter sorter;
     private Path sourceRoot;
     private Path targetRoot;
 
     @BeforeEach
     void setUp() {
-        sorter = new MediaFileSorter(fileNameUtils);
+        when(duplicatePreProcessor.processConflicts(anyList()))
+                // Return the same list of actions without any processing for this test
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        sorter = new MediaFileSorter(fileNameUtils, duplicatePreProcessor);
         sourceRoot = Path.of("/source");
         targetRoot = Path.of("/target");
     }
