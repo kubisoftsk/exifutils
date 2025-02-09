@@ -39,7 +39,8 @@ public class FileNameAnalyzer {
 
                 // Other
                 createFormatter("'download_'yyyyMMdd'_'HHmmss"),
-                createFormatter("'IMG_'yyyy'_'MM'_'dd'_'HH'_'mm'_'ss")
+                createFormatter("'IMG_'yyyy'_'MM'_'dd'_'HH'_'mm'_'ss"),
+                createFormatter("'WhatsApp Image 'yyyy-MM-dd' at 'HH.mm.ss")
         );
     }
 

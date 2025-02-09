@@ -2,7 +2,6 @@ package sk.kubisoft.exifutils.setdate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sk.kubisoft.exifutils.core.analysis.MediaTypeDetector;
 import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.file.*;
 import sk.kubisoft.exifutils.core.file.conflict.DuplicatePreProcessor;
@@ -11,11 +10,13 @@ import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
 import sk.kubisoft.exifutils.core.metadata.ExifDateSetter;
+import sk.kubisoft.exifutils.core.utils.DateTimeUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,7 +31,6 @@ public class SetDateCommand {
     private final ConfigService configService;
     private final FileExplorer fileExplorer;
     private final FileNameAnalyzer fileNameAnalyzer;
-    private final MediaTypeDetector mediaTypeDetector;
     private final ExifDateSetter exifDateSetter;
     private final MediaFileNameUtils fileNameUtils;
     private final DuplicatePreProcessor duplicatePreProcessor;
@@ -38,13 +38,12 @@ public class SetDateCommand {
 
     @Inject
     public SetDateCommand(Console console, ConfigService configService, FileNameAnalyzer fileNameAnalyzer,
-                          FileExplorer fileExplorer, MediaTypeDetector mediaTypeDetector, ExifDateSetter exifDateSetter,
+                          FileExplorer fileExplorer, ExifDateSetter exifDateSetter,
                           MediaFileNameUtils fileNameUtils, DuplicatePreProcessor duplicatePreProcessor, FileMover fileMover) {
         this.console = console;
         this.configService = configService;
         this.fileNameAnalyzer = fileNameAnalyzer;
         this.fileExplorer = fileExplorer;
-        this.mediaTypeDetector = mediaTypeDetector;
         this.exifDateSetter = exifDateSetter;
         this.fileNameUtils = fileNameUtils;
         this.duplicatePreProcessor = duplicatePreProcessor;
@@ -55,14 +54,14 @@ public class SetDateCommand {
         console.verboseln("Running ExifUtils Rename command with input: %s", input);
 
         console.println("Searching for media files...");
-        List<Path> allFiles = fileExplorer.listFiles(input.sourcePaths());
-        console.println("Found %d files.", allFiles.size());
+        List<MediaFile> mediaFiles = fileExplorer.listMediaFiles(input.sourcePaths());
+        console.println("Found %d files.", mediaFiles.size());
 
         List<SetDateAction> setDateActionList;
-        if (input.dateTime() != null) {
-            setDateActionList = setDateTimeManually(allFiles, input.dateTime());
+        if (input.localDateTime() != null) {
+            setDateActionList = setDateTimeManually(mediaFiles, input.localDateTime(), input.zoneId());
         } else {
-            setDateActionList = listAndParseFromFileNames(allFiles, input.pattern());
+            setDateActionList = listAndParseFromFileNames(mediaFiles, input.pattern());
         }
 
         console.println("Total %d files will have date set.", setDateActionList.size());
@@ -122,34 +121,53 @@ public class SetDateCommand {
                 .toList();
     }
 
-    private List<SetDateAction> setDateTimeManually(List<Path> allFiles, OffsetDateTime offsetDateTime) {
+    private List<SetDateAction> setDateTimeManually(List<MediaFile> mediaFiles, LocalDateTime localDateTime, ZoneId zoneId) {
+        var offsetDateTime = OffsetDateTime.of(localDateTime, getOffset(localDateTime, zoneId));
         console.println("Setting date and time for files to: %s", offsetDateTime);
 
         List<SetDateAction> actions = new ArrayList<>();
-        for (var file : allFiles) {
-            var mediaDate = new MediaDateTime(offsetDateTime.toLocalDateTime(), offsetDateTime.getOffset());
-            var mediaType = mediaTypeDetector.detectMediaType(file);
-            actions.add(new SetDateAction(file, mediaType, mediaDate));
+        for (int i = 0; i < mediaFiles.size(); i++) {
+            var mediaFile = mediaFiles.get(i);
+
+            // If we have more files, increment the manually supply date by one second, to avoid many conflicts
+            // Since we are supplying date, it is not desired to have the same date up to second precision for all files
+            // so we increment every date by one second for every file
+            var localDateToUse = localDateTime.plusSeconds(i);
+            var mediaDate = new MediaDateTime(localDateToUse, offsetDateTime.getOffset());
+
+            actions.add(new SetDateAction(mediaFile.originalPath(), mediaFile.mediaType(), mediaDate));
         }
         return actions;
     }
 
-    private List<SetDateAction> listAndParseFromFileNames(List<Path> allFiles, String userPattern) {
+    private List<SetDateAction> listAndParseFromFileNames(List<MediaFile> mediaFiles, String userPattern) {
         // TODO implement also user pattern parsing
         console.println("Setting date and time for files using pattern guessed from file names");
 
         List<SetDateAction> actions = new ArrayList<>();
-        for (var file : allFiles) {
-            var dateTimeOptional = fileNameAnalyzer.analyzeFileName(file.getFileName().toString());
+        for (var mediaFile : mediaFiles) {
+            var dateTimeOptional = fileNameAnalyzer.analyzeFileName(mediaFile.originalPath().getFileName().toString());
             dateTimeOptional.ifPresent(localDateTime -> {
-                // TODO take from config service
-                var offsetToUse = ZoneOffset.systemDefault().getRules().getOffset(localDateTime);
+                var offsetToUse = getOffset(localDateTime, null);
                 var mediaDate = new MediaDateTime(localDateTime, offsetToUse);
-                var mediaType = mediaTypeDetector.detectMediaType(file);
-                actions.add(new SetDateAction(file, mediaType, mediaDate));
+                actions.add(new SetDateAction(mediaFile.originalPath(), mediaFile.mediaType(), mediaDate));
             });
         }
 
         return actions;
+    }
+
+    private ZoneOffset getOffset(LocalDateTime localDateTime, ZoneId zoneId) {
+        ZoneId zoneIdToUse = zoneId;
+        if (zoneIdToUse == null) {
+            var config = configService.getConfig();
+            var dateTimeConfig = config.getDateTime();
+            String timeZone = (dateTimeConfig == null) ? null : dateTimeConfig.getTimeZone();
+            if (timeZone != null) {
+                zoneIdToUse = ZoneId.of(timeZone);
+            }
+        }
+
+        return DateTimeUtils.getDefaultZoneOffset(localDateTime, zoneIdToUse);
     }
 }

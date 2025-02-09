@@ -14,7 +14,8 @@ import javax.inject.Singleton;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,14 @@ public class SetDateCommandRunner implements CommandRunner {
     private static final Option DATE_TIME = Option.builder()
             .option("d")
             .longOpt("date-time")
-            .desc("Manually set local date and time for given files in format 'yyyy-MM-dd HH:mm:ss XXX' - for example '2021-01-01 12:00:00 +02:00'")
+            .desc("Manually set local date and time for given files in format 'yyyy-MM-dd HH:mm:ss' - for example '2021-01-01 12:00:00'")
+            .hasArg()
+            .build();
+
+    private static final Option ZONE_ID = Option.builder()
+            .option("z")
+            .longOpt("zone-id")
+            .desc("Manually set time-zone ID for given files, such as Europe/Paris. If not set, default time-zone from config is used.")
             .hasArg()
             .build();
 
@@ -89,18 +97,28 @@ public class SetDateCommandRunner implements CommandRunner {
             }
         }
 
-        OffsetDateTime dateTime = null;
+        LocalDateTime dateTime = null;
         if (cmd.hasOption(DATE_TIME)) {
             try {
                 String dateTimeStr = cmd.getOptionValue(DATE_TIME.getOpt());
-                dateTime = OffsetDateTime.parse(dateTimeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss XXX"));
+                dateTime = LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             } catch (Exception e) {
                 throw new ParseException("Invalid date-time format: " + e.getMessage());
             }
         }
 
+        ZoneId zoneId = null;
+        if (cmd.hasOption(ZONE_ID)) {
+            try {
+                String zoneIdStr = cmd.getOptionValue(ZONE_ID.getOpt());
+                zoneId = ZoneId.of(zoneIdStr);
+            } catch (Exception e) {
+                throw new ParseException("Invalid time-zone ID: " + e.getMessage());
+            }
+        }
+
         boolean rename = cmd.hasOption(RENAME.getOpt());
-        return new SetDateCommandInput(sourceFiles, patternStr, dateTime, rename);
+        return new SetDateCommandInput(sourceFiles, patternStr, dateTime, zoneId, rename);
     }
 
     @Override
@@ -118,6 +136,7 @@ public class SetDateCommandRunner implements CommandRunner {
         var options = new Options();
         options.addOption(PATTERN);
         options.addOption(DATE_TIME);
+        options.addOption(ZONE_ID);
         options.addOption(RENAME);
         return options;
     }

@@ -1,7 +1,8 @@
 package sk.kubisoft.exifutils.setdate;
 
 import java.nio.file.Path;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 public record SetDateCommandInput(
@@ -10,7 +11,9 @@ public record SetDateCommandInput(
 
         String pattern,
 
-        OffsetDateTime dateTime,
+        LocalDateTime localDateTime,
+
+        ZoneId zoneId,
 
         boolean rename
 
