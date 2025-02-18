@@ -50,6 +50,12 @@ public class SetDateCommandRunner implements CommandRunner {
             .desc("Rename files according to their original date and time.")
             .build();
 
+    private static final Option UNKNOWN_ONLY = Option.builder()
+            .option("u")
+            .longOpt("unknown")
+            .desc("Set date and time only to files with unknown date and time. This option will skip files with already set date and time.")
+            .build();
+
     private final Console console;
 
     private final SetDateCommand setDateCommand;
@@ -118,7 +124,8 @@ public class SetDateCommandRunner implements CommandRunner {
         }
 
         boolean rename = cmd.hasOption(RENAME.getOpt());
-        return new SetDateCommandInput(sourceFiles, patternStr, dateTime, zoneId, rename);
+        boolean unknownOnly = cmd.hasOption(UNKNOWN_ONLY.getOpt());
+        return new SetDateCommandInput(sourceFiles, patternStr, dateTime, zoneId, rename, unknownOnly);
     }
 
     @Override
@@ -138,6 +145,7 @@ public class SetDateCommandRunner implements CommandRunner {
         options.addOption(DATE_TIME);
         options.addOption(ZONE_ID);
         options.addOption(RENAME);
+        options.addOption(UNKNOWN_ONLY);
         return options;
     }
 

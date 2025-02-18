@@ -15,7 +15,7 @@ public record SetDateCommandInput(
 
         ZoneId zoneId,
 
-        boolean rename
+        boolean rename,
 
-) {
+        boolean unknownOnly) {
 }

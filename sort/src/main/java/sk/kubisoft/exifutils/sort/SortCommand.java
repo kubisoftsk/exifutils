@@ -55,7 +55,7 @@ public class SortCommand {
                 .toList();
 
         console.println("Found %d media files with date, %d media files without date.", mediaFilesWithDate.size(), mediaFilesWithoutDate.size());
-        mediaFilesWithoutDate.forEach((mediaFile) -> console.verboseln("No date found for %s", mediaFile.originalPath()));
+        mediaFilesWithoutDate.forEach((mediaFile) -> console.println("No date found for %s", mediaFile.originalPath()));
 
         // TODO duplicate refactor somehow
         if (input.writeDate()) {

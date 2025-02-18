@@ -17,6 +17,7 @@
         <module>info</module>
         <module>rename</module>
         <module>set-date</module>
+        <module>set-gps</module>
         <module>sort</module>
     </modules>
 
@@ -70,6 +71,11 @@
             <dependency>
                 <groupId>sk.kubisoft.exifutils</groupId>
                 <artifactId>exifutils-set-date</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>sk.kubisoft.exifutils</groupId>
+                <artifactId>exifutils-set-gps</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

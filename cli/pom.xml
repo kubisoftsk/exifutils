@@ -33,6 +33,10 @@
         </dependency>
         <dependency>
             <groupId>sk.kubisoft.exifutils</groupId>
+            <artifactId>exifutils-set-gps</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>sk.kubisoft.exifutils</groupId>
             <artifactId>exifutils-rename</artifactId>
         </dependency>
         <dependency>

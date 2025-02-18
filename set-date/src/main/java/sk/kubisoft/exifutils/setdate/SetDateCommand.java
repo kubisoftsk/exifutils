@@ -2,6 +2,7 @@ package sk.kubisoft.exifutils.setdate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.file.*;
 import sk.kubisoft.exifutils.core.file.conflict.DuplicatePreProcessor;
@@ -32,19 +33,21 @@ public class SetDateCommand {
     private final FileExplorer fileExplorer;
     private final FileNameAnalyzer fileNameAnalyzer;
     private final ExifDateSetter exifDateSetter;
+    private final MediaAnalyzer mediaAnalyzer;
     private final MediaFileNameUtils fileNameUtils;
     private final DuplicatePreProcessor duplicatePreProcessor;
     private final FileMover fileMover;
 
     @Inject
     public SetDateCommand(Console console, ConfigService configService, FileNameAnalyzer fileNameAnalyzer,
-                          FileExplorer fileExplorer, ExifDateSetter exifDateSetter,
+                          FileExplorer fileExplorer, ExifDateSetter exifDateSetter, MediaAnalyzer mediaAnalyzer,
                           MediaFileNameUtils fileNameUtils, DuplicatePreProcessor duplicatePreProcessor, FileMover fileMover) {
         this.console = console;
         this.configService = configService;
         this.fileNameAnalyzer = fileNameAnalyzer;
         this.fileExplorer = fileExplorer;
         this.exifDateSetter = exifDateSetter;
+        this.mediaAnalyzer = mediaAnalyzer;
         this.fileNameUtils = fileNameUtils;
         this.duplicatePreProcessor = duplicatePreProcessor;
         this.fileMover = fileMover;
@@ -54,8 +57,18 @@ public class SetDateCommand {
         console.verboseln("Running ExifUtils Rename command with input: %s", input);
 
         console.println("Searching for media files...");
-        List<MediaFile> mediaFiles = fileExplorer.listMediaFiles(input.sourcePaths());
-        console.println("Found %d files.", mediaFiles.size());
+        List<MediaFile> allMediaFiles = fileExplorer.listMediaFiles(input.sourcePaths());
+        console.println("Found %d files.", allMediaFiles.size());
+
+        List<MediaFile> mediaFiles;
+        if (input.unknownOnly()) {
+            var analyzedMediaFiles = mediaAnalyzer.analyze(allMediaFiles.stream().map(MediaFile::originalPath).toList());
+            mediaFiles = analyzedMediaFiles.stream()
+                    .filter(mediaFile -> mediaFile.creationDate() == null)
+                    .toList();
+        } else {
+            mediaFiles = allMediaFiles;
+        }
 
         List<SetDateAction> setDateActionList;
         if (input.localDateTime() != null) {

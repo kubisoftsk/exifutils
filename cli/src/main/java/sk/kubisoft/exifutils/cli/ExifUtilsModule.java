@@ -14,6 +14,7 @@ import sk.kubisoft.exifutils.dedupe.DeDupeCommandRunner;
 import sk.kubisoft.exifutils.info.InfoCommandRunner;
 import sk.kubisoft.exifutils.rename.RenameCommandRunner;
 import sk.kubisoft.exifutils.setdate.SetDateCommandRunner;
+import sk.kubisoft.exifutils.setgps.SetGpsCommandRunner;
 import sk.kubisoft.exifutils.sort.SortCommandRunner;
 
 import javax.inject.Singleton;
@@ -62,6 +63,14 @@ public class ExifUtilsModule {
     @StringKey("set-date")
     CommandRunner provideSetDateCommandRunner(SetDateCommandRunner setDateCommandRunner) {
         return setDateCommandRunner;
+    }
+
+    @Provides
+    @Singleton
+    @IntoMap
+    @StringKey("set-gps")
+    CommandRunner provideSetGpsCommandRunner(SetGpsCommandRunner setGpsCommandRunner) {
+        return setGpsCommandRunner;
     }
 
 	// TODO add shift command that will shift the date and time of the media files
