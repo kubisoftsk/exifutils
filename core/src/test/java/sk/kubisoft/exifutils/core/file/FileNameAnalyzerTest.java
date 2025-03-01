@@ -24,6 +24,18 @@ class FileNameAnalyzerTest {
     }
 
     @Test
+    void shouldParseBasicFormat1() {
+        var result = analyzer.analyzeFileName("2016-07-09 22-25-48.mp4");
+
+        assertTrue(result.isPresent());
+        var date = result.get();
+        assertEquals(
+                LocalDateTime.of(2016, 7, 9, 22, 25, 48),
+                date
+        );
+    }
+
+    @Test
     void shouldParseBasicIsoFormatWithHyphen() {
         var result = analyzer.analyzeFileName("20240122-153010.jpg");
 

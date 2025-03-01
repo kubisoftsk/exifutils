@@ -74,7 +74,7 @@ public class SetDateCommand {
         if (input.localDateTime() != null) {
             setDateActionList = setDateTimeManually(mediaFiles, input.localDateTime(), input.zoneId());
         } else {
-            setDateActionList = listAndParseFromFileNames(mediaFiles, input.pattern());
+            setDateActionList = listAndParseFromFileNames(mediaFiles, input.zoneId(), input.pattern());
         }
 
         console.println("Total %d files will have date set.", setDateActionList.size());
@@ -153,7 +153,7 @@ public class SetDateCommand {
         return actions;
     }
 
-    private List<SetDateAction> listAndParseFromFileNames(List<MediaFile> mediaFiles, String userPattern) {
+    private List<SetDateAction> listAndParseFromFileNames(List<MediaFile> mediaFiles, ZoneId zoneId, String userPattern) {
         // TODO implement also user pattern parsing
         console.println("Setting date and time for files using pattern guessed from file names");
 
@@ -161,7 +161,7 @@ public class SetDateCommand {
         for (var mediaFile : mediaFiles) {
             var dateTimeOptional = fileNameAnalyzer.analyzeFileName(mediaFile.originalPath().getFileName().toString());
             dateTimeOptional.ifPresent(localDateTime -> {
-                var offsetToUse = getOffset(localDateTime, null);
+                var offsetToUse = getOffset(localDateTime, zoneId);
                 var mediaDate = new MediaDateTime(localDateTime, offsetToUse);
                 actions.add(new SetDateAction(mediaFile.originalPath(), mediaFile.mediaType(), mediaDate));
             });
