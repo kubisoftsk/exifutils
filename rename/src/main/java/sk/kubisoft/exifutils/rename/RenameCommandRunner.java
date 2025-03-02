@@ -13,6 +13,7 @@ import javax.inject.Singleton;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,13 @@ public class RenameCommandRunner implements CommandRunner {
             .option("w")
             .longOpt("write-date")
             .desc("Write analyzed date to file metadata.")
+            .build();
+
+    private static final Option ZONE_ID = Option.builder()
+            .option("z")
+            .longOpt("zone-id")
+            .desc("Use given time-zone ID for given files, such as Europe/Paris. If not set, default time-zone from config is used. Works only with -w option.")
+            .hasArg()
             .build();
 
     private final Console console;
@@ -69,8 +77,17 @@ public class RenameCommandRunner implements CommandRunner {
         }
 
         boolean writeDate = cmd.hasOption(WRITE.getOpt());
+        ZoneId zoneId = null;
+        if (cmd.hasOption(ZONE_ID)) {
+            try {
+                String zoneIdStr = cmd.getOptionValue(ZONE_ID.getOpt());
+                zoneId = ZoneId.of(zoneIdStr);
+            } catch (Exception e) {
+                throw new ParseException("Invalid time-zone ID: " + e.getMessage());
+            }
+        }
 
-        return new RenameCommandInput(sourceDirs, writeDate);
+        return new RenameCommandInput(sourceDirs, writeDate, zoneId);
     }
 
     @Override
@@ -87,6 +104,7 @@ public class RenameCommandRunner implements CommandRunner {
     public Options getOptions() {
         var options = new Options();
         options.addOption(WRITE);
+        options.addOption(ZONE_ID);
         return options;
     }
 

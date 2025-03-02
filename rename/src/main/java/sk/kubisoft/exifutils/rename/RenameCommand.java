@@ -9,12 +9,15 @@ import sk.kubisoft.exifutils.core.file.MoveAction;
 import sk.kubisoft.exifutils.core.file.SetDateAction;
 import sk.kubisoft.exifutils.core.file.conflict.DuplicatePreProcessor;
 import sk.kubisoft.exifutils.core.logging.Console;
+import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
 import sk.kubisoft.exifutils.core.metadata.ExifDateSetter;
+import sk.kubisoft.exifutils.core.utils.DateTimeUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +66,7 @@ public class RenameCommand {
         if (input.writeDate()) {
             var setDateActions = mediaFilesWithDate.stream()
                     .filter(exifDateSetter::needsDateTimeSet)
-                    .map(mediaFile -> new SetDateAction(mediaFile.originalPath(), mediaFile.mediaType(), mediaFile.creationDate()))
+                    .map(mediaFile -> createSetDateAction(mediaFile, input.zoneId()))
                     .toList();
 
             if (setDateActions.isEmpty()) {
@@ -94,6 +97,18 @@ public class RenameCommand {
             fileMover.moveFiles(moveActions);
         } else {
             console.println("Aborted.");
+        }
+    }
+
+    private SetDateAction createSetDateAction(MediaFile mediaFile, ZoneId zoneIdToUse) {
+        if (zoneIdToUse == null) {
+            return new SetDateAction(mediaFile.originalPath(), mediaFile.mediaType(), mediaFile.creationDate());
+        } else {
+            var originalDate = mediaFile.creationDate();
+            var zoneOffset = DateTimeUtils.getDefaultZoneOffset(originalDate.getLocalDateTime(), zoneIdToUse);
+            MediaDateTime newDate = new MediaDateTime(originalDate.getLocalDateTime(), zoneOffset);
+
+            return new SetDateAction(mediaFile.originalPath(), mediaFile.mediaType(), newDate);
         }
     }
 
