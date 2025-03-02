@@ -82,28 +82,28 @@ public class SetDateCommand {
 
         if (console.confirmAction("Do you want to continue?")) {
             exifDateSetter.setDateTime(setDateActionList);
+
+            if (input.rename()) {
+                // TODO this is mostly duplicate! refactor
+                List<MoveAction> moveActions = createMoveActions(setDateActionList);
+
+                if (moveActions.isEmpty()) {
+                    console.println("No files to rename.");
+                    return;
+                }
+                console.println("Total %d files will be renamed:", moveActions.size());
+                moveActions.forEach((action) -> console.println("Rename %s", action));
+
+                // Confirm action or abort
+                if (console.confirmAction("Do you want to continue?")) {
+                    console.println("Renaming files...");
+                    fileMover.moveFiles(moveActions);
+                } else {
+                    console.println("Aborted.");
+                }
+            }
         } else {
             console.println("Aborted.");
-        }
-
-        if (input.rename()) {
-            // TODO this is mostly duplicate! refactor
-            List<MoveAction> moveActions = createMoveActions(setDateActionList);
-
-            if (moveActions.isEmpty()) {
-                console.println("No files to rename.");
-                return;
-            }
-            console.println("Total %d files will be renamed:", moveActions.size());
-            moveActions.forEach((action) -> console.println("Rename %s", action));
-
-            // Confirm action or abort
-            if (console.confirmAction("Do you want to continue?")) {
-                console.println("Renaming files...");
-                fileMover.moveFiles(moveActions);
-            } else {
-                console.println("Aborted.");
-            }
         }
     }
 
