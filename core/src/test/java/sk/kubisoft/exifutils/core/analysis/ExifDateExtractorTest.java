@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.logging.JUnitConsole;
@@ -213,7 +212,21 @@ class ExifDateExtractorTest {
         assertThat(exifDateTime.zoneOffset()).isNull();
     }
 
-	// TODO test with metadata that was written by this tool set-date command which stores dates in iphone like way
+    @Test
+    void extractDateTimeForVideo8() {
+        // This is video taken with Nikon D3100 DSLR camera at 12:43:35 local time in Slovakia (+0100)
+        // Offset is missing in metadata
+        // This is a special case, because the video date is stored in local time, not in UTC as is common for videos
+        Map<String, String> metaData = loadMetaData("/exifdata/video_9.json");
+
+        var exifDateTime = extract(metaData);
+
+        assertThat(exifDateTime).isNotNull();
+        assertThat(exifDateTime.localDateTime()).hasToString("2013-01-11T12:43:35");
+        assertThat(exifDateTime.zoneOffset()).isNull();
+    }
+
+
 
     private ExifDateTime extract(Map<String, String> metadata) {
         return exifDateExtractor.extractCreationDate(metadata)
