@@ -3,12 +3,18 @@ package sk.kubisoft.exifutils.core.analysis;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import sk.kubisoft.exifutils.core.analysis.device.DateTimeField;
+import sk.kubisoft.exifutils.core.analysis.device.DeviceProfile;
+import sk.kubisoft.exifutils.core.analysis.device.DeviceProfileService;
 import sk.kubisoft.exifutils.core.logging.Console;
+import sk.kubisoft.exifutils.core.media.MediaType;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -17,88 +23,66 @@ public class ExifDateExtractor {
 
     private static final Logger logger = LoggerFactory.getLogger(ExifDateExtractor.class);
 
+	private static final String EXIF_MODEL_TAG = "Model";
+
     private final Console console;
 
     private final ExifDateParser exifDateParser;
 
+	private final DeviceProfileService deviceProfileService;
+
     @Inject
-    public ExifDateExtractor(Console console, ExifDateParser exifDateParser) {
+    public ExifDateExtractor(Console console, ExifDateParser exifDateParser, DeviceProfileService deviceProfileService) {
         this.console = console;
         this.exifDateParser = exifDateParser;
+		this.deviceProfileService = deviceProfileService;
     }
 
-    // Order of precedence for date fields
-    private static final OffsetDateTimeField[] DATE_TIME_FIELDS = {
-            new OffsetDateTimeField("DateTimeOriginal", "OffsetTimeOriginal"),
-            new OffsetDateTimeField("CreationDate", "OffsetTime"),
-            new OffsetDateTimeField("CreateDate", "OffsetTime"),
-            new OffsetDateTimeField("MediaCreateDate", null),
-    };
+    public Optional<ExifDateTime> extractCreationDate(MediaType mediaType, Map<String, String> metadata) {
+		String model = metadata.get(EXIF_MODEL_TAG);
+		DeviceProfile deviceProfile;
+		if (StringUtils.isBlank(model)) {
+			deviceProfile = deviceProfileService.getDefaultProfile();
+		} else {
+			deviceProfile = deviceProfileService.getProfileForModel(model);
+		}
+		console.verboseln("Using device profile: %s", deviceProfile.getModel());
 
-    public Optional<ExifDateTime> extractCreationDate(Map<String, String> metadata) {
-        Map<OffsetDateTimeField, ExifDateTime> dateFieldsWithDate = new LinkedHashMap<>();
-        for (var dateField : DATE_TIME_FIELDS) {
-            String dateStr = metadata.get(dateField.dateField());
-            String offsetStr = (dateField.offsetField() == null) ? null : metadata.get(dateField.offsetField());
+		List<DateTimeField> dateTimeFields = switch (mediaType) {
+			case IMAGE -> deviceProfile.getImageFields();
+			case VIDEO -> deviceProfile.getVideoFields();
+			default -> throw new IllegalArgumentException("Unsupported media type: " + mediaType);
+		};
+
+		ExifDateTime exifDateTime = null;
+        for (var dateField : dateTimeFields) {
+            String dateStr = metadata.get(dateField.getDateField());
+            String offsetStr = (dateField.getOffsetField() == null) ? null : metadata.get(dateField.getOffsetField());
 
             if (StringUtils.isBlank(dateStr)) {
                 continue;
             }
 
             try {
-                var exifDateTime = exifDateParser.parseExifDate(dateStr, offsetStr);
-                exifDateTime.ifPresent(dateTime -> dateFieldsWithDate.put(dateField, dateTime));
+                var exifDateTimeOptional = exifDateParser.parseExifDate(dateStr, dateField.isLocalTime(), offsetStr);
+				if (exifDateTimeOptional.isPresent()) {
+					exifDateTime = exifDateTimeOptional.get();
+					console.verboseln("Found date in EXIF field %s: %s", dateField.getDateField(), exifDateTime);
+					break;
+				}
             } catch (DateTimeParseException e) {
-                logger.warn("Could not parse date from {} field: '{}': {}", dateField.dateField(), dateStr, e.getMessage());
+                logger.warn("Could not parse date from {} field: '{}': {}", dateField.getDateField(), dateStr, e.getMessage());
             } catch (Exception e) {
-                logger.error("Error parsing date from {} field: {}", dateField.dateField(), dateStr, e);
+                logger.error("Error parsing date from {} field: {}", dateField.getDateField(), dateStr, e);
             }
         }
 
-        // Verbose and debug logging
-        console.verboseln("Found dates in following EXIF fields:");
-        int maxFieldLength = dateFieldsWithDate.keySet().stream()
-                .mapToInt(field -> field.toString().length())
-                .max()
-                .orElse(0);
-        dateFieldsWithDate.forEach((field, date) -> {
-            var paddedField = StringUtils.rightPad(field.toString(), maxFieldLength);
-            console.verboseln("  %s: %s", paddedField, date);
-        });
-
-        // Check parsed dates and return the first valid one with offset present
-        Optional<Map.Entry<OffsetDateTimeField, ExifDateTime>> firstFieldWithOffset = dateFieldsWithDate.entrySet().stream()
-																								   .filter(entry -> entry.getValue().zoneOffset() != null)
-																								   .findFirst();
-
-        if (firstFieldWithOffset.isPresent()) {
-			var firstWithOffsetEntry = firstFieldWithOffset.get();
-            console.verboseln("Using date with offset within EXIF tag: %s: %s", firstWithOffsetEntry.getKey(), firstWithOffsetEntry.getValue());
-            return Optional.of(firstWithOffsetEntry.getValue());
-        }
-
-        // If no valid date with offset found, return the first valid date without offset,
-        // or empty if no valid date found
-		Optional<Map.Entry<OffsetDateTimeField, ExifDateTime>> firstField = dateFieldsWithDate.entrySet().stream()
-																								   .findFirst();
-		if (firstField.isPresent()) {
-			var firstEntry = firstField.get();
-			console.verboseln("Using date within EXIF tag: %s: %s", firstEntry.getKey(), firstEntry.getValue());
-			return Optional.of(firstEntry.getValue());
+		if (exifDateTime != null) {
+			return Optional.of(exifDateTime);
 		} else {
 			console.verboseln("No valid date found in EXIF tags");
 			return Optional.empty();
 		}
     }
 
-    private record OffsetDateTimeField(String dateField, String offsetField) {
-        @Override
-        public String toString() {
-            if (offsetField == null) {
-                return dateField;
-            } else {
-                return dateField + "+" + offsetField;
-            }
-        }
-    }
 }

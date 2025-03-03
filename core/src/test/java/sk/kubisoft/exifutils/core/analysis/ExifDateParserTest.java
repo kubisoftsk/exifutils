@@ -19,7 +19,7 @@ class ExifDateParserTest {
         String dateStr = "2023:08:31 15:10:31";
         String offsetStr = null;
 
-        var dateTimeOptional = exifDateParser.parseExifDate(dateStr, offsetStr);
+        var dateTimeOptional = exifDateParser.parseExifDate(dateStr, true, offsetStr);
 
         assertThat(dateTimeOptional).isPresent();
         var dateTime = dateTimeOptional.get();
@@ -32,7 +32,7 @@ class ExifDateParserTest {
         String dateStr = "2023:08:31 15:10:31+03:00";
         String offsetStr = null;
 
-        var dateTime = exifDateParser.parseExifDate(dateStr, offsetStr);
+        var dateTime = exifDateParser.parseExifDate(dateStr, true, offsetStr);
 
         assertThat(dateTime).isPresent();
         assertThat(dateTime.get().localDateTime()).isEqualTo("2023-08-31T15:10:31");
@@ -44,7 +44,7 @@ class ExifDateParserTest {
         String dateStr = "2023:08:31 15:10:31";
         String offsetStr = "+03:00";
 
-        var dateTime = exifDateParser.parseExifDate(dateStr, offsetStr);
+        var dateTime = exifDateParser.parseExifDate(dateStr, true, offsetStr);
 
         assertThat(dateTime).isPresent();
         assertThat(dateTime.get().localDateTime()).isEqualTo("2023-08-31T15:10:31");
@@ -56,7 +56,7 @@ class ExifDateParserTest {
         String dateStr = "2023:08:31 15:10:31.123";
         String offsetStr = null;
 
-        var dateTime = exifDateParser.parseExifDate(dateStr, offsetStr);
+        var dateTime = exifDateParser.parseExifDate(dateStr, true, offsetStr);
 
         assertThat(dateTime).isPresent();
         assertThat(dateTime.get().localDateTime()).isEqualTo("2023-08-31T15:10:31");
@@ -68,7 +68,7 @@ class ExifDateParserTest {
         String dateStr = "2023:08:31 15:10:31+0300";
         String offsetStr = null;
 
-        var dateTime = exifDateParser.parseExifDate(dateStr, offsetStr);
+        var dateTime = exifDateParser.parseExifDate(dateStr, true, offsetStr);
 
         assertThat(dateTime).isPresent();
         assertThat(dateTime.get().localDateTime()).isEqualTo("2023-08-31T15:10:31");
@@ -80,7 +80,7 @@ class ExifDateParserTest {
         String dateStr = "2023:08:31 15:10:31+03:00";
         String offsetStr = "+02:00";
 
-        var dateTime = exifDateParser.parseExifDate(dateStr, offsetStr);
+        var dateTime = exifDateParser.parseExifDate(dateStr, true, offsetStr);
 
         assertThat(dateTime).isPresent();
         assertThat(dateTime.get().localDateTime()).isEqualTo("2023-08-31T15:10:31");
@@ -91,7 +91,7 @@ class ExifDateParserTest {
     @NullAndEmptySource
     @ValueSource(strings = {" ", "  ", "0000:00:00 00:00:00"})
     void testInvalidOrBlankDates(String dateStr) {
-        var dateTime = exifDateParser.parseExifDate(dateStr, null);
+        var dateTime = exifDateParser.parseExifDate(dateStr, true,null);
         assertThat(dateTime).isEmpty();
     }
 
@@ -100,7 +100,7 @@ class ExifDateParserTest {
         String dateStr = "2023-08-31 15:10:31"; // uses hyphen instead of colon
 
         assertThrows(DateTimeParseException.class, () ->
-                exifDateParser.parseExifDate(dateStr, null)
+                exifDateParser.parseExifDate(dateStr, true,null)
         );
     }
 
@@ -109,7 +109,7 @@ class ExifDateParserTest {
         String dateStr = "2023:08:31 15:10:31";
         String offsetStr = "invalid";
 
-        var dateTime = exifDateParser.parseExifDate(dateStr, offsetStr);
+        var dateTime = exifDateParser.parseExifDate(dateStr, true, offsetStr);
 
         assertThat(dateTime).isPresent();
         assertThat(dateTime.get().localDateTime()).isEqualTo("2023-08-31T15:10:31");
@@ -121,7 +121,7 @@ class ExifDateParserTest {
         String dateStr = "2023:08:31 15:10:31-0500";
         String offsetStr = null;
 
-        var dateTime = exifDateParser.parseExifDate(dateStr, offsetStr);
+        var dateTime = exifDateParser.parseExifDate(dateStr, true, offsetStr);
 
         assertThat(dateTime).isPresent();
         assertThat(dateTime.get().localDateTime()).isEqualTo("2023-08-31T15:10:31");

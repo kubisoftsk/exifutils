@@ -75,7 +75,7 @@ class MediaAnalyzerTest {
 		LocalDateTime localDateTime = null;
 		ZoneOffset zoneOffset = null;
 
-        var creationDate = analyze(IMAGE, localDateTime, zoneOffset);
+        var creationDate = analyze(IMAGE, localDateTime, true, zoneOffset);
 
         assertThat(creationDate).isNull();
     }
@@ -86,7 +86,7 @@ class MediaAnalyzerTest {
 		LocalDateTime localDateTime = LocalDateTime.of(2023, 8, 31, 18, 11, 44);
 		ZoneOffset zoneOffset = ZoneOffset.ofHours(3);
 
-        var creationDate = analyze(IMAGE, localDateTime, zoneOffset);
+        var creationDate = analyze(IMAGE, localDateTime, true, zoneOffset);
 
         assertThat(creationDate).isNotNull();
         assertThat(creationDate.getLocalDateTime()).hasToString("2023-08-31T18:11:44");
@@ -98,7 +98,7 @@ class MediaAnalyzerTest {
 		LocalDateTime localDateTime = LocalDateTime.of(2020, 1, 3, 7, 19, 8);
 		ZoneOffset zoneOffset = null;
 
-        var creationDate = analyze(IMAGE, localDateTime, zoneOffset);
+        var creationDate = analyze(IMAGE, localDateTime, true, zoneOffset);
 
         assertThat(creationDate).isNotNull();
         assertThat(creationDate.getLocalDateTime()).hasToString("2020-01-03T07:19:08");
@@ -113,7 +113,7 @@ class MediaAnalyzerTest {
 		ZoneOffset zoneOffset = null;
 		ZoneOffset gpsResolvedZoneOffset = ZoneOffset.ofHours(1);
 
-        var creationDate = analyze(IMAGE, localDateTime, zoneOffset, gpsResolvedZoneOffset);
+        var creationDate = analyze(IMAGE, localDateTime, true, zoneOffset, gpsResolvedZoneOffset);
 
         assertThat(creationDate).isNotNull();
         assertThat(creationDate.getLocalDateTime()).hasToString("2023-01-02T17:14:56");
@@ -126,7 +126,7 @@ class MediaAnalyzerTest {
 		LocalDateTime localDateTime = null;
 		ZoneOffset zoneOffset = null;
 
-        var creationDate = analyze(VIDEO, localDateTime, zoneOffset);
+        var creationDate = analyze(VIDEO, localDateTime, true, zoneOffset);
 
         assertThat(creationDate).isNull();
     }
@@ -137,7 +137,7 @@ class MediaAnalyzerTest {
 		LocalDateTime localDateTime = LocalDateTime.of(2023, 8, 31, 18, 10, 31);
 		ZoneOffset zoneOffset = ZoneOffset.ofHours(3);
 
-        var creationDate = analyze(VIDEO, localDateTime, zoneOffset);
+        var creationDate = analyze(VIDEO, localDateTime, true, zoneOffset);
 
         assertThat(creationDate).isNotNull();
         assertThat(creationDate.getLocalDateTime()).hasToString("2023-08-31T18:10:31");
@@ -153,7 +153,7 @@ class MediaAnalyzerTest {
 		ZoneOffset zoneOffset = null;
 		ZoneOffset gpsResolvedZoneOffset = ZoneOffset.ofHours(3);
 
-		var creationDate = analyze(VIDEO, localDateTime, zoneOffset, gpsResolvedZoneOffset);
+		var creationDate = analyze(VIDEO, localDateTime, false, zoneOffset, gpsResolvedZoneOffset);
 
 		assertThat(creationDate).isNotNull();
 		assertThat(creationDate.getLocalDateTime()).hasToString("2023-08-30T11:32:51");
@@ -168,7 +168,7 @@ class MediaAnalyzerTest {
 		LocalDateTime localDateTime = LocalDateTime.of(2023, 4, 19, 16, 43, 21);
 		ZoneOffset zoneOffset = null;
 
-        var creationDate = analyze(VIDEO, localDateTime, zoneOffset);
+        var creationDate = analyze(VIDEO, localDateTime, false, zoneOffset);
 
         assertThat(creationDate).isNotNull();
         assertThat(creationDate.getLocalDateTime()).hasToString("2023-04-19T18:43:21");
@@ -183,24 +183,24 @@ class MediaAnalyzerTest {
 		LocalDateTime localDateTime = LocalDateTime.of(2025, 1, 4, 15, 58, 1);
 		ZoneOffset zoneOffset = null;
 
-        var creationDate = analyze(VIDEO, localDateTime, zoneOffset);
+        var creationDate = analyze(VIDEO, localDateTime, false, zoneOffset);
 
         assertThat(creationDate).isNotNull();
         assertThat(creationDate.getLocalDateTime()).hasToString("2025-01-04T16:58:01");
         assertThat(creationDate.getZoneOffset()).hasToString("+01:00");
     }
 
-	private MediaDateTime analyze(MediaType mediaType, LocalDateTime localDateTime, ZoneOffset zoneOffset) {
-		return analyze(mediaType, localDateTime, zoneOffset, null);
+	private MediaDateTime analyze(MediaType mediaType, LocalDateTime localDateTime, boolean localTime, ZoneOffset zoneOffset) {
+		return analyze(mediaType, localDateTime, localTime, zoneOffset, null);
 	}
 
-    private MediaDateTime analyze(MediaType mediaType, LocalDateTime localDateTime,
+    private MediaDateTime analyze(MediaType mediaType, LocalDateTime localDateTime, boolean localTime,
 								  ZoneOffset zoneOffset, ZoneOffset gpsResolvedZoneOffset) {
         when(mediaTypeDetectorMock.detectMediaType(any()))
 				.thenReturn(mediaType);
 		if (localDateTime != null) {
-			when(exifDateExtractorMock.extractCreationDate(any()))
-					.thenReturn(Optional.of(new ExifDateTime(localDateTime, zoneOffset)));
+			when(exifDateExtractorMock.extractCreationDate(any(), any()))
+					.thenReturn(Optional.of(new ExifDateTime(localDateTime, localTime, zoneOffset)));
 		}
         when(metaDataHandlerFactoryMock.create())
                 .thenReturn(Mockito.mock(MetaDataHandler.class));

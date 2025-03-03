@@ -40,7 +40,7 @@ public class ExifDateParser {
      * @return Optional containing the parsed OffsetDateTime, or empty if input is invalid
      * @throws DateTimeParseException if the date string cannot be parsed
      */
-    public Optional<ExifDateTime> parseExifDate(String dateStr, String offsetStr) throws DateTimeParseException {
+    public Optional<ExifDateTime> parseExifDate(String dateStr, boolean localTime, String offsetStr) throws DateTimeParseException {
         // Check for blank or invalid date string
         if (dateStr == null || dateStr.isBlank() || "0000:00:00 00:00:00".equals(dateStr.trim())) {
             return Optional.empty();
@@ -77,6 +77,6 @@ public class ExifDateParser {
             // If offset parsing fails, keep offset null
         }
 
-        return Optional.of(new ExifDateTime(dateTime, offset));
+        return Optional.of(new ExifDateTime(dateTime, localTime, offset));
     }
 }
