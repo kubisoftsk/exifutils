@@ -7,9 +7,6 @@ imageFields:
   - dateField: DateTime
     localTime: true
     offsetField: OffsetTime
-  - dateField: DateTimeDigitized
-    localTime: true
-    offsetField: OffsetTimeDigitized
 
 videoFields:
   - dateField: CreationDate
