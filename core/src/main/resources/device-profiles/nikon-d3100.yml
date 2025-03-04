@@ -1,0 +1,5 @@
+model: NIKON D3100
+
+videoFields:
+  - dateField: DateTimeOriginal
+    localTime: true

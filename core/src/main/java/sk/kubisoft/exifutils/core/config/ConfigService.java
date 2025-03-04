@@ -3,6 +3,8 @@ package sk.kubisoft.exifutils.core.config;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
+
 import sk.kubisoft.exifutils.core.config.model.ExifUtilsConfiguration;
 import sk.kubisoft.exifutils.core.utils.EnvironmentUtils;
 
@@ -23,10 +25,13 @@ public final class ConfigService {
 
 	private static final String CONFIG_FILE_NAME = "exifsort-config.yml";
 
+	private final Yaml yaml;
+
 	private ExifUtilsConfiguration config;
 
 	@Inject
-	public ConfigService() {
+	public ConfigService(Yaml yaml) {
+		this.yaml = yaml;
 		loadConfig();
 	}
 
@@ -43,7 +48,6 @@ public final class ConfigService {
 			createDefaultConfig(configFile);
 		}
 
-		org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml();
 		try (InputStream is = Files.newInputStream(configFile)) {
 			config = yaml.loadAs(is, ExifUtilsConfiguration.class);
 			logger.info("Loaded config file: {}", configFile);

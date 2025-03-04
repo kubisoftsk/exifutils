@@ -1,0 +1,15 @@
+model: default
+
+imageFields:
+  - dateField: DateTimeOriginal
+    localTime: true
+    offsetField: OffsetTimeOriginal
+  - dateField: DateTime
+    localTime: true
+    offsetField: OffsetTime
+
+videoFields:
+  - dateField: CreationDate
+    localTime: true
+  - dateField: CreateDate
+    localTime: false

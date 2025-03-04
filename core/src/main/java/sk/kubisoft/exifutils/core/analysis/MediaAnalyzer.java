@@ -82,33 +82,30 @@ public class MediaAnalyzer {
 	private MediaFile analyze(Path file, MetaDataHandler metaDataHandler, GpsZoneExtractor gpsZoneExtractor) {
 		MediaType mediaType = mediaTypeDetector.detectMediaType(file);
 		Map<String, String> metadata = metaDataHandler.extractMetaData(file);
-		Optional<ExifDateTime> extractedDateOptional = exifDateExtractor.extractCreationDate(metadata);
+		Optional<ExifDateTime> extractedDateOptional = exifDateExtractor.extractCreationDate(mediaType, metadata);
 		if (extractedDateOptional.isEmpty()) {
 			console.verboseln("No date found in metadata");
 			return new MediaFile(file, mediaType, metadata, null);
 		}
 		ExifDateTime extractedDate = extractedDateOptional.get();
-		if (extractedDate.zoneOffset() == null) {
+		LocalDateTime localDateTimeToUse = extractedDate.localDateTime();
+		ZoneOffset zoneOffsetToUse = extractedDate.zoneOffset();
+
+		if (zoneOffsetToUse == null) {
 			console.verboseln("Zone offset is missing, resolving offset...");
 			var localDateTime = extractedDate.localDateTime();
-			ZoneOffset offsetToUse = resolveZoneOffset(file, localDateTime, metadata, gpsZoneExtractor);
+			zoneOffsetToUse = resolveZoneOffset(file, localDateTime, metadata, gpsZoneExtractor);
 
-			if (mediaType == MediaType.IMAGE) {
-				// assume the image local date is in local time, so we don't need to convert it, just assign it
-				extractedDate = new ExifDateTime(localDateTime, offsetToUse);
-			} else if (mediaType == MediaType.VIDEO) {
-				// assume the video local date without offset is in UTC time, this is important for videos, because historically
-				// quick time videos has the date in UTC time, so we must convert it to local time with guessed offset
-				console.verboseln("Converting video date from UTC to local time with offset: %s", offsetToUse);
+			// if the extracted EXIF date is stored in UTC time, so we must convert it to local time with guessed offset
+			// to get the correct true local time at guessed offset
+			if (!extractedDate.localTime()) {
+				console.verboseln("Converting video date from UTC to local time with offset: %s", zoneOffsetToUse);
 				OffsetDateTime utcDateTime = localDateTime.atOffset(ZoneOffset.UTC);
-				var localTimeAtOffsetSameInstant = utcDateTime.withOffsetSameInstant(offsetToUse).toLocalDateTime();
-				extractedDate = new ExifDateTime(localTimeAtOffsetSameInstant, offsetToUse);
-			} else {
-				throw new IllegalArgumentException("Unknown media type: " + mediaType);
+				localDateTimeToUse = utcDateTime.withOffsetSameInstant(zoneOffsetToUse).toLocalDateTime();
 			}
 		}
 
-		MediaDateTime mediaDateTime = new MediaDateTime(extractedDate.localDateTime(), extractedDate.zoneOffset());
+		MediaDateTime mediaDateTime = new MediaDateTime(localDateTimeToUse, zoneOffsetToUse);
 		console.verboseln("Resolved create date: %s", mediaDateTime);
 		return new MediaFile(file, mediaType, metadata, mediaDateTime);
 	}

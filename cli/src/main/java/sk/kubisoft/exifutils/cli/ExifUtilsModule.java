@@ -7,6 +7,8 @@ import dagger.Provides;
 import dagger.multibindings.IntoMap;
 import dagger.multibindings.StringKey;
 import org.apache.tika.Tika;
+import org.yaml.snakeyaml.Yaml;
+
 import sk.kubisoft.exifutils.cli.logging.SystemConsole;
 import sk.kubisoft.exifutils.core.CommandRunner;
 import sk.kubisoft.exifutils.core.logging.Console;
@@ -35,6 +37,12 @@ public class ExifUtilsModule {
     ObjectMapper provideObjectMapper() {
         return new ObjectMapper();
     }
+
+	@Provides
+	@Singleton
+	Yaml provideYaml() {
+		return new Yaml();
+	}
 
     @Provides
     @Singleton
