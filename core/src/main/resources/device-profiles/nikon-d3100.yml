@@ -1,5 +1,9 @@
 model: NIKON D3100
 
+imageFields:
+  - dateField: DateTimeOriginal
+    localTime: true
+
 videoFields:
   - dateField: DateTimeOriginal
     localTime: true

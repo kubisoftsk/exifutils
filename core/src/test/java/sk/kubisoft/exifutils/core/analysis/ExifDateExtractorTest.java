@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.yaml.snakeyaml.Yaml;
-
 import sk.kubisoft.exifutils.core.analysis.device.DeviceProfileService;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.logging.JUnitConsole;
@@ -137,6 +136,20 @@ class ExifDateExtractorTest {
         assertThat(exifDateTime.localDateTime()).hasToString("2016-12-23T11:05:28");
 		assertThat(exifDateTime.localTime()).isTrue();
 		assertThat(exifDateTime.zoneOffset()).isNull();
+    }
+
+    @Test
+    void extractDateTimeForImage9() {
+        // This is full size image taken with Nikon D3100 camera in Slovakia at local time 12:43:35
+        // there is no zone offset in metadata
+        Map<String, String> metaData = loadMetaData("/exifdata/image_9.json");
+
+        var exifDateTime = extract(IMAGE, metaData);
+
+        assertThat(exifDateTime).isNotNull();
+        assertThat(exifDateTime.localDateTime()).hasToString("2013-01-03T09:44:05");
+        assertThat(exifDateTime.localTime()).isTrue();
+        assertThat(exifDateTime.zoneOffset()).isNull();
     }
 
     @Test
