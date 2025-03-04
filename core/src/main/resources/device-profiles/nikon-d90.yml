@@ -1,0 +1,9 @@
+model: NIKON D90
+
+imageFields:
+  - dateField: DateTimeOriginal
+    localTime: true
+
+videoFields:
+  - dateField: DateTimeOriginal
+    localTime: true

@@ -13,6 +13,8 @@ public class SystemConsole implements Console {
 
     private boolean verbose = false;
 
+    private boolean alwaysTrue = false;
+
     public SystemConsole() {
         this.scanner = new Scanner(System.in);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -33,16 +35,22 @@ public class SystemConsole implements Console {
 
     @Override
     public boolean confirmAction(String message) {
+        if (alwaysTrue) {
+            return true;
+        }
         while (true) {
-            System.out.print(message + " (y/n): ");
+            System.out.print(message + " (y/n/a) or (yes/no/all): ");
             String response = scanner.nextLine().trim().toLowerCase();
 
-            if (response.equals("y") || response.equals("yes")) {
+            if (response.equals("y") || response.equals("yes") || response.equals("a") || response.equals("all")) {
+                if (response.equals("a") || response.equals("all")) {
+                    alwaysTrue = true;
+                }
                 return true;
             } else if (response.equals("n") || response.equals("no")) {
                 return false;
             }
-            System.out.println("Please answer 'y' or 'n'");
+            System.out.println("Please answer 'y', 'n' or 'a'");
         }
     }
 

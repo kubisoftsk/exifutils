@@ -29,6 +29,7 @@ public class DeviceProfileService {
 
 		add(profileMap, DEFAULT_PROFILE);
 		add(profileMap, "nikon-d3100");
+		add(profileMap, "nikon-d90");
 
 		this.profiles = Collections.unmodifiableMap(profileMap);
 	}
