@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 @Singleton
 public class FilesService {
 
+    // TODO probably delete this class
+
     @Inject
     public FilesService() {
     }
