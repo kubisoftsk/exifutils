@@ -27,7 +27,6 @@ public class GpsZoneExtractor {
     public GpsZoneExtractor() {
     }
 
-    // TODO path only needed for exception handling, refactor to remove
     public Optional<ZoneId> extractGpsZone(Path path, Map<String, String> metadata) {
         String gpsLatitude = metadata.get(GPS_LATITUDE_TAG);
         String gpsLongitude = metadata.get(GPS_LONGITUDE_TAG);
