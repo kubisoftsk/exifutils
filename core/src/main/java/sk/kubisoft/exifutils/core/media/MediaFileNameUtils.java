@@ -24,10 +24,10 @@ public class MediaFileNameUtils {
         this.configService = configService;
     }
 
-    // TODO take date from mediaFile itself
-    public String createNewName(MediaFile mediaFile, MediaDateTime date) {
+    public String createNewName(MediaFile mediaFile) {
         String result = getPattern();
-        LocalDateTime dateTime = date.getLocalDateTime();
+        var mediaDate = mediaFile.creationDate();
+        LocalDateTime dateTime = mediaDate.getLocalDateTime();
 
         // Find all ${date,format} patterns
         Matcher dateMatcher = Pattern.compile("\\$\\{date,([^}]+)}").matcher(result);

@@ -75,7 +75,6 @@ public class ShiftDateCommand {
             exifDateSetter.setDateTime(setDateActionList);
 
             if (input.rename()) {
-                // TODO this is mostly duplicate! refactor
                 List<MoveAction> moveActions = createMoveActions(setDateActionList);
 
                 if (moveActions.isEmpty()) {
@@ -112,9 +111,8 @@ public class ShiftDateCommand {
         for (var setDateAction : setDateActions) {
             var originalPath = setDateAction.file();
 
-            // TODO Refactor not to use media file or decide if it is ok
             var mediaFile = new MediaFile(originalPath, setDateAction.mediaType(), Collections.emptyMap(), setDateAction.dateTime());
-            var newName = fileNameUtils.createNewName(mediaFile, mediaFile.creationDate());
+            var newName = fileNameUtils.createNewName(mediaFile);
             var targetPath = originalPath.getParent().resolve(newName);
 
             rawMoveActions.add(new MoveAction(originalPath, targetPath));

@@ -11,7 +11,6 @@ import sk.kubisoft.exifutils.core.logging.Console;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -96,16 +95,6 @@ public class SortCommandRunner implements CommandRunner {
         if (Files.exists(destinationDir)) {
             if (!Files.isDirectory(destinationDir)) {
                 throw new ParseException("Destination path exists but is not a directory: " + destPath);
-            }
-
-            try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(destinationDir)) {
-                // TODO Make this check configurable via an option
-                //if (dirStream.iterator().hasNext()) {
-                //	throw new ParseException("Destination directory is not empty: " + destPath);
-                //}
-
-            } catch (IOException e) {
-                throw new ParseException("Cannot access destination directory: " + e.getMessage());
             }
         } else {
             try {

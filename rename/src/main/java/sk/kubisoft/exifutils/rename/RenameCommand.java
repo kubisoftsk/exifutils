@@ -118,7 +118,7 @@ public class RenameCommand {
         for (var mediaFile : mediaFiles) {
             var originalPath = mediaFile.originalPath();
 
-            var newName = fileNameUtils.createNewName(mediaFile, mediaFile.creationDate());
+            var newName = fileNameUtils.createNewName(mediaFile);
             var targetPath = originalPath.getParent().resolve(newName);
 
             rawMoveActions.add(new MoveAction(originalPath, targetPath));

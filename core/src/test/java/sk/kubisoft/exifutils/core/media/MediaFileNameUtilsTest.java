@@ -47,7 +47,7 @@ class MediaFileNameUtilsTest {
         );
 
         // when
-        String result = renamer.createNewName(mediaFile, mediaDateTime);
+        String result = renamer.createNewName(mediaFile);
 
         // then
         assertEquals("IMG_20240118_153045.jpg", result);
@@ -65,7 +65,7 @@ class MediaFileNameUtilsTest {
         );
 
         // when
-        String result = renamer.createNewName(mediaFile, mediaDateTime);
+        String result = renamer.createNewName(mediaFile);
 
         // then
         assertEquals("IMG_20240118_153045.mov", result);
@@ -83,7 +83,7 @@ class MediaFileNameUtilsTest {
         );
 
         // when
-        String result = renamer.createNewName(mediaFile, mediaDateTime);
+        String result = renamer.createNewName(mediaFile);
 
         // then
         assertEquals("IMG_20240118_153045.jpg", result);
@@ -101,7 +101,7 @@ class MediaFileNameUtilsTest {
         );
 
         // when
-        String result = renamer.createNewName(mediaFile, mediaDateTime);
+        String result = renamer.createNewName(mediaFile);
 
         // then
         assertEquals("IMG_20240118_153045.heic", result);

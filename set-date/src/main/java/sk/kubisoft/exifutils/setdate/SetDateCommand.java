@@ -113,9 +113,8 @@ public class SetDateCommand {
         for (var setDateAction : setDateActions) {
             var originalPath = setDateAction.file();
 
-            // TODO Refactor not to use media file or decide if it is ok
             var mediaFile = new MediaFile(originalPath, setDateAction.mediaType(), Collections.emptyMap(), setDateAction.dateTime());
-            var newName = fileNameUtils.createNewName(mediaFile, mediaFile.creationDate());
+            var newName = fileNameUtils.createNewName(mediaFile);
             var targetPath = originalPath.getParent().resolve(newName);
 
             rawMoveActions.add(new MoveAction(originalPath, targetPath));
@@ -154,7 +153,6 @@ public class SetDateCommand {
     }
 
     private List<SetDateAction> listAndParseFromFileNames(List<MediaFile> mediaFiles, ZoneId zoneId, String userPattern) {
-        // TODO implement also user pattern parsing
         console.println("Setting date and time for files using pattern guessed from file names");
 
         List<SetDateAction> actions = new ArrayList<>();

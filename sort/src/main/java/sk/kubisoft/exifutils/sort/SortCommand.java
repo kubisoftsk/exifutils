@@ -57,7 +57,6 @@ public class SortCommand {
         console.println("Found %d media files with date, %d media files without date.", mediaFilesWithDate.size(), mediaFilesWithoutDate.size());
         mediaFilesWithoutDate.forEach((mediaFile) -> console.println("No date found for %s", mediaFile.originalPath()));
 
-        // TODO duplicate refactor somehow
         if (input.writeDate()) {
             var setDateActions = mediaFilesWithDate.stream()
                     .filter(exifDateSetter::needsDateTimeSet)
