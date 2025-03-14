@@ -96,6 +96,10 @@ public class FileExplorer {
         return StringUtils.containsAny(sourceArg, "*", "?", "[", "]");
     }
 
+    public List<Path> listFiles(Path inputPath) {
+        return listFiles(List.of(inputPath));
+    }
+
     public List<Path> listFiles(List<Path> inputPaths) {
         Set<Path> allPaths = new HashSet<>();
         for (var path : inputPaths) {

@@ -1,6 +1,6 @@
 package sk.kubisoft.exifutils.core.file.conflict;
 
-import sk.kubisoft.exifutils.core.file.FilesService;
+import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.MoveAction;
 
 import javax.inject.Inject;
@@ -11,11 +11,11 @@ import java.util.*;
 @Singleton
 public class DuplicatePreProcessor {
 
-    private final FilesService filesService;
+    private final FileExplorer fileExplorer;
 
     @Inject
-    public DuplicatePreProcessor(FilesService filesService) {
-        this.filesService = filesService;
+    public DuplicatePreProcessor(FileExplorer fileExplorer) {
+        this.fileExplorer = fileExplorer;
     }
 
     public List<MoveAction> processConflicts(List<MoveAction> moveActions) {
@@ -29,7 +29,7 @@ public class DuplicatePreProcessor {
 
             // 1. Get existing files in the target folder
             var existingFilesTargetFolder = existingFilesMap.computeIfAbsent(targetParent, k -> {
-                var listedFiles = filesService.listFiles(targetParent);
+                var listedFiles = fileExplorer.listFiles(targetParent);
                 return new HashSet<>(listedFiles.stream()
                         .map(Path::getFileName)
                         .map(Path::toString)
