@@ -43,7 +43,8 @@ class MediaFileNameUtilsTest {
         MediaFile mediaFile = new MediaFile(
                 Path.of("IMG_7456.JPG"),
                 MediaType.IMAGE,
-                null
+                null,
+                mediaDateTime
         );
 
         // when
@@ -61,7 +62,8 @@ class MediaFileNameUtilsTest {
         MediaFile mediaFile = new MediaFile(
                 Path.of("IMG_7456.MOV"),
                 MediaType.VIDEO,
-                null
+                null,
+                mediaDateTime
         );
 
         // when
@@ -79,7 +81,8 @@ class MediaFileNameUtilsTest {
         MediaFile mediaFile = new MediaFile(
                 Path.of("IMG20240118153045.JPG"),
                 MediaType.IMAGE,
-                null
+                null,
+                mediaDateTime
         );
 
         // when
@@ -97,7 +100,8 @@ class MediaFileNameUtilsTest {
         MediaFile mediaFile = new MediaFile(
                 Path.of("IMG_7456.HEIC"),
                 MediaType.IMAGE,
-                null
+                null,
+                mediaDateTime
         );
 
         // when
