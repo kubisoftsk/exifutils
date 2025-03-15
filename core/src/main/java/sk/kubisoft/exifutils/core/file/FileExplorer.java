@@ -7,31 +7,45 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.nio.file.Paths;
+import java.util.*;
 
 @Singleton
 public class FileExplorer {
 
+    private final FileService fileService;
+
     private final MediaTypeDetector mediaTypeDetector;
 
     @Inject
-    public FileExplorer(MediaTypeDetector mediaTypeDetector) {
+    public FileExplorer(FileService fileService, MediaTypeDetector mediaTypeDetector) {
+        this.fileService = fileService;
         this.mediaTypeDetector = mediaTypeDetector;
+    }
+
+    public List<Path> listFiles(String[] args) {
+        List<Path> inputPaths = Arrays.stream(args)
+                .map(Paths::get)
+                .toList();
+
+        if (inputPaths.isEmpty()) {
+            // No input paths provided, use current directory
+            inputPaths = List.of(Paths.get(""));
+        }
+
+        return listFiles(inputPaths);
+    }
+
+    public List<Path> listFiles(Path inputPath) {
+        return listFiles(List.of(inputPath));
     }
 
     public List<Path> listFiles(List<Path> inputPaths) {
         Set<Path> allPaths = new HashSet<>();
         for (var path : inputPaths) {
-            if (path.toFile().isDirectory()) {
-                allPaths.addAll(walk(path));
-            } else {
-                allPaths.add(path);
-            }
+            checkPath(path);
+            allPaths.addAll(listPath(path));
         }
 
         return allPaths.stream()
@@ -39,9 +53,9 @@ public class FileExplorer {
                 .toList();
     }
 
-    public List<MediaFile> listMediaFiles(List<Path> inputPaths) {
+    public List<MediaFile> listMediaFiles(String[] args) {
         List<MediaFile> mediaFiles = new ArrayList<>();
-        for (var path : listFiles(inputPaths)) {
+        for (var path : listFiles(args)) {
             var mediaType = mediaTypeDetector.detectMediaType(path);
             if (mediaType != null) {
                 mediaFiles.add(new MediaFile(path, mediaType));
@@ -50,11 +64,28 @@ public class FileExplorer {
         return mediaFiles;
     }
 
-    private Set<Path> walk(Path inputDir) {
-        Set<Path> allPaths = new HashSet<>();
-        try (var filesStream = Files.walk(inputDir)) {
+    private List<Path> listPath(Path path) {
+        if (fileService.isDirectory(path)) {
+            return walk(path);
+        } else {
+            return List.of(path);
+        }
+    }
+
+    private void checkPath(Path path) {
+        if (!fileService.exists(path)) {
+            throw new IllegalArgumentException("Source file / directory does not exist" + path);
+        }
+        if (!fileService.isReadable(path)) {
+            throw new IllegalArgumentException("Cannot read source file / directory: " + path);
+        }
+    }
+
+    private List<Path> walk(Path inputDir) {
+        List<Path> allPaths = new ArrayList<>();
+        try (var filesStream = fileService.walk(inputDir)) {
             var inputDirFiles = filesStream
-                    .filter(path -> path.toFile().isFile())
+                    .filter(fileService::isRegularFile)
                     .toList();
             allPaths.addAll(inputDirFiles);
         } catch (IOException e) {

@@ -2,7 +2,6 @@ package sk.kubisoft.exifutils.rename;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.FileMover;
 import sk.kubisoft.exifutils.core.file.MoveAction;
@@ -27,7 +26,6 @@ public class RenameCommand {
     private static final Logger logger = LoggerFactory.getLogger(RenameCommand.class);
 
     private final FileExplorer fileExplorer;
-    private final MediaAnalyzer mediaAnalyzer;
     private final MediaFileNameUtils fileNameUtils;
     private final DuplicatePreProcessor duplicatePreProcessor;
     private final FileMover fileMover;
@@ -35,10 +33,9 @@ public class RenameCommand {
     private final ExifDateSetter exifDateSetter;
 
     @Inject
-    public RenameCommand(FileExplorer fileExplorer, MediaAnalyzer mediaAnalyzer, MediaFileNameUtils fileNameUtils,
-                         DuplicatePreProcessor duplicatePreProcessor, FileMover fileMover, Console console, ExifDateSetter exifDateSetter) {
+    public RenameCommand(FileExplorer fileExplorer, MediaFileNameUtils fileNameUtils, DuplicatePreProcessor duplicatePreProcessor,
+                         FileMover fileMover, Console console, ExifDateSetter exifDateSetter) {
         this.fileExplorer = fileExplorer;
-        this.mediaAnalyzer = mediaAnalyzer;
         this.fileNameUtils = fileNameUtils;
         this.duplicatePreProcessor = duplicatePreProcessor;
         this.fileMover = fileMover;
@@ -50,13 +47,13 @@ public class RenameCommand {
         console.verboseln("Running ExifUtils Rename command with input: %s", input);
 
         console.println("Searching for media files...");
-        var allFiles = fileExplorer.listFiles(input.sourceDirectories());
+        List<MediaFile> mediaFiles = fileExplorer.listMediaFiles(input.inputPaths());
+        console.println("Found %d files.", mediaFiles.size());
 
-        var allMediaFiles = mediaAnalyzer.analyze(allFiles);
-        List<MediaFile> mediaFilesWithDate = allMediaFiles.stream()
+        List<MediaFile> mediaFilesWithDate = mediaFiles.stream()
                 .filter(mediaFile -> mediaFile.creationDate() != null)
                 .toList();
-        List<MediaFile> mediaFilesWithoutDate = allMediaFiles.stream()
+        List<MediaFile> mediaFilesWithoutDate = mediaFiles.stream()
                 .filter(mediaFile -> mediaFile.creationDate() == null)
                 .toList();
 
@@ -118,7 +115,7 @@ public class RenameCommand {
         for (var mediaFile : mediaFiles) {
             var originalPath = mediaFile.originalPath();
 
-            var newName = fileNameUtils.createNewName(mediaFile, mediaFile.creationDate());
+            var newName = fileNameUtils.createNewName(mediaFile);
             var targetPath = originalPath.getParent().resolve(newName);
 
             rawMoveActions.add(new MoveAction(originalPath, targetPath));

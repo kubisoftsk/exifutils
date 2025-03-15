@@ -13,3 +13,11 @@ Videos:
  because some files may be incorrectly tagged with the wrong time zone, its probably rate tough 
 
 Onplus newest does not add location tag to video
+
+## Command Line Arguments Processing
+
+For each command line argument:
+    - If the argument is a path to a directory:
+        - Add all files from the directory, recursively
+    - Else:
+        - Add the file individually and continue

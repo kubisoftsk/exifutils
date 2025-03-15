@@ -2,7 +2,6 @@ package sk.kubisoft.exifutils.shiftdate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.FileMover;
 import sk.kubisoft.exifutils.core.file.MoveAction;
@@ -29,18 +28,16 @@ public class ShiftDateCommand {
 
     private final Console console;
     private final FileExplorer fileExplorer;
-    private final MediaAnalyzer mediaAnalyzer;
     private final ExifDateSetter exifDateSetter;
     private final MediaFileNameUtils fileNameUtils;
     private final DuplicatePreProcessor duplicatePreProcessor;
     private final FileMover fileMover;
 
     @Inject
-    public ShiftDateCommand(Console console, FileExplorer fileExplorer, MediaAnalyzer mediaAnalyzer, ExifDateSetter exifDateSetter,
+    public ShiftDateCommand(Console console, FileExplorer fileExplorer, ExifDateSetter exifDateSetter,
                             MediaFileNameUtils fileNameUtils, DuplicatePreProcessor duplicatePreProcessor, FileMover fileMover) {
         this.console = console;
         this.fileExplorer = fileExplorer;
-        this.mediaAnalyzer = mediaAnalyzer;
         this.exifDateSetter = exifDateSetter;
         this.fileNameUtils = fileNameUtils;
         this.duplicatePreProcessor = duplicatePreProcessor;
@@ -51,9 +48,9 @@ public class ShiftDateCommand {
         console.verboseln("Running ExifUtils shift-date command with input: %s", input);
 
         console.println("Searching for media files...");
-        var allFiles = fileExplorer.listFiles(input.sourcePaths());
+        List<MediaFile> allMediaFiles = fileExplorer.listMediaFiles(input.inputPaths());
+        console.println("Found %d files.", allMediaFiles.size());
 
-        var allMediaFiles = mediaAnalyzer.analyze(allFiles);
         List<MediaFile> mediaFilesWithDate = allMediaFiles.stream()
                 .filter(mediaFile -> mediaFile.creationDate() != null)
                 .toList();
@@ -75,7 +72,6 @@ public class ShiftDateCommand {
             exifDateSetter.setDateTime(setDateActionList);
 
             if (input.rename()) {
-                // TODO this is mostly duplicate! refactor
                 List<MoveAction> moveActions = createMoveActions(setDateActionList);
 
                 if (moveActions.isEmpty()) {
@@ -112,9 +108,8 @@ public class ShiftDateCommand {
         for (var setDateAction : setDateActions) {
             var originalPath = setDateAction.file();
 
-            // TODO Refactor not to use media file or decide if it is ok
             var mediaFile = new MediaFile(originalPath, setDateAction.mediaType(), Collections.emptyMap(), setDateAction.dateTime());
-            var newName = fileNameUtils.createNewName(mediaFile, mediaFile.creationDate());
+            var newName = fileNameUtils.createNewName(mediaFile);
             var targetPath = originalPath.getParent().resolve(newName);
 
             rawMoveActions.add(new MoveAction(originalPath, targetPath));

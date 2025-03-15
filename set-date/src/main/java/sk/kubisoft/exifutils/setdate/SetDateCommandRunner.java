@@ -11,13 +11,9 @@ import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
@@ -82,18 +78,8 @@ public class SetDateCommandRunner implements CommandRunner {
     }
 
     private SetDateCommandInput parseInput(CommandLine cmd) throws ParseException{
-        List<Path> sourceFiles = new ArrayList<>();
         String[] args = cmd.getArgs();
-        for (String sourceArg : args) {
-            Path sourceFile = Paths.get(sourceArg);
-            if (!Files.exists(sourceFile)) {
-                throw new ParseException("Source file/directory does not exist: " + sourceArg);
-            }
-            if (!Files.isReadable(sourceFile)) {
-                throw new ParseException("Cannot read source file: " + sourceArg);
-            }
-            sourceFiles.add(sourceFile);
-        }
+
         String patternStr = cmd.getOptionValue(PATTERN.getOpt());
         if (StringUtils.isNotBlank(patternStr)) {
             try {
@@ -125,7 +111,7 @@ public class SetDateCommandRunner implements CommandRunner {
 
         boolean rename = cmd.hasOption(RENAME.getOpt());
         boolean unknownOnly = cmd.hasOption(UNKNOWN_ONLY.getOpt());
-        return new SetDateCommandInput(sourceFiles, patternStr, dateTime, zoneId, rename, unknownOnly);
+        return new SetDateCommandInput(args, patternStr, dateTime, zoneId, rename, unknownOnly);
     }
 
     @Override

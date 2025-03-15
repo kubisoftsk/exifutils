@@ -10,16 +10,12 @@ import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
 public class InfoCommandRunner implements CommandRunner {
 
-    private static final Option PRINT_ALL = Option.builder()
+    public static final Option PRINT_ALL = Option.builder()
             .option("a")
             .longOpt("all")
             .desc("Print all available metadata information.")
@@ -27,18 +23,21 @@ public class InfoCommandRunner implements CommandRunner {
 
     private final Console console;
 
+    InfoCommandInputParser inputParser;
+
     private final InfoCommand infoCommand;
 
     @Inject
-    public InfoCommandRunner(Console console, InfoCommand infoCommand) {
+    public InfoCommandRunner(Console console, InfoCommandInputParser inputParser, InfoCommand infoCommand) {
         this.console = console;
+        this.inputParser = inputParser;
         this.infoCommand = infoCommand;
     }
 
     @Override
     public int runCommand(CommandLine command) {
         try {
-            InfoCommandInput input = parseInput(command);
+            InfoCommandInput input = inputParser.parseInput(command);
             infoCommand.execute(input);
             return 0;
         } catch (ParseException e) {
@@ -48,30 +47,6 @@ public class InfoCommandRunner implements CommandRunner {
             console.errorln("Error executing " + getCommandName() + " command", e);
             return 1;
         }
-    }
-
-    private InfoCommandInput parseInput(CommandLine cmd) throws ParseException {
-        // Parse source directories - if none provided, use current directory
-        List<Path> sourceDirs = new ArrayList<>();
-        String[] args = cmd.getArgs();
-        if (args.length == 0) {
-            throw new ParseException("No source file / directory provided.");
-        }
-        for (String sourceArg : args) {
-            Path sourceDir = Paths.get(sourceArg);
-            if (!Files.exists(sourceDir)) {
-                throw new ParseException("Source file / directory does not exist: " + sourceArg);
-            }
-            if (!Files.isReadable(sourceDir)) {
-                throw new ParseException("Cannot read source file / directory: " + sourceArg);
-            }
-            sourceDirs.add(sourceDir);
-        }
-
-
-        var printAll = cmd.hasOption(PRINT_ALL.getOpt());
-
-        return new InfoCommandInput(sourceDirs, printAll);
     }
 
     @Override

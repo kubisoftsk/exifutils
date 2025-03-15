@@ -43,11 +43,12 @@ class MediaFileNameUtilsTest {
         MediaFile mediaFile = new MediaFile(
                 Path.of("IMG_7456.JPG"),
                 MediaType.IMAGE,
-                null
+                null,
+                mediaDateTime
         );
 
         // when
-        String result = renamer.createNewName(mediaFile, mediaDateTime);
+        String result = renamer.createNewName(mediaFile);
 
         // then
         assertEquals("IMG_20240118_153045.jpg", result);
@@ -61,11 +62,12 @@ class MediaFileNameUtilsTest {
         MediaFile mediaFile = new MediaFile(
                 Path.of("IMG_7456.MOV"),
                 MediaType.VIDEO,
-                null
+                null,
+                mediaDateTime
         );
 
         // when
-        String result = renamer.createNewName(mediaFile, mediaDateTime);
+        String result = renamer.createNewName(mediaFile);
 
         // then
         assertEquals("IMG_20240118_153045.mov", result);
@@ -79,11 +81,12 @@ class MediaFileNameUtilsTest {
         MediaFile mediaFile = new MediaFile(
                 Path.of("IMG20240118153045.JPG"),
                 MediaType.IMAGE,
-                null
+                null,
+                mediaDateTime
         );
 
         // when
-        String result = renamer.createNewName(mediaFile, mediaDateTime);
+        String result = renamer.createNewName(mediaFile);
 
         // then
         assertEquals("IMG_20240118_153045.jpg", result);
@@ -97,11 +100,12 @@ class MediaFileNameUtilsTest {
         MediaFile mediaFile = new MediaFile(
                 Path.of("IMG_7456.HEIC"),
                 MediaType.IMAGE,
-                null
+                null,
+                mediaDateTime
         );
 
         // when
-        String result = renamer.createNewName(mediaFile, mediaDateTime);
+        String result = renamer.createNewName(mediaFile);
 
         // then
         assertEquals("IMG_20240118_153045.heic", result);

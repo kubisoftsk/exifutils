@@ -34,7 +34,7 @@ public class MediaFileSorter {
 
             String targetFileName;
             if (rename) {
-                targetFileName = fileNameUtils.createNewName(mediaFile, mediaFile.creationDate());
+                targetFileName = fileNameUtils.createNewName(mediaFile);
             } else {
                 targetFileName = originalFileName;
             }

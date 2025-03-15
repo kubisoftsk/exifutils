@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import sk.kubisoft.exifutils.core.file.FilesService;
+import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.MoveAction;
 
 import java.nio.file.Path;
@@ -18,13 +18,13 @@ import static org.mockito.Mockito.when;
 class DuplicatePreProcessorTest {
 
     @Mock
-    private FilesService filesServiceMock;
+    private FileExplorer fileExplorerMock;
 
     private DuplicatePreProcessor duplicatePreProcessor;
 
     @BeforeEach
     void setUp() {
-        duplicatePreProcessor = new DuplicatePreProcessor(filesServiceMock);
+        duplicatePreProcessor = new DuplicatePreProcessor(fileExplorerMock);
     }
 
     @Test
@@ -75,7 +75,7 @@ class DuplicatePreProcessorTest {
 
     @Test
     void testMoveWithConflictsToDifferentDirWithExistingName() {
-        when(filesServiceMock.listFiles(Path.of("dir2")))
+        when(fileExplorerMock.listFiles(Path.of("dir2")))
                 .thenReturn(List.of(Path.of("IMG_20250101_102030.jpg")));
 
         var moveActionList = List.of(
@@ -94,7 +94,7 @@ class DuplicatePreProcessorTest {
 
     @Test
     void testMoveWithConflictsToSameDirWithExistingNames() {
-        when(filesServiceMock.listFiles(Path.of("dir")))
+        when(fileExplorerMock.listFiles(Path.of("dir")))
                 .thenReturn(List.of(Path.of("IMG_20250101_102030.jpg"), Path.of("IMG_20250101_102031.jpg"), Path.of("IMG_20250101_102032.jpg")));
 
         var moveActionList = List.of(
@@ -114,9 +114,9 @@ class DuplicatePreProcessorTest {
 
     @Test
     void testMoveWithConflictsToTwoDifferentDirsWithConflicts() {
-        when(filesServiceMock.listFiles(Path.of("dir1")))
+        when(fileExplorerMock.listFiles(Path.of("dir1")))
                 .thenReturn(List.of(Path.of("IMG_20250101_102030.jpg"), Path.of("IMG_1024.jpg"), Path.of("IMG_1025.jpg")));
-        when(filesServiceMock.listFiles(Path.of("dir2")))
+        when(fileExplorerMock.listFiles(Path.of("dir2")))
                 .thenReturn(List.of(Path.of("IMG_20250101_102040.jpg")));
 
         var moveActionList = List.of(
@@ -135,7 +135,7 @@ class DuplicatePreProcessorTest {
 
     @Test
     void testMoveWithConflictsInSameDirToSameName() {
-        when(filesServiceMock.listFiles(Path.of("dir")))
+        when(fileExplorerMock.listFiles(Path.of("dir")))
                 .thenReturn(List.of(Path.of("IMG_20230804_174615.jpg"), Path.of("IMG_20230804_174615_1.jpg"), Path.of("IMG_20230804_174615_3.jpg")));
 
         var moveActionList = List.of(

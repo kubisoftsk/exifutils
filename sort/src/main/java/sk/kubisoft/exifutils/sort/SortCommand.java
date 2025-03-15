@@ -2,7 +2,6 @@ package sk.kubisoft.exifutils.sort;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.FileMover;
 import sk.kubisoft.exifutils.core.file.MoveAction;
@@ -21,18 +20,15 @@ public class SortCommand {
     private static final Logger logger = LoggerFactory.getLogger(SortCommand.class);
 
     private final FileExplorer fileExplorer;
-    private final MediaAnalyzer mediaAnalyzer;
     private final MediaFileSorter mediaFileSorter;
     private final FileMover fileMover;
     private final Console console;
     private final ExifDateSetter exifDateSetter;
 
     @Inject
-    public SortCommand(FileExplorer fileExplorer, MediaAnalyzer mediaAnalyzer,
-                       MediaFileSorter mediaFileSorter, FileMover fileMover, Console console,
-                       ExifDateSetter exifDateSetter) {
+    public SortCommand(FileExplorer fileExplorer, MediaFileSorter mediaFileSorter,
+                       FileMover fileMover, Console console, ExifDateSetter exifDateSetter) {
         this.fileExplorer = fileExplorer;
-        this.mediaAnalyzer = mediaAnalyzer;
         this.mediaFileSorter = mediaFileSorter;
         this.fileMover = fileMover;
         this.console = console;
@@ -43,10 +39,9 @@ public class SortCommand {
         console.verboseln("Running ExifUtils Sort command with input: {}", input);
 
         console.println("Searching for media files...");
-        var allFiles = fileExplorer.listFiles(input.sourceDirectories());
-        console.println("Found %d files.", allFiles.size());
+        List<MediaFile> allMediaFiles = fileExplorer.listMediaFiles(input.inputPaths());
+        console.println("Found %d files.", allMediaFiles.size());
 
-        var allMediaFiles = mediaAnalyzer.analyze(allFiles);
         List<MediaFile> mediaFilesWithDate = allMediaFiles.stream()
                 .filter(mediaFile -> mediaFile.creationDate() != null)
                 .toList();
@@ -57,7 +52,6 @@ public class SortCommand {
         console.println("Found %d media files with date, %d media files without date.", mediaFilesWithDate.size(), mediaFilesWithoutDate.size());
         mediaFilesWithoutDate.forEach((mediaFile) -> console.println("No date found for %s", mediaFile.originalPath()));
 
-        // TODO duplicate refactor somehow
         if (input.writeDate()) {
             var setDateActions = mediaFilesWithDate.stream()
                     .filter(exifDateSetter::needsDateTimeSet)

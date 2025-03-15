@@ -131,6 +131,7 @@ public class SystemConsole implements Console {
     @Override
     public void error(String message, Throwable t) {
         System.err.print(message);
+        System.err.println(message + ": " + t.getMessage());
         logger.error(message, t);
     }
 
@@ -144,7 +145,7 @@ public class SystemConsole implements Console {
     @Override
     public void error(String format, Throwable t, Object... args) {
         String message = String.format(format, args);
-        System.err.print(message);
+        System.err.println(message + ": " + t.getMessage());
         logger.error(message, t);
     }
 
@@ -156,7 +157,7 @@ public class SystemConsole implements Console {
 
     @Override
     public void errorln(String message, Throwable t) {
-        System.err.println(message);
+        System.err.println(message + ": " + t.getMessage());
         logger.error(message, t);
     }
 
@@ -170,7 +171,7 @@ public class SystemConsole implements Console {
     @Override
     public void errorln(String format, Throwable t, Object... args) {
         String message = String.format(format, args);
-        System.err.println(message);
+        System.err.println(message + ": " + t.getMessage());
         logger.error(message, t);
     }
 }
