@@ -6,14 +6,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sk.kubisoft.exifutils.core.analysis.MediaTypeDetector;
+import sk.kubisoft.exifutils.core.media.MediaFile;
+import sk.kubisoft.exifutils.core.media.MediaType;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 
@@ -46,6 +48,7 @@ class FileExplorerTest {
         addPath(mockPaths, firstDir.resolve("P2110001.jpg"), false);
         addPath(mockPaths, firstDir.resolve("P2110002.jpg"), false);
         addPath(mockPaths, firstDir.resolve("P2110003.mov"), false);
+        addPath(mockPaths, firstDir.resolve("readme.txt"), false);
 
         lenient().when(fileService.walk(eq(root))).thenReturn(mockPaths.stream());
     }
@@ -58,6 +61,12 @@ class FileExplorerTest {
 
         lenient().when(fileService.isReadable(path)).thenReturn(true);
         lenient().when(fileService.exists(path)).thenReturn(true);
+
+        if (path.getFileName().toString().endsWith(".jpg")) {
+            lenient().when(mediaTypeDetector.detectMediaType(path)).thenReturn(MediaType.IMAGE);
+        } else if (path.getFileName().toString().endsWith(".mov")) {
+            lenient().when(mediaTypeDetector.detectMediaType(path)).thenReturn(MediaType.VIDEO);
+        }
     }
 
     @Test
@@ -85,18 +94,31 @@ class FileExplorerTest {
                 Path.of("root", "first", "P2110001.jpg"),
                 Path.of("root", "first", "P2110002.jpg"),
                 Path.of("root", "first", "P2110003.mov"),
+                Path.of("root", "first", "readme.txt"),
                 Path.of("root", "IMG_00001.jpg"),
                 Path.of("root", "IMG_00002.jpg")
         );
     }
 
     @Test
-    void testListFilesWithJpgGlobFilter() {
-        var files = fileExplorer.listFiles(new String[]{"root" + File.separator + "*"});
+    void testListFilesNonExistentDir() {
+        assertThatThrownBy(() -> fileExplorer.listFiles(new String[]{"nonexistent"}))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Source file / directory does not existnonexistent");
+    }
 
-        assertThat(files).containsExactly(
+    @Test
+    void testListMediaFilesForRootDir() {
+        var mediaFiles = fileExplorer.listMediaFiles(new String[]{"root"});
+
+        assertThat(mediaFiles).hasSize(6);
+
+        var paths = mediaFiles.stream().map(MediaFile::originalPath).toList();
+
+        assertThat(paths).containsExactly(Path.of("root", "DSC_4321.mov"),
                 Path.of("root", "first", "P2110001.jpg"),
                 Path.of("root", "first", "P2110002.jpg"),
+                Path.of("root", "first", "P2110003.mov"),
                 Path.of("root", "IMG_00001.jpg"),
                 Path.of("root", "IMG_00002.jpg")
         );
