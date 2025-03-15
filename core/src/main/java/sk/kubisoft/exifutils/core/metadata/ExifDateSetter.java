@@ -3,8 +3,8 @@ package sk.kubisoft.exifutils.core.metadata;
 import org.apache.commons.lang3.StringUtils;
 import sk.kubisoft.exifutils.core.file.SetDateAction;
 import sk.kubisoft.exifutils.core.logging.Console;
+import sk.kubisoft.exifutils.core.media.AnalyzedMediaFile;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
-import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaType;
 
 import javax.inject.Inject;
@@ -38,9 +38,9 @@ public class ExifDateSetter {
         this.metaDataHandlerFactory = metaDataHandlerFactory;
     }
 
-    public boolean needsDateTimeSet(MediaFile mediaFile) {
-        var metadata = mediaFile.metadata();
-        return switch (mediaFile.mediaType()) {
+    public boolean needsDateTimeSet(AnalyzedMediaFile mediaFile) {
+        var metadata = mediaFile.getMetadata();
+        return switch (mediaFile.getMediaType()) {
             case IMAGE -> {
                 var dateTimeOriginal = metadata.get(DATE_TIME_ORIGINAL_TAG);
                 var offsetTimeOriginal = metadata.get(OFFSET_TIME_ORIGINAL_TAG);
@@ -51,7 +51,7 @@ public class ExifDateSetter {
                 var creationDate = metadata.get(CREATION_DATE_OFFSET_TAG);
                 yield StringUtils.isBlank(createDate) || StringUtils.isBlank(creationDate);
             }
-            default -> throw new IllegalArgumentException("Unsupported media type: " + mediaFile.mediaType());
+            default -> throw new IllegalArgumentException("Unsupported media type: " + mediaFile.getMediaType());
         };
     }
 

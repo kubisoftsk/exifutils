@@ -2,12 +2,14 @@ package sk.kubisoft.exifutils.rename;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.FileMover;
 import sk.kubisoft.exifutils.core.file.MoveAction;
 import sk.kubisoft.exifutils.core.file.SetDateAction;
 import sk.kubisoft.exifutils.core.file.conflict.DuplicatePreProcessor;
 import sk.kubisoft.exifutils.core.logging.Console;
+import sk.kubisoft.exifutils.core.media.AnalyzedMediaFile;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
@@ -27,16 +29,18 @@ public class RenameCommand {
 
     private final FileExplorer fileExplorer;
     private final MediaFileNameUtils fileNameUtils;
+    private final MediaAnalyzer mediaAnalyzer;
     private final DuplicatePreProcessor duplicatePreProcessor;
     private final FileMover fileMover;
     private final Console console;
     private final ExifDateSetter exifDateSetter;
 
     @Inject
-    public RenameCommand(FileExplorer fileExplorer, MediaFileNameUtils fileNameUtils, DuplicatePreProcessor duplicatePreProcessor,
-                         FileMover fileMover, Console console, ExifDateSetter exifDateSetter) {
+    public RenameCommand(FileExplorer fileExplorer, MediaFileNameUtils fileNameUtils, MediaAnalyzer mediaAnalyzer,
+                         DuplicatePreProcessor duplicatePreProcessor, FileMover fileMover, Console console, ExifDateSetter exifDateSetter) {
         this.fileExplorer = fileExplorer;
         this.fileNameUtils = fileNameUtils;
+        this.mediaAnalyzer = mediaAnalyzer;
         this.duplicatePreProcessor = duplicatePreProcessor;
         this.fileMover = fileMover;
         this.console = console;
@@ -50,15 +54,17 @@ public class RenameCommand {
         List<MediaFile> mediaFiles = fileExplorer.listMediaFiles(input.inputPaths());
         console.println("Found %d files.", mediaFiles.size());
 
-        List<MediaFile> mediaFilesWithDate = mediaFiles.stream()
-                .filter(mediaFile -> mediaFile.creationDate() != null)
+        List<AnalyzedMediaFile> analyzedFiles = mediaAnalyzer.analyze(mediaFiles);
+
+        List<AnalyzedMediaFile> mediaFilesWithDate = analyzedFiles.stream()
+                .filter(mediaFile -> mediaFile.getCreationDate() != null)
                 .toList();
-        List<MediaFile> mediaFilesWithoutDate = mediaFiles.stream()
-                .filter(mediaFile -> mediaFile.creationDate() == null)
+        List<AnalyzedMediaFile> mediaFilesWithoutDate = analyzedFiles.stream()
+                .filter(mediaFile -> mediaFile.getCreationDate() == null)
                 .toList();
 
         console.println("Found %d media files with date, %d media files without date.", mediaFilesWithDate.size(), mediaFilesWithoutDate.size());
-        mediaFilesWithoutDate.forEach((mediaFile) -> console.println("No date found for %s", mediaFile.originalPath()));
+        mediaFilesWithoutDate.forEach((mediaFile) -> console.println("No date found for %s", mediaFile.getOriginalPath()));
 
         if (input.writeDate()) {
             var setDateActions = mediaFilesWithDate.stream()
@@ -97,23 +103,23 @@ public class RenameCommand {
         }
     }
 
-    private SetDateAction createSetDateAction(MediaFile mediaFile, ZoneId zoneIdToUse) {
+    private SetDateAction createSetDateAction(AnalyzedMediaFile mediaFile, ZoneId zoneIdToUse) {
         if (zoneIdToUse == null) {
-            return new SetDateAction(mediaFile.originalPath(), mediaFile.mediaType(), mediaFile.creationDate());
+            return new SetDateAction(mediaFile.getOriginalPath(), mediaFile.getMediaType(), mediaFile.getCreationDate());
         } else {
-            var originalDate = mediaFile.creationDate();
+            var originalDate = mediaFile.getCreationDate();
             var zoneOffset = DateTimeUtils.getDefaultZoneOffset(originalDate.getLocalDateTime(), zoneIdToUse);
             MediaDateTime newDate = new MediaDateTime(originalDate.getLocalDateTime(), zoneOffset);
 
-            return new SetDateAction(mediaFile.originalPath(), mediaFile.mediaType(), newDate);
+            return new SetDateAction(mediaFile.getOriginalPath(), mediaFile.getMediaType(), newDate);
         }
     }
 
-    private List<MoveAction> createMoveActions(List<MediaFile> mediaFiles) {
+    private List<MoveAction> createMoveActions(List<AnalyzedMediaFile> mediaFiles) {
         List<MoveAction> rawMoveActions = new ArrayList<>();
 
         for (var mediaFile : mediaFiles) {
-            var originalPath = mediaFile.originalPath();
+            var originalPath = mediaFile.getOriginalPath();
 
             var newName = fileNameUtils.createNewName(mediaFile);
             var targetPath = originalPath.getParent().resolve(newName);

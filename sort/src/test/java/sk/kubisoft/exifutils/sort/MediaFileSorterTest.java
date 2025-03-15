@@ -7,8 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sk.kubisoft.exifutils.core.file.MoveAction;
 import sk.kubisoft.exifutils.core.file.conflict.DuplicatePreProcessor;
+import sk.kubisoft.exifutils.core.media.AnalyzedMediaFile;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
-import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
 
 import java.nio.file.Path;
@@ -49,7 +49,7 @@ class MediaFileSorterTest {
     @Test
     void testSortSingleFile() {
         // Given
-        var mediaFile = new MediaFile(sourceRoot.resolve("IMG7277.JPG"), IMAGE, emptyMap(),
+        var mediaFile = new AnalyzedMediaFile(sourceRoot.resolve("IMG7277.JPG"), IMAGE, emptyMap(),
                 mediaDateTime(LocalDateTime.of(2024, 7, 15, 10, 30)));
 
         // When
@@ -65,9 +65,9 @@ class MediaFileSorterTest {
     @Test
     void testSortMultipleFilesFromSameMonth() {
         // Given
-        var file1 = new MediaFile(sourceRoot.resolve("IMG7277.JPG"), IMAGE, emptyMap(),
+        var file1 = new AnalyzedMediaFile(sourceRoot.resolve("IMG7277.JPG"), IMAGE, emptyMap(),
                 mediaDateTime(LocalDateTime.of(2024, 7, 15, 10, 30)));
-        var file2 = new MediaFile(sourceRoot.resolve("IMG7278.JPG"), IMAGE, emptyMap(),
+        var file2 = new AnalyzedMediaFile(sourceRoot.resolve("IMG7278.JPG"), IMAGE, emptyMap(),
                 mediaDateTime(LocalDateTime.of(2024, 7, 15, 10, 30)));
 
         // When
@@ -86,9 +86,9 @@ class MediaFileSorterTest {
     @Test
     void testSortFilesFromDifferentMonths() {
         // Given
-        var julyFile = new MediaFile(sourceRoot.resolve("IMG7277.JPG"), IMAGE, emptyMap(),
+        var julyFile = new AnalyzedMediaFile(sourceRoot.resolve("IMG7277.JPG"), IMAGE, emptyMap(),
                 mediaDateTime(LocalDateTime.of(2024, 7, 15, 10, 30)));
-        var augustFile = new MediaFile(sourceRoot.resolve("IMG7278.JPG"), IMAGE, emptyMap(),
+        var augustFile = new AnalyzedMediaFile(sourceRoot.resolve("IMG7278.JPG"), IMAGE, emptyMap(),
                 mediaDateTime(LocalDateTime.of(2024, 8, 1, 10, 30)));
 
         // When
@@ -107,9 +107,9 @@ class MediaFileSorterTest {
     @Test
     void testSortFilesFromDifferentYears() {
         // Given
-        var file2024 = new MediaFile(sourceRoot.resolve("IMG7277.JPG"), IMAGE, emptyMap(),
+        var file2024 = new AnalyzedMediaFile(sourceRoot.resolve("IMG7277.JPG"), IMAGE, emptyMap(),
                 mediaDateTime(LocalDateTime.of(2024, 7, 15, 10, 30)));
-        var file2023 = new MediaFile(sourceRoot.resolve("IMG7278.JPG"), IMAGE, emptyMap(),
+        var file2023 = new AnalyzedMediaFile(sourceRoot.resolve("IMG7278.JPG"), IMAGE, emptyMap(),
                 mediaDateTime(LocalDateTime.of(2023, 12, 31, 23, 59)));
 
         // When
@@ -128,7 +128,7 @@ class MediaFileSorterTest {
     @Test
     void testPreservesOriginalFileName() {
         // Given
-        var complexFileName = new MediaFile(sourceRoot.resolve("IMG_20240115_123456_HDR.jpg"), IMAGE, emptyMap(),
+        var complexFileName = new AnalyzedMediaFile(sourceRoot.resolve("IMG_20240115_123456_HDR.jpg"), IMAGE, emptyMap(),
                 mediaDateTime(LocalDateTime.of(2024, 1, 15, 12, 34, 56)));
 
         // When

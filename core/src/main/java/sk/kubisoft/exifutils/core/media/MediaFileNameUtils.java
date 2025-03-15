@@ -24,9 +24,9 @@ public class MediaFileNameUtils {
         this.configService = configService;
     }
 
-    public String createNewName(MediaFile mediaFile) {
+    public String createNewName(AnalyzedMediaFile mediaFile) {
         String result = getPattern();
-        var mediaDate = mediaFile.creationDate();
+        var mediaDate = mediaFile.getCreationDate();
         LocalDateTime dateTime = mediaDate.getLocalDateTime();
 
         // Find all ${date,format} patterns
@@ -42,13 +42,13 @@ public class MediaFileNameUtils {
 
         // Replace other variables
         Map<String, String> replacements = new HashMap<>();
-        replacements.put("${prefix}", getPrefix(mediaFile.mediaType()));
+        replacements.put("${prefix}", getPrefix(mediaFile.getMediaType()));
 
         for (Map.Entry<String, String> entry : replacements.entrySet()) {
             result = result.replace(entry.getKey(), entry.getValue());
         }
 
-        var extension = getExtension(mediaFile.originalPath().getFileName().toString());
+        var extension = getExtension(mediaFile.getOriginalPath().getFileName().toString());
         return result + "." + StringUtils.toRootLowerCase(extension);
     }
 

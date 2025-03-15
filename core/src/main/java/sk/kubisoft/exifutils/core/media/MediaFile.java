@@ -1,33 +1,44 @@
 package sk.kubisoft.exifutils.core.media;
 
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.Map;
+import java.util.Objects;
 
-public record MediaFile(
+public class MediaFile {
 
-        Path originalPath,
+    private final Path originalPath;
 
-        MediaType mediaType,
-
-        Map<String, String> metadata,
-
-        MediaDateTime creationDate
-
-) {
+    private final MediaType mediaType;
 
     public MediaFile(Path originalPath, MediaType mediaType) {
-        this(originalPath, mediaType, Collections.emptyMap(), null);
+        this.originalPath = Objects.requireNonNull(originalPath, "Path is required");
+        this.mediaType = Objects.requireNonNull(mediaType, "MediaType is required");
     }
 
-    public MediaFile(Path originalPath, MediaType mediaType, Map<String, String> metadata) {
-        this(originalPath, mediaType, metadata, null);
+    public Path getOriginalPath() {
+        return originalPath;
     }
 
-    public MediaFile(Path originalPath, MediaType mediaType, Map<String, String> metadata, MediaDateTime creationDate) {
-        this.originalPath = originalPath;
-        this.mediaType = mediaType;
-        this.metadata = metadata;
-        this.creationDate = creationDate;
+    public MediaType getMediaType() {
+        return mediaType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        MediaFile mediaFile = (MediaFile) o;
+        return Objects.equals(originalPath, mediaFile.originalPath);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(originalPath);
+    }
+
+    @Override
+    public String toString() {
+        return "MediaFile{" +
+                "originalPath=" + originalPath +
+                ", mediaType=" + mediaType +
+                '}';
     }
 }

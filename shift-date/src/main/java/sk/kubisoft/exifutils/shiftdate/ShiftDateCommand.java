@@ -2,12 +2,14 @@ package sk.kubisoft.exifutils.shiftdate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.FileMover;
 import sk.kubisoft.exifutils.core.file.MoveAction;
 import sk.kubisoft.exifutils.core.file.SetDateAction;
 import sk.kubisoft.exifutils.core.file.conflict.DuplicatePreProcessor;
 import sk.kubisoft.exifutils.core.logging.Console;
+import sk.kubisoft.exifutils.core.media.AnalyzedMediaFile;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
@@ -29,16 +31,18 @@ public class ShiftDateCommand {
     private final Console console;
     private final FileExplorer fileExplorer;
     private final ExifDateSetter exifDateSetter;
+    private final MediaAnalyzer mediaAnalyzer;
     private final MediaFileNameUtils fileNameUtils;
     private final DuplicatePreProcessor duplicatePreProcessor;
     private final FileMover fileMover;
 
     @Inject
-    public ShiftDateCommand(Console console, FileExplorer fileExplorer, ExifDateSetter exifDateSetter,
+    public ShiftDateCommand(Console console, FileExplorer fileExplorer, ExifDateSetter exifDateSetter, MediaAnalyzer mediaAnalyzer,
                             MediaFileNameUtils fileNameUtils, DuplicatePreProcessor duplicatePreProcessor, FileMover fileMover) {
         this.console = console;
         this.fileExplorer = fileExplorer;
         this.exifDateSetter = exifDateSetter;
+        this.mediaAnalyzer = mediaAnalyzer;
         this.fileNameUtils = fileNameUtils;
         this.duplicatePreProcessor = duplicatePreProcessor;
         this.fileMover = fileMover;
@@ -51,15 +55,17 @@ public class ShiftDateCommand {
         List<MediaFile> allMediaFiles = fileExplorer.listMediaFiles(input.inputPaths());
         console.println("Found %d files.", allMediaFiles.size());
 
-        List<MediaFile> mediaFilesWithDate = allMediaFiles.stream()
-                .filter(mediaFile -> mediaFile.creationDate() != null)
+        List<AnalyzedMediaFile> analyzedMediaFiles = mediaAnalyzer.analyze(allMediaFiles);
+
+        List<AnalyzedMediaFile> mediaFilesWithDate = analyzedMediaFiles.stream()
+                .filter(mediaFile -> mediaFile.getCreationDate() != null)
                 .toList();
-        List<MediaFile> mediaFilesWithoutDate = allMediaFiles.stream()
-                .filter(mediaFile -> mediaFile.creationDate() == null)
+        List<AnalyzedMediaFile> mediaFilesWithoutDate = analyzedMediaFiles.stream()
+                .filter(mediaFile -> mediaFile.getCreationDate() == null)
                 .toList();
 
         console.println("Found %d media files with date, %d media files without date.", mediaFilesWithDate.size(), mediaFilesWithoutDate.size());
-        mediaFilesWithoutDate.forEach((mediaFile) -> console.println("No date found for %s", mediaFile.originalPath()));
+        mediaFilesWithoutDate.forEach((mediaFile) -> console.println("No date found for %s", mediaFile.getOriginalPath()));
 
         List<SetDateAction> setDateActionList = mediaFilesWithDate.stream()
                 .map(mediaFile -> createSetDateAction(mediaFile, input.duration()))
@@ -94,12 +100,12 @@ public class ShiftDateCommand {
         }
     }
 
-    private SetDateAction createSetDateAction(MediaFile mediaFile, Duration duration) {
-        OffsetDateTime originalDateTime = mediaFile.creationDate().getDateTime();
+    private SetDateAction createSetDateAction(AnalyzedMediaFile mediaFile, Duration duration) {
+        OffsetDateTime originalDateTime = mediaFile.getCreationDate().getDateTime();
         OffsetDateTime shiftedDateTime = originalDateTime.plus(duration);
         MediaDateTime newMediaDate = new MediaDateTime(shiftedDateTime.toLocalDateTime(), shiftedDateTime.getOffset());
 
-        return new SetDateAction(mediaFile.originalPath(), mediaFile.mediaType(), newMediaDate);
+        return new SetDateAction(mediaFile.getOriginalPath(), mediaFile.getMediaType(), newMediaDate);
     }
 
     private List<MoveAction> createMoveActions(List<SetDateAction> setDateActions) {
@@ -108,7 +114,7 @@ public class ShiftDateCommand {
         for (var setDateAction : setDateActions) {
             var originalPath = setDateAction.file();
 
-            var mediaFile = new MediaFile(originalPath, setDateAction.mediaType(), Collections.emptyMap(), setDateAction.dateTime());
+            var mediaFile = new AnalyzedMediaFile(originalPath, setDateAction.mediaType(), Collections.emptyMap(), setDateAction.dateTime());
             var newName = fileNameUtils.createNewName(mediaFile);
             var targetPath = originalPath.getParent().resolve(newName);
 

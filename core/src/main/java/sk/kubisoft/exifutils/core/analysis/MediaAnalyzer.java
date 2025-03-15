@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.logging.Console;
+import sk.kubisoft.exifutils.core.media.AnalyzedMediaFile;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
-import sk.kubisoft.exifutils.core.media.MediaType;
 import sk.kubisoft.exifutils.core.metadata.MetaDataHandler;
 import sk.kubisoft.exifutils.core.metadata.MetaDataHandlerFactory;
 import sk.kubisoft.exifutils.core.utils.DateTimeUtils;
@@ -30,24 +30,22 @@ public class MediaAnalyzer {
 
 	private final Console console;
 	private final ConfigService configService;
-	private final MediaTypeDetector mediaTypeDetector;
 	private final MetaDataHandlerFactory metaDataHandlerFactory;
 	private final ExifDateExtractor exifDateExtractor;
 	private final GpsZoneExtractor gpsZoneExtractor;
 
 	@Inject
-	public MediaAnalyzer(Console console, ConfigService configService, MediaTypeDetector mediaTypeDetector,
-						 MetaDataHandlerFactory metaDataHandlerFactory, ExifDateExtractor exifDateExtractor, GpsZoneExtractor gpsZoneExtractor) {
+	public MediaAnalyzer(Console console, ConfigService configService, MetaDataHandlerFactory metaDataHandlerFactory,
+						 ExifDateExtractor exifDateExtractor, GpsZoneExtractor gpsZoneExtractor) {
 		this.console = console;
 		this.configService = configService;
-		this.mediaTypeDetector = mediaTypeDetector;
 		this.metaDataHandlerFactory = metaDataHandlerFactory;
 		this.exifDateExtractor = exifDateExtractor;
 		this.gpsZoneExtractor = gpsZoneExtractor;
 	}
 
-	public List<MediaFile> analyze(List<Path> files) {
-		List<MediaFile> mediaFiles = new ArrayList<>();
+	public List<AnalyzedMediaFile> analyze(List<MediaFile> files) {
+		List<AnalyzedMediaFile> analyzedFiles = new ArrayList<>();
 		console.println("Starting analysis of media files...", files.size());
 		try (var metaDataHandler = metaDataHandlerFactory.create()) {
 			for (int i = 0; i < files.size(); i++) {
@@ -60,8 +58,8 @@ public class MediaAnalyzer {
 				}
 
 				try {
-					MediaFile mediaFile = analyze(file, metaDataHandler, gpsZoneExtractor);
-					mediaFiles.add(mediaFile);
+					AnalyzedMediaFile mediaFile = analyze(file, metaDataHandler, gpsZoneExtractor);
+					analyzedFiles.add(mediaFile);
 				} catch (Exception e) {
 					console.error("Error processing file: %s", e, file);
 				}
@@ -76,16 +74,15 @@ public class MediaAnalyzer {
 		} catch (Exception e) {
 			throw new RuntimeException("Error processing files", e);
 		}
-		return mediaFiles;
+		return analyzedFiles;
 	}
 
-	private MediaFile analyze(Path file, MetaDataHandler metaDataHandler, GpsZoneExtractor gpsZoneExtractor) {
-		MediaType mediaType = mediaTypeDetector.detectMediaType(file);
-		Map<String, String> metadata = metaDataHandler.extractMetaData(file);
-		Optional<ExifDateTime> extractedDateOptional = exifDateExtractor.extractCreationDate(mediaType, metadata);
+	private AnalyzedMediaFile analyze(MediaFile mediaFile, MetaDataHandler metaDataHandler, GpsZoneExtractor gpsZoneExtractor) {
+		Map<String, String> metadata = metaDataHandler.extractMetaData(mediaFile.getOriginalPath());
+		Optional<ExifDateTime> extractedDateOptional = exifDateExtractor.extractCreationDate(mediaFile.getMediaType(), metadata);
 		if (extractedDateOptional.isEmpty()) {
 			console.verboseln("No date found in metadata");
-			return new MediaFile(file, mediaType, metadata, null);
+			return new AnalyzedMediaFile(mediaFile.getOriginalPath(), mediaFile.getMediaType(), metadata, null);
 		}
 		ExifDateTime extractedDate = extractedDateOptional.get();
 		LocalDateTime localDateTimeToUse = extractedDate.localDateTime();
@@ -94,7 +91,7 @@ public class MediaAnalyzer {
 		if (zoneOffsetToUse == null) {
 			console.verboseln("Zone offset is missing, resolving offset...");
 			var localDateTime = extractedDate.localDateTime();
-			zoneOffsetToUse = resolveZoneOffset(file, localDateTime, metadata, gpsZoneExtractor);
+			zoneOffsetToUse = resolveZoneOffset(mediaFile.getOriginalPath(), localDateTime, metadata, gpsZoneExtractor);
 
 			// if the extracted EXIF date is stored in UTC time, so we must convert it to local time with guessed offset
 			// to get the correct true local time at guessed offset
@@ -107,7 +104,7 @@ public class MediaAnalyzer {
 
 		MediaDateTime mediaDateTime = new MediaDateTime(localDateTimeToUse, zoneOffsetToUse);
 		console.verboseln("Resolved create date: %s", mediaDateTime);
-		return new MediaFile(file, mediaType, metadata, mediaDateTime);
+		return new AnalyzedMediaFile(mediaFile.getOriginalPath(), mediaFile.getMediaType(), metadata, mediaDateTime);
 	}
 
 	private ZoneOffset resolveZoneOffset(Path file, LocalDateTime localDateTime, Map<String, String> metadata, GpsZoneExtractor gpsZoneExtractor) {

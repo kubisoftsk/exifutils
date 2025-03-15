@@ -2,11 +2,13 @@ package sk.kubisoft.exifutils.sort;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.file.FileMover;
 import sk.kubisoft.exifutils.core.file.MoveAction;
 import sk.kubisoft.exifutils.core.file.SetDateAction;
 import sk.kubisoft.exifutils.core.logging.Console;
+import sk.kubisoft.exifutils.core.media.AnalyzedMediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.metadata.ExifDateSetter;
 
@@ -22,14 +24,16 @@ public class SortCommand {
     private final FileExplorer fileExplorer;
     private final MediaFileSorter mediaFileSorter;
     private final FileMover fileMover;
+    private final MediaAnalyzer mediaAnalyzer;
     private final Console console;
     private final ExifDateSetter exifDateSetter;
 
     @Inject
-    public SortCommand(FileExplorer fileExplorer, MediaFileSorter mediaFileSorter,
+    public SortCommand(FileExplorer fileExplorer, MediaFileSorter mediaFileSorter, MediaAnalyzer mediaAnalyzer,
                        FileMover fileMover, Console console, ExifDateSetter exifDateSetter) {
         this.fileExplorer = fileExplorer;
         this.mediaFileSorter = mediaFileSorter;
+        this.mediaAnalyzer = mediaAnalyzer;
         this.fileMover = fileMover;
         this.console = console;
         this.exifDateSetter = exifDateSetter;
@@ -42,20 +46,22 @@ public class SortCommand {
         List<MediaFile> allMediaFiles = fileExplorer.listMediaFiles(input.inputPaths());
         console.println("Found %d files.", allMediaFiles.size());
 
-        List<MediaFile> mediaFilesWithDate = allMediaFiles.stream()
-                .filter(mediaFile -> mediaFile.creationDate() != null)
+        List<AnalyzedMediaFile> analyzedFiles = mediaAnalyzer.analyze(allMediaFiles);
+
+        List<AnalyzedMediaFile> mediaFilesWithDate = analyzedFiles.stream()
+                .filter(mediaFile -> mediaFile.getCreationDate() != null)
                 .toList();
-        List<MediaFile> mediaFilesWithoutDate = allMediaFiles.stream()
-                .filter(mediaFile -> mediaFile.creationDate() == null)
+        List<AnalyzedMediaFile> mediaFilesWithoutDate = analyzedFiles.stream()
+                .filter(mediaFile -> mediaFile.getCreationDate() == null)
                 .toList();
 
         console.println("Found %d media files with date, %d media files without date.", mediaFilesWithDate.size(), mediaFilesWithoutDate.size());
-        mediaFilesWithoutDate.forEach((mediaFile) -> console.println("No date found for %s", mediaFile.originalPath()));
+        mediaFilesWithoutDate.forEach((mediaFile) -> console.println("No date found for %s", mediaFile.getOriginalPath()));
 
         if (input.writeDate()) {
             var setDateActions = mediaFilesWithDate.stream()
                     .filter(exifDateSetter::needsDateTimeSet)
-                    .map(mediaFile -> new SetDateAction(mediaFile.originalPath(), mediaFile.mediaType(), mediaFile.creationDate()))
+                    .map(mediaFile -> new SetDateAction(mediaFile.getOriginalPath(), mediaFile.getMediaType(), mediaFile.getCreationDate()))
                     .toList();
 
             if (setDateActions.isEmpty()) {
