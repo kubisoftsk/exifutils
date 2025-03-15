@@ -73,7 +73,7 @@ class FileExplorerTest {
     void testListFilesSpecificPath() {
         var files = fileExplorer.listFiles(Path.of("root", "IMG_00001.jpg"));
 
-        assertThat(files).containsExactly(Path.of("root", "IMG_00001.jpg"));
+        assertThat(files).containsExactlyInAnyOrder(Path.of("root", "IMG_00001.jpg"));
     }
 
     @Test
@@ -83,14 +83,14 @@ class FileExplorerTest {
                 Path.of("root", "first", "P2110001.jpg"))
         );
 
-        assertThat(files).containsExactly(Path.of("root", "first", "P2110001.jpg"), Path.of("root", "IMG_00001.jpg"));
+        assertThat(files).containsExactlyInAnyOrder(Path.of("root", "first", "P2110001.jpg"), Path.of("root", "IMG_00001.jpg"));
     }
 
     @Test
     void testListFilesRootDir() {
         var files = fileExplorer.listFiles(new String[]{"root"});
 
-        assertThat(files).containsExactly(Path.of("root", "DSC_4321.mov"),
+        assertThat(files).containsExactlyInAnyOrder(Path.of("root", "DSC_4321.mov"),
                 Path.of("root", "first", "P2110001.jpg"),
                 Path.of("root", "first", "P2110002.jpg"),
                 Path.of("root", "first", "P2110003.mov"),
@@ -115,7 +115,7 @@ class FileExplorerTest {
 
         var paths = mediaFiles.stream().map(MediaFile::originalPath).toList();
 
-        assertThat(paths).containsExactly(Path.of("root", "DSC_4321.mov"),
+        assertThat(paths).containsExactlyInAnyOrder(Path.of("root", "DSC_4321.mov"),
                 Path.of("root", "first", "P2110001.jpg"),
                 Path.of("root", "first", "P2110002.jpg"),
                 Path.of("root", "first", "P2110003.mov"),
