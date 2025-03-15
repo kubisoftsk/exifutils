@@ -2,8 +2,8 @@ package sk.kubisoft.exifutils.sort;
 
 import sk.kubisoft.exifutils.core.file.MoveAction;
 import sk.kubisoft.exifutils.core.file.conflict.DuplicatePreProcessor;
+import sk.kubisoft.exifutils.core.media.AnalyzedMediaFile;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
-import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
 
 import javax.inject.Inject;
@@ -25,11 +25,11 @@ public class MediaFileSorter {
         this.duplicatePreProcessor = duplicatePreProcessor;
     }
 
-    public List<MoveAction> sort(List<MediaFile> mediaFiles, Path targetRootPath, boolean rename) {
+    public List<MoveAction> sort(List<AnalyzedMediaFile> mediaFiles, Path targetRootPath, boolean rename) {
         var moveActions = new ArrayList<MoveAction>();
 
         for (var mediaFile : mediaFiles) {
-            var originalPath = mediaFile.originalPath();
+            var originalPath = mediaFile.getOriginalPath();
             var originalFileName = originalPath.getFileName().toString();
 
             String targetFileName;
@@ -38,7 +38,7 @@ public class MediaFileSorter {
             } else {
                 targetFileName = originalFileName;
             }
-            var targetDateFolder = createTargetDateFolder(mediaFile.creationDate());
+            var targetDateFolder = createTargetDateFolder(mediaFile.getCreationDate());
             var finalTargetPath = targetRootPath.resolve(targetDateFolder).resolve(targetFileName);
 
             moveActions.add(new MoveAction(originalPath, finalTargetPath));

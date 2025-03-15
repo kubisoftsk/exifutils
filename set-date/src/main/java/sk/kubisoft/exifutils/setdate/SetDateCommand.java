@@ -2,10 +2,12 @@ package sk.kubisoft.exifutils.setdate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.file.*;
 import sk.kubisoft.exifutils.core.file.conflict.DuplicatePreProcessor;
 import sk.kubisoft.exifutils.core.logging.Console;
+import sk.kubisoft.exifutils.core.media.AnalyzedMediaFile;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
@@ -31,18 +33,20 @@ public class SetDateCommand {
     private final ConfigService configService;
     private final FileExplorer fileExplorer;
     private final FileNameAnalyzer fileNameAnalyzer;
+    private final MediaAnalyzer mediaAnalyzer;
     private final ExifDateSetter exifDateSetter;
     private final MediaFileNameUtils fileNameUtils;
     private final DuplicatePreProcessor duplicatePreProcessor;
     private final FileMover fileMover;
 
     @Inject
-    public SetDateCommand(Console console, ConfigService configService, FileNameAnalyzer fileNameAnalyzer,
+    public SetDateCommand(Console console, ConfigService configService, FileNameAnalyzer fileNameAnalyzer, MediaAnalyzer mediaAnalyzer,
                           FileExplorer fileExplorer, ExifDateSetter exifDateSetter, MediaFileNameUtils fileNameUtils,
                           DuplicatePreProcessor duplicatePreProcessor, FileMover fileMover) {
         this.console = console;
         this.configService = configService;
         this.fileNameAnalyzer = fileNameAnalyzer;
+        this.mediaAnalyzer = mediaAnalyzer;
         this.fileExplorer = fileExplorer;
         this.exifDateSetter = exifDateSetter;
         this.fileNameUtils = fileNameUtils;
@@ -59,8 +63,11 @@ public class SetDateCommand {
 
         List<MediaFile> mediaFiles;
         if (input.unknownOnly()) {
-            mediaFiles = allMediaFiles.stream()
-                    .filter(mediaFile -> mediaFile.creationDate() == null)
+            var analyzedMediaFiles = mediaAnalyzer.analyze(allMediaFiles);
+
+            mediaFiles = analyzedMediaFiles.stream()
+                    .filter(mediaFile -> mediaFile.getCreationDate() == null)
+                    .map(analyzedMediaFile -> (MediaFile) analyzedMediaFile)
                     .toList();
         } else {
             mediaFiles = allMediaFiles;
@@ -109,7 +116,7 @@ public class SetDateCommand {
         for (var setDateAction : setDateActions) {
             var originalPath = setDateAction.file();
 
-            var mediaFile = new MediaFile(originalPath, setDateAction.mediaType(), Collections.emptyMap(), setDateAction.dateTime());
+            var mediaFile = new AnalyzedMediaFile(originalPath, setDateAction.mediaType(), Collections.emptyMap(), setDateAction.dateTime());
             var newName = fileNameUtils.createNewName(mediaFile);
             var targetPath = originalPath.getParent().resolve(newName);
 
@@ -143,7 +150,7 @@ public class SetDateCommand {
             var localDateToUse = localDateTime.plusSeconds(i);
             var mediaDate = new MediaDateTime(localDateToUse, offsetDateTime.getOffset());
 
-            actions.add(new SetDateAction(mediaFile.originalPath(), mediaFile.mediaType(), mediaDate));
+            actions.add(new SetDateAction(mediaFile.getOriginalPath(), mediaFile.getMediaType(), mediaDate));
         }
         return actions;
     }
@@ -153,11 +160,11 @@ public class SetDateCommand {
 
         List<SetDateAction> actions = new ArrayList<>();
         for (var mediaFile : mediaFiles) {
-            var dateTimeOptional = fileNameAnalyzer.analyzeFileName(mediaFile.originalPath().getFileName().toString());
+            var dateTimeOptional = fileNameAnalyzer.analyzeFileName(mediaFile.getOriginalPath().getFileName().toString());
             dateTimeOptional.ifPresent(localDateTime -> {
                 var offsetToUse = getOffset(localDateTime, zoneId);
                 var mediaDate = new MediaDateTime(localDateTime, offsetToUse);
-                actions.add(new SetDateAction(mediaFile.originalPath(), mediaFile.mediaType(), mediaDate));
+                actions.add(new SetDateAction(mediaFile.getOriginalPath(), mediaFile.getMediaType(), mediaDate));
             });
         }
 

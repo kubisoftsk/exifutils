@@ -36,12 +36,12 @@ public class GpsDataSetter {
                 var action = actionList.get(i);
 
                 if (console.isVerbose()) {
-                    console.println("Setting GPS data for file %d of %d: %s", i + 1, actionList.size(), action.mediaFile().originalPath());
+                    console.println("Setting GPS data for file %d of %d: %s", i + 1, actionList.size(), action.mediaFile().getOriginalPath());
                 } else {
-                    console.progress("Setting GPS data for file %d of %d: %s", i + 1, actionList.size(), action.mediaFile().originalPath());
+                    console.progress("Setting GPS data for file %d of %d: %s", i + 1, actionList.size(), action.mediaFile().getOriginalPath());
                 }
 
-                setLocation(metaDataSetter, action.mediaFile().originalPath(), action.mediaFile().metadata(), action.latitude(), action.longitude());
+                setLocation(metaDataSetter, action.mediaFile().getOriginalPath(), action.latitude(), action.longitude());
 
                 if (console.isVerbose()) {
                     console.println(""); // Append newline after each file in verbose mode for clarity
@@ -56,7 +56,7 @@ public class GpsDataSetter {
         }
     }
 
-    private void setLocation(MetaDataHandler metaDataSetter, Path path, Map<String, String> metadata, Double latitude, Double longitude) {
+    private void setLocation(MetaDataHandler metaDataSetter, Path path, Double latitude, Double longitude) {
         Map<String, String> newTags;
         if (latitude == null && longitude == null) {
             newTags = createNullTags();

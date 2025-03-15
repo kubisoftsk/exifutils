@@ -113,7 +113,7 @@ class FileExplorerTest {
 
         assertThat(mediaFiles).hasSize(6);
 
-        var paths = mediaFiles.stream().map(MediaFile::originalPath).toList();
+        var paths = mediaFiles.stream().map(MediaFile::getOriginalPath).toList();
 
         assertThat(paths).containsExactlyInAnyOrder(Path.of("root", "DSC_4321.mov"),
                 Path.of("root", "first", "P2110001.jpg"),

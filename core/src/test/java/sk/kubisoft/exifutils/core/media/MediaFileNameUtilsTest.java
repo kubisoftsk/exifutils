@@ -40,7 +40,7 @@ class MediaFileNameUtilsTest {
         // given
         LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 18, 15, 30, 45);
         MediaDateTime mediaDateTime = mediaDateTime(localDateTime);
-        MediaFile mediaFile = new MediaFile(
+        AnalyzedMediaFile mediaFile = new AnalyzedMediaFile(
                 Path.of("IMG_7456.JPG"),
                 MediaType.IMAGE,
                 null,
@@ -59,7 +59,7 @@ class MediaFileNameUtilsTest {
         // given
         LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 18, 15, 30, 45);
         MediaDateTime mediaDateTime = mediaDateTime(localDateTime);
-        MediaFile mediaFile = new MediaFile(
+        AnalyzedMediaFile mediaFile = new AnalyzedMediaFile(
                 Path.of("IMG_7456.MOV"),
                 MediaType.VIDEO,
                 null,
@@ -78,7 +78,7 @@ class MediaFileNameUtilsTest {
         // given
         LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 18, 15, 30, 45);
         MediaDateTime mediaDateTime = mediaDateTime(localDateTime);
-        MediaFile mediaFile = new MediaFile(
+        AnalyzedMediaFile mediaFile = new AnalyzedMediaFile(
                 Path.of("IMG20240118153045.JPG"),
                 MediaType.IMAGE,
                 null,
@@ -97,7 +97,7 @@ class MediaFileNameUtilsTest {
         // given
         LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 18, 15, 30, 45);
         MediaDateTime mediaDateTime = mediaDateTime(localDateTime);
-        MediaFile mediaFile = new MediaFile(
+        AnalyzedMediaFile mediaFile = new AnalyzedMediaFile(
                 Path.of("IMG_7456.HEIC"),
                 MediaType.IMAGE,
                 null,

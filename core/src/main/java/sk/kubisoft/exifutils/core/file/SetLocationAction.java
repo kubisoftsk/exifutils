@@ -27,6 +27,6 @@ public record SetLocationAction(
 
     @Override
     public String toString() {
-        return String.format("Set GPS location %f %f to %s", latitude, longitude, mediaFile.originalPath());
+        return String.format("Set GPS location %f %f to %s", latitude, longitude, mediaFile.getOriginalPath());
     }
 }

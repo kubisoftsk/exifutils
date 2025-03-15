@@ -40,9 +40,6 @@ class MediaAnalyzerTest {
     @Mock
     private ConfigService configServiceMock;
 
-    @Mock
-    private MediaTypeDetector mediaTypeDetectorMock;
-
 	@Mock
 	private MetaDataHandlerFactory metaDataHandlerFactoryMock;
 
@@ -56,8 +53,7 @@ class MediaAnalyzerTest {
 
     @BeforeEach
     void setUp() {
-        mediaAnalyzer = new MediaAnalyzer(console, configServiceMock, mediaTypeDetectorMock,
-                metaDataHandlerFactoryMock, exifDateExtractorMock, gpsZoneExtractorMock);
+        mediaAnalyzer = new MediaAnalyzer(console, configServiceMock, metaDataHandlerFactoryMock, exifDateExtractorMock, gpsZoneExtractorMock);
         lenient().when(configServiceMock.getConfig()).thenReturn(createConfig());
     }
 
@@ -196,8 +192,6 @@ class MediaAnalyzerTest {
 
     private MediaDateTime analyze(MediaType mediaType, LocalDateTime localDateTime, boolean localTime,
 								  ZoneOffset zoneOffset, ZoneOffset gpsResolvedZoneOffset) {
-        when(mediaTypeDetectorMock.detectMediaType(any()))
-				.thenReturn(mediaType);
 		if (localDateTime != null) {
 			when(exifDateExtractorMock.extractCreationDate(any(), any()))
 					.thenReturn(Optional.of(new ExifDateTime(localDateTime, localTime, zoneOffset)));
@@ -210,13 +204,14 @@ class MediaAnalyzerTest {
 		}
 		Path testFilePath = Paths.get("dummy");
 
-		List<MediaFile> mediaFiles = mediaAnalyzer.analyze(List.of(testFilePath));
+        var mediaFiles = List.of(new MediaFile(testFilePath, mediaType));
+		var analyzedFiles = mediaAnalyzer.analyze(mediaFiles);
 
-        if (mediaFiles.isEmpty()) {
+        if (analyzedFiles.isEmpty()) {
             return null;
         }
 
-        return mediaFiles.getFirst().creationDate();
+        return analyzedFiles.getFirst().getCreationDate();
     }
 
 }

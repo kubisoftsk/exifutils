@@ -1,8 +1,10 @@
 package sk.kubisoft.exifutils.info;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.logging.Console;
+import sk.kubisoft.exifutils.core.media.AnalyzedMediaFile;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaType;
 
@@ -16,12 +18,14 @@ public class InfoCommand {
     private final FileExplorer fileExplorer;
     private final Console console;
     private final ObjectMapper objectMapper;
+    private final MediaAnalyzer mediaAnalyzer;
 
     @Inject
-    public InfoCommand(FileExplorer fileExplorer, Console console, ObjectMapper objectMapper) {
+    public InfoCommand(FileExplorer fileExplorer, Console console, ObjectMapper objectMapper, MediaAnalyzer mediaAnalyzer) {
         this.fileExplorer = fileExplorer;
         this.console = console;
         this.objectMapper = objectMapper;
+        this.mediaAnalyzer = mediaAnalyzer;
     }
 
     public void execute(InfoCommandInput input) {
@@ -31,14 +35,16 @@ public class InfoCommand {
         List<MediaFile> mediaFiles = fileExplorer.listMediaFiles(input.inputPaths());
         console.println("Found %d files.", mediaFiles.size());
 
-        for (MediaFile mediaFile : mediaFiles) {
-            MediaType mediaType = mediaFile.mediaType();
-            console.println("File %s:", mediaFile.originalPath());
-            console.println("Resolved created date: %s", (mediaFile.creationDate()) != null ? mediaFile.creationDate() : "N/A");
+        List<AnalyzedMediaFile> analyzedFiles = mediaAnalyzer.analyze(mediaFiles);
+
+        for (AnalyzedMediaFile mediaFile : analyzedFiles) {
+            MediaType mediaType = mediaFile.getMediaType();
+            console.println("File %s:", mediaFile.getOriginalPath());
+            console.println("Resolved created date: %s", (mediaFile.getCreationDate()) != null ? mediaFile.getCreationDate() : "N/A");
             if (input.printAll()) {
                 console.println("Media type: %s", mediaType);
                 console.println("EXIF metadata:");
-                var metaData = mediaFile.metadata();
+                var metaData = mediaFile.getMetadata();
                 try {
                     String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(metaData);
                     console.println(json);
