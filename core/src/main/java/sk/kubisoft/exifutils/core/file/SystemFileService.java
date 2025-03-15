@@ -1,6 +1,7 @@
 package sk.kubisoft.exifutils.core.file;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -30,5 +31,10 @@ public class SystemFileService implements FileService {
     @Override
     public Stream<Path> walk(Path inputDir) throws IOException {
         return Files.walk(inputDir);
+    }
+
+    @Override
+    public DirectoryStream<Path> newDirectoryStream(Path rootDirectory, DirectoryStream.Filter<Path> filter) throws IOException {
+        return Files.newDirectoryStream(rootDirectory, filter);
     }
 }

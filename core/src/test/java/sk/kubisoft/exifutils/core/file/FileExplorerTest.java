@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sk.kubisoft.exifutils.core.analysis.MediaTypeDetector;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ class FileExplorerTest {
         addPath(mockPaths, firstDir, true);
         addPath(mockPaths, firstDir.resolve("P2110001.jpg"), false);
         addPath(mockPaths, firstDir.resolve("P2110002.jpg"), false);
-        addPath(mockPaths, firstDir.resolve("P2110002.mov"), false);
+        addPath(mockPaths, firstDir.resolve("P2110003.mov"), false);
 
         lenient().when(fileService.walk(eq(root))).thenReturn(mockPaths.stream());
     }
@@ -60,12 +61,45 @@ class FileExplorerTest {
     }
 
     @Test
-    void testListFiles() {
-        var args = new String[]{"root"};
+    void testListFilesSpecificPath() {
+        var files = fileExplorer.listFiles(Path.of("root", "IMG_00001.jpg"));
 
-        var files = fileExplorer.listFiles(args);
+        assertThat(files).containsExactly(Path.of("root", "IMG_00001.jpg"));
+    }
 
-        assertThat(files).hasSize(7);
+    @Test
+    void testListFilesSpecificFilePaths() {
+        var files = fileExplorer.listFiles(List.of(
+                Path.of("root", "IMG_00001.jpg"),
+                Path.of("root", "first", "P2110001.jpg"))
+        );
+
+        assertThat(files).containsExactly(Path.of("root", "first", "P2110001.jpg"), Path.of("root", "IMG_00001.jpg"));
+    }
+
+    @Test
+    void testListFilesRootDir() {
+        var files = fileExplorer.listFiles(new String[]{"root"});
+
+        assertThat(files).containsExactly(Path.of("root", "DSC_4321.mov"),
+                Path.of("root", "first", "P2110001.jpg"),
+                Path.of("root", "first", "P2110002.jpg"),
+                Path.of("root", "first", "P2110003.mov"),
+                Path.of("root", "IMG_00001.jpg"),
+                Path.of("root", "IMG_00002.jpg")
+        );
+    }
+
+    @Test
+    void testListFilesWithJpgGlobFilter() {
+        var files = fileExplorer.listFiles(new String[]{"root" + File.separator + "*"});
+
+        assertThat(files).containsExactly(
+                Path.of("root", "first", "P2110001.jpg"),
+                Path.of("root", "first", "P2110002.jpg"),
+                Path.of("root", "IMG_00001.jpg"),
+                Path.of("root", "IMG_00002.jpg")
+        );
     }
 
 }

@@ -9,10 +9,7 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,30 +33,95 @@ public class FileExplorer {
         Set<Path> allPaths = new HashSet<>();
 
         for (String sourceArg : args) {
-            Path path;
-            PathMatcher matcher = null;
             if (containsGlobCharacter(sourceArg)) {
-                int pathSeparatorIndex = getLastGlobPathSeparatorIndex(sourceArg);
-                String globParentPath = sourceArg.substring(0, pathSeparatorIndex);
-                path = Paths.get(globParentPath);
-
-                String globPattern = sourceArg.substring(pathSeparatorIndex + 1);
-                matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
+                allPaths.addAll(processGlobArg(sourceArg));
             } else {
-                path = Paths.get(sourceArg);
-            }
-
-            checkPath(path);
-            if (fileService.isDirectory(path)) {
-                allPaths.addAll(walk(path));
-            } else {
-                allPaths.add(path);
+                allPaths.addAll(processPathArg(sourceArg));
             }
         }
 
         return allPaths.stream()
                 .sorted()
                 .toList();
+    }
+
+    public List<MediaFile> listMediaFiles(String[] args) {
+        List<MediaFile> mediaFiles = new ArrayList<>();
+        for (var path : listFiles(args)) {
+            var mediaType = mediaTypeDetector.detectMediaType(path);
+            if (mediaType != null) {
+                mediaFiles.add(new MediaFile(path, mediaType));
+            }
+        }
+        return mediaFiles;
+    }
+
+    public List<Path> listFiles(Path inputPath) {
+        return listFiles(List.of(inputPath));
+    }
+
+    public List<Path> listFiles(List<Path> inputPaths) {
+        Set<Path> allPaths = new HashSet<>();
+        for (var path : inputPaths) {
+            allPaths.addAll(listPath(path));
+        }
+
+        return allPaths.stream()
+                .sorted()
+                .toList();
+    }
+
+    private List<Path> processGlobArg(String sourceArg) {
+        int pathSeparatorIndex = getLastGlobPathSeparatorIndex(sourceArg);
+        String globRootPath = sourceArg.substring(0, pathSeparatorIndex);
+        String globPattern = sourceArg.substring(pathSeparatorIndex + 1);
+        Path globRoot = Paths.get(globRootPath);
+        checkPath(globRoot);
+
+        List<Path> allDirs = new ArrayList<>();
+        allDirs.add(globRoot);
+        try (var filesStream = fileService.walk(globRoot)) {
+            filesStream.filter(fileService::isDirectory)
+                    .forEach(allDirs::add);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+        final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
+        DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<>() {
+            @Override
+            public boolean accept(Path entry)  {
+                return fileService.isRegularFile(entry) && matcher.matches(entry.getFileName());
+            }
+        };
+
+        List<Path> allPaths = new ArrayList<>();
+        for (Path directory : allDirs) {
+            try(var directoryStream = fileService.newDirectoryStream(directory, filter)) {
+                for (Path path : directoryStream) {
+                    allPaths.add(path);
+                }
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        return allPaths;
+    }
+
+    private List<Path> processPathArg(String sourceArg) {
+        Path path = Paths.get(sourceArg);
+        checkPath(path);
+
+        return listPath(path);
+    }
+
+    private List<Path> listPath(Path path) {
+        if (fileService.isDirectory(path)) {
+            return walk(path);
+        } else {
+            return List.of(path);
+        }
     }
 
     private void checkPath(Path path) {
@@ -96,41 +158,11 @@ public class FileExplorer {
         return StringUtils.containsAny(sourceArg, "*", "?", "[", "]");
     }
 
-    public List<Path> listFiles(Path inputPath) {
-        return listFiles(List.of(inputPath));
-    }
-
-    public List<Path> listFiles(List<Path> inputPaths) {
-        Set<Path> allPaths = new HashSet<>();
-        for (var path : inputPaths) {
-            if (fileService.isDirectory(path)) {
-                allPaths.addAll(walk(path));
-            } else {
-                allPaths.add(path);
-            }
-        }
-
-        return allPaths.stream()
-                .sorted()
-                .toList();
-    }
-
-    public List<MediaFile> listMediaFiles(List<Path> inputPaths) {
-        List<MediaFile> mediaFiles = new ArrayList<>();
-        for (var path : listFiles(inputPaths)) {
-            var mediaType = mediaTypeDetector.detectMediaType(path);
-            if (mediaType != null) {
-                mediaFiles.add(new MediaFile(path, mediaType));
-            }
-        }
-        return mediaFiles;
-    }
-
-    private Set<Path> walk(Path inputDir) {
-        Set<Path> allPaths = new HashSet<>();
+    private List<Path> walk(Path inputDir) {
+        List<Path> allPaths = new ArrayList<>();
         try (var filesStream = fileService.walk(inputDir)) {
             var inputDirFiles = filesStream
-                    .filter(path -> fileService.isRegularFile(path))
+                    .filter(fileService::isRegularFile)
                     .toList();
             allPaths.addAll(inputDirFiles);
         } catch (IOException e) {

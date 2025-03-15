@@ -11,10 +11,6 @@ import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
@@ -59,27 +55,16 @@ public class SetGpsCommandRunner implements CommandRunner {
     }
 
     private SetGpsCommandInput parseInput(CommandLine cmd) throws ParseException {
-        List<Path> sourceFiles = new ArrayList<>();
         String[] args = cmd.getArgs();
-        for (String sourceArg : args) {
-            Path sourceFile = Paths.get(sourceArg);
-            if (!Files.exists(sourceFile)) {
-                throw new ParseException("Source file/directory does not exist: " + sourceArg);
-            }
-            if (!Files.isReadable(sourceFile)) {
-                throw new ParseException("Cannot read source file: " + sourceArg);
-            }
-            sourceFiles.add(sourceFile);
-        }
         if (cmd.hasOption(DELETE)) {
-            return new SetGpsCommandInput(sourceFiles, null, null, true);
+            return new SetGpsCommandInput(args, null, null, true);
         } else {
             String coordinatesString = cmd.getOptionValue(COORDINATES);
             if (StringUtils.isBlank(coordinatesString)) {
                 throw new ParseException("GPS coordinates must be provided.");
             }
             var coordinates = parseCoordinates(coordinatesString);
-            return new SetGpsCommandInput(sourceFiles, coordinates.latitude(), coordinates.longitude(), false);
+            return new SetGpsCommandInput(args, coordinates.latitude(), coordinates.longitude(), false);
         }
     }
 
