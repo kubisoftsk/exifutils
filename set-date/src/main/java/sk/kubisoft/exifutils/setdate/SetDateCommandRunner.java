@@ -79,6 +79,7 @@ public class SetDateCommandRunner implements CommandRunner {
 
     private SetDateCommandInput parseInput(CommandLine cmd) throws ParseException{
         String[] args = cmd.getArgs();
+
         String patternStr = cmd.getOptionValue(PATTERN.getOpt());
         if (StringUtils.isNotBlank(patternStr)) {
             try {

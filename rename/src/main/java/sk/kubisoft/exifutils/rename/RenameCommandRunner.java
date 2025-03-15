@@ -10,11 +10,7 @@ import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
@@ -59,24 +55,10 @@ public class RenameCommandRunner implements CommandRunner {
     }
 
     private RenameCommandInput parseInput(CommandLine cmd) throws ParseException {
-        // Parse source directories - if none provided, use current directory
-        List<Path> sourceDirs = new ArrayList<>();
         String[] args = cmd.getArgs();
-        if (args.length == 0) {
-            throw new ParseException("No source file / directory provided.");
-        }
-        for (String sourceArg : args) {
-            Path sourceDir = Paths.get(sourceArg);
-            if (!Files.exists(sourceDir)) {
-                throw new ParseException("Source directory does not exist: " + sourceArg);
-            }
-            if (!Files.isReadable(sourceDir)) {
-                throw new ParseException("Cannot read source directory: " + sourceArg);
-            }
-            sourceDirs.add(sourceDir);
-        }
 
         boolean writeDate = cmd.hasOption(WRITE.getOpt());
+
         ZoneId zoneId = null;
         if (cmd.hasOption(ZONE_ID)) {
             try {
@@ -87,7 +69,7 @@ public class RenameCommandRunner implements CommandRunner {
             }
         }
 
-        return new RenameCommandInput(sourceDirs, writeDate, zoneId);
+        return new RenameCommandInput(args, writeDate, zoneId);
     }
 
     @Override
@@ -111,7 +93,7 @@ public class RenameCommandRunner implements CommandRunner {
     @Override
     public List<CommandArgument> getCommandArguments() {
         return List.of(
-                new CommandArgument.Builder("DIR")
+                new CommandArgument.Builder("FILE|DIR")
                         .multiple()
                         .build()
         );

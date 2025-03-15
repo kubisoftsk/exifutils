@@ -5,7 +5,7 @@ import java.time.ZoneId;
 
 public record SetDateCommandInput(
 
-        String[] sourcePaths,
+        String[] inputPaths,
 
         String pattern,
 

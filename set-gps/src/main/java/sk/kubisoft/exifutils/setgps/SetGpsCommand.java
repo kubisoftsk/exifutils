@@ -31,7 +31,7 @@ public class SetGpsCommand {
         console.verboseln("Running ExifUtils Rename command with input: %s", input);
 
         console.println("Searching for media files...");
-        List<MediaFile> mediaFiles = fileExplorer.listMediaFiles(input.sourcePaths());
+        List<MediaFile> mediaFiles = fileExplorer.listMediaFiles(input.inputPaths());
         console.println("Found %d files.", mediaFiles.size());
 
         List<SetLocationAction> actions = new ArrayList<>();

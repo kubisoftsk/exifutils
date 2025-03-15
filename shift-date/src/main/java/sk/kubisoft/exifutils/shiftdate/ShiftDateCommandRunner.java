@@ -10,11 +10,7 @@ import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
@@ -60,18 +56,8 @@ public class ShiftDateCommandRunner implements CommandRunner {
     }
 
     private ShiftDateCommandInput parseInput(CommandLine cmd) throws ParseException {
-        List<Path> sourceFiles = new ArrayList<>();
         String[] args = cmd.getArgs();
-        for (String sourceArg : args) {
-            Path sourceFile = Paths.get(sourceArg);
-            if (!Files.exists(sourceFile)) {
-                throw new ParseException("Source file/directory does not exist: " + sourceArg);
-            }
-            if (!Files.isReadable(sourceFile)) {
-                throw new ParseException("Cannot read source file: " + sourceArg);
-            }
-            sourceFiles.add(sourceFile);
-        }
+
         String durationString = cmd.getOptionValue(DURATION.getOpt());
         Duration duration;
         try {
@@ -82,7 +68,7 @@ public class ShiftDateCommandRunner implements CommandRunner {
 
         boolean rename = cmd.hasOption(RENAME.getOpt());
 
-        return new ShiftDateCommandInput(sourceFiles, duration, rename);
+        return new ShiftDateCommandInput(args, duration, rename);
     }
 
     @Override
