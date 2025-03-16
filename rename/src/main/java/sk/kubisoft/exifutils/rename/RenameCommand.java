@@ -81,6 +81,8 @@ public class RenameCommand {
                     exifDateSetter.setDateTime(setDateActions);
                 } else {
                     console.println("Aborted.");
+                    // Do not continue with renaming if user aborted
+                    return;
                 }
             }
         }
