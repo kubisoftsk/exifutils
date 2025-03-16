@@ -1,440 +1,244 @@
 [
-  {
-    "name": "ch.qos.logback.classic.encoder.PatternLayoutEncoder",
-    "queryAllPublicMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "ch.qos.logback.classic.joran.SerializedModelConfigurator",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "ch.qos.logback.classic.util.DefaultJoranConfigurator",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "ch.qos.logback.core.FileAppender",
-    "queryAllPublicMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      },
-      {
-        "name": "setAppend",
-        "parameterTypes": [
-          "boolean"
-        ]
-      },
-      {
-        "name": "setFile",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "ch.qos.logback.core.OutputStreamAppender",
-    "methods": [
-      {
-        "name": "setEncoder",
-        "parameterTypes": [
-          "ch.qos.logback.core.encoder.Encoder"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "ch.qos.logback.core.encoder.Encoder",
-    "methods": [
-      {
-        "name": "valueOf",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "ch.qos.logback.core.encoder.LayoutWrappingEncoder",
-    "methods": [
-      {
-        "name": "setParent",
-        "parameterTypes": [
-          "ch.qos.logback.core.spi.ContextAware"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "ch.qos.logback.core.pattern.PatternLayoutEncoderBase",
-    "methods": [
-      {
-        "name": "setPattern",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "ch.qos.logback.core.spi.ContextAware",
-    "methods": [
-      {
-        "name": "valueOf",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "com.fasterxml.jackson.databind.ext.Java7SupportImpl",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "com.google.common.cache.Cache"
-  },
-  {
-    "name": "com.google.common.util.concurrent.AbstractFuture",
-    "fields": [
-      {
-        "name": "listeners"
-      },
-      {
-        "name": "value"
-      },
-      {
-        "name": "waiters"
-      }
-    ]
-  },
-  {
-    "name": "com.google.common.util.concurrent.AbstractFuture$Waiter",
-    "fields": [
-      {
-        "name": "next"
-      },
-      {
-        "name": "thread"
-      }
-    ]
-  },
-  {
-    "name": "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "java.beans.PropertyVetoException"
-  },
-  {
-    "name": "java.io.FilePermission"
-  },
-  {
-    "name": "java.lang.Object",
-    "allDeclaredFields": true,
-    "queryAllPublicMethods": true
-  },
-  {
-    "name": "java.lang.ObjectBeanInfo"
-  },
-  {
-    "name": "java.lang.ObjectCustomizer"
-  },
-  {
-    "name": "java.lang.RuntimePermission"
-  },
-  {
-    "name": "java.lang.ref.Cleaner",
-    "methods": [
-      {
-        "name": "create",
-        "parameterTypes": []
-      },
-      {
-        "name": "register",
-        "parameterTypes": [
-          "java.lang.Object",
-          "java.lang.Runnable"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.lang.ref.Cleaner$Cleanable"
-  },
-  {
-    "name": "java.net.NetPermission"
-  },
-  {
-    "name": "java.net.SocketPermission"
-  },
-  {
-    "name": "java.net.URLPermission",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.lang.String",
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.security.AllPermission"
-  },
-  {
-    "name": "java.security.SecurityPermission"
-  },
-  {
-    "name": "java.sql.Date"
-  },
-  {
-    "name": "java.sql.Timestamp"
-  },
-  {
-    "name": "java.util.PropertyPermission"
-  },
-  {
-    "name": "java.util.concurrent.atomic.AtomicBoolean",
-    "fields": [
-      {
-        "name": "value"
-      }
-    ]
-  },
-  {
-    "name": "java.util.concurrent.atomic.AtomicReference",
-    "fields": [
-      {
-        "name": "value"
-      }
-    ]
-  },
-  {
-    "name": "javax.smartcardio.CardPermission"
-  },
-  {
-    "name": "org.apache.log4j.Logger"
-  },
-  {
-    "name": "org.apache.logging.log4j.Logger"
-  },
-  {
-    "name": "org.slf4j.Logger"
-  },
-  {
-    "name": "sk.kubisoft.exifutils.cli.logging.LoggingDirectoryProperty",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.analysis.device.DateTimeField",
-    "allDeclaredFields": true,
-    "queryAllPublicMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      },
-      {
-        "name": "setDateField",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      },
-      {
-        "name": "setLocalTime",
-        "parameterTypes": [
-          "boolean"
-        ]
-      },
-      {
-        "name": "setOffsetField",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.analysis.device.DateTimeFieldBeanInfo"
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.analysis.device.DateTimeFieldCustomizer"
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.analysis.device.DeviceProfile",
-    "allDeclaredFields": true,
-    "queryAllPublicMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      },
-      {
-        "name": "setImageFields",
-        "parameterTypes": [
-          "java.util.List"
-        ]
-      },
-      {
-        "name": "setModel",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      },
-      {
-        "name": "setVideoFields",
-        "parameterTypes": [
-          "java.util.List"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.analysis.device.DeviceProfileBeanInfo"
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.analysis.device.DeviceProfileCustomizer"
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.config.model.DateTimeConfig",
-    "allDeclaredFields": true,
-    "queryAllPublicMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      },
-      {
-        "name": "setTimeZone",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.config.model.DateTimeConfigBeanInfo"
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.config.model.DateTimeConfigCustomizer"
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.config.model.ExifToolConfig",
-    "allDeclaredFields": true,
-    "queryAllPublicMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      },
-      {
-        "name": "setPath",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.config.model.ExifToolConfigBeanInfo"
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.config.model.ExifToolConfigCustomizer"
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.config.model.ExifUtilsConfiguration",
-    "allDeclaredFields": true,
-    "queryAllPublicMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      },
-      {
-        "name": "setDateTime",
-        "parameterTypes": [
-          "sk.kubisoft.exifutils.core.config.model.DateTimeConfig"
-        ]
-      },
-      {
-        "name": "setExifTool",
-        "parameterTypes": [
-          "sk.kubisoft.exifutils.core.config.model.ExifToolConfig"
-        ]
-      },
-      {
-        "name": "setRename",
-        "parameterTypes": [
-          "sk.kubisoft.exifutils.core.config.model.RenameConfig"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.config.model.ExifUtilsConfigurationBeanInfo"
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.config.model.ExifUtilsConfigurationCustomizer"
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.config.model.RenameConfig",
-    "allDeclaredFields": true,
-    "queryAllPublicMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      },
-      {
-        "name": "setPattern",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.config.model.RenameConfigBeanInfo"
-  },
-  {
-    "name": "sk.kubisoft.exifutils.core.config.model.RenameConfigCustomizer"
-  },
-  {
-    "name": "sun.misc.Unsafe",
-    "allDeclaredFields": true
-  }
+{
+  "name":"ch.qos.logback.classic.encoder.PatternLayoutEncoder",
+  "queryAllPublicMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"ch.qos.logback.classic.joran.SerializedModelConfigurator",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"ch.qos.logback.classic.util.DefaultJoranConfigurator",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"ch.qos.logback.core.FileAppender",
+  "queryAllPublicMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setAppend","parameterTypes":["boolean"] }, {"name":"setFile","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"ch.qos.logback.core.OutputStreamAppender",
+  "methods":[{"name":"setEncoder","parameterTypes":["ch.qos.logback.core.encoder.Encoder"] }]
+},
+{
+  "name":"ch.qos.logback.core.encoder.Encoder",
+  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"ch.qos.logback.core.encoder.LayoutWrappingEncoder",
+  "methods":[{"name":"setParent","parameterTypes":["ch.qos.logback.core.spi.ContextAware"] }]
+},
+{
+  "name":"ch.qos.logback.core.pattern.PatternLayoutEncoderBase",
+  "methods":[{"name":"setPattern","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"ch.qos.logback.core.spi.ContextAware",
+  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"com.fasterxml.jackson.databind.ext.Java7SupportImpl",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.google.common.cache.Cache"
+},
+{
+  "name":"com.google.common.util.concurrent.AbstractFuture",
+  "fields":[{"name":"listeners"}, {"name":"value"}, {"name":"waiters"}]
+},
+{
+  "name":"com.google.common.util.concurrent.AbstractFuture$Waiter",
+  "fields":[{"name":"next"}, {"name":"thread"}]
+},
+{
+  "name":"com.google.protobuf.ExtensionRegistry",
+  "methods":[{"name":"getEmptyRegistry","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"java.beans.PropertyVetoException"
+},
+{
+  "name":"java.io.FilePermission"
+},
+{
+  "name":"java.lang.Object",
+  "allDeclaredFields":true,
+  "queryAllPublicMethods":true
+},
+{
+  "name":"java.lang.ObjectBeanInfo"
+},
+{
+  "name":"java.lang.ObjectCustomizer"
+},
+{
+  "name":"java.lang.RuntimePermission"
+},
+{
+  "name":"java.lang.ref.Cleaner",
+  "methods":[{"name":"create","parameterTypes":[] }, {"name":"register","parameterTypes":["java.lang.Object","java.lang.Runnable"] }]
+},
+{
+  "name":"java.lang.ref.Cleaner$Cleanable"
+},
+{
+  "name":"java.net.NetPermission"
+},
+{
+  "name":"java.net.SocketPermission"
+},
+{
+  "name":"java.net.URLPermission",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.String","java.lang.String"] }]
+},
+{
+  "name":"java.nio.Buffer",
+  "fields":[{"name":"address"}]
+},
+{
+  "name":"java.security.AllPermission"
+},
+{
+  "name":"java.security.SecureRandomParameters"
+},
+{
+  "name":"java.security.SecurityPermission"
+},
+{
+  "name":"java.sql.Date"
+},
+{
+  "name":"java.sql.Timestamp"
+},
+{
+  "name":"java.util.PropertyPermission"
+},
+{
+  "name":"java.util.concurrent.atomic.AtomicBoolean",
+  "fields":[{"name":"value"}]
+},
+{
+  "name":"java.util.concurrent.atomic.AtomicReference",
+  "fields":[{"name":"value"}]
+},
+{
+  "name":"javax.smartcardio.CardPermission"
+},
+{
+  "name":"libcore.io.Memory"
+},
+{
+  "name":"org.apache.log4j.Logger"
+},
+{
+  "name":"org.apache.logging.log4j.Logger"
+},
+{
+  "name":"org.osgi.framework.BundleEvent"
+},
+{
+  "name":"org.robolectric.Robolectric"
+},
+{
+  "name":"org.slf4j.Logger"
+},
+{
+  "name":"sk.kubisoft.exifutils.cli.logging.LoggingDirectoryProperty",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sk.kubisoft.exifutils.core.analysis.device.DateTimeField",
+  "allDeclaredFields":true,
+  "queryAllPublicMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setDateField","parameterTypes":["java.lang.String"] }, {"name":"setLocalTime","parameterTypes":["boolean"] }, {"name":"setOffsetField","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"sk.kubisoft.exifutils.core.analysis.device.DateTimeFieldBeanInfo"
+},
+{
+  "name":"sk.kubisoft.exifutils.core.analysis.device.DateTimeFieldCustomizer"
+},
+{
+  "name":"sk.kubisoft.exifutils.core.analysis.device.DeviceProfile",
+  "allDeclaredFields":true,
+  "queryAllPublicMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setImageFields","parameterTypes":["java.util.List"] }, {"name":"setModel","parameterTypes":["java.lang.String"] }, {"name":"setVideoFields","parameterTypes":["java.util.List"] }]
+},
+{
+  "name":"sk.kubisoft.exifutils.core.analysis.device.DeviceProfileBeanInfo"
+},
+{
+  "name":"sk.kubisoft.exifutils.core.analysis.device.DeviceProfileCustomizer"
+},
+{
+  "name":"sk.kubisoft.exifutils.core.config.model.DateTimeConfig",
+  "allDeclaredFields":true,
+  "queryAllPublicMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setTimeZone","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"sk.kubisoft.exifutils.core.config.model.DateTimeConfigBeanInfo"
+},
+{
+  "name":"sk.kubisoft.exifutils.core.config.model.DateTimeConfigCustomizer"
+},
+{
+  "name":"sk.kubisoft.exifutils.core.config.model.ExifToolConfig",
+  "allDeclaredFields":true,
+  "queryAllPublicMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setPath","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"sk.kubisoft.exifutils.core.config.model.ExifToolConfigBeanInfo"
+},
+{
+  "name":"sk.kubisoft.exifutils.core.config.model.ExifToolConfigCustomizer"
+},
+{
+  "name":"sk.kubisoft.exifutils.core.config.model.ExifUtilsConfiguration",
+  "allDeclaredFields":true,
+  "queryAllPublicMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setDateTime","parameterTypes":["sk.kubisoft.exifutils.core.config.model.DateTimeConfig"] }, {"name":"setExifTool","parameterTypes":["sk.kubisoft.exifutils.core.config.model.ExifToolConfig"] }, {"name":"setRename","parameterTypes":["sk.kubisoft.exifutils.core.config.model.RenameConfig"] }]
+},
+{
+  "name":"sk.kubisoft.exifutils.core.config.model.ExifUtilsConfigurationBeanInfo"
+},
+{
+  "name":"sk.kubisoft.exifutils.core.config.model.ExifUtilsConfigurationCustomizer"
+},
+{
+  "name":"sk.kubisoft.exifutils.core.config.model.RenameConfig",
+  "allDeclaredFields":true,
+  "queryAllPublicMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setPattern","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"sk.kubisoft.exifutils.core.config.model.RenameConfigBeanInfo"
+},
+{
+  "name":"sk.kubisoft.exifutils.core.config.model.RenameConfigCustomizer"
+},
+{
+  "name":"sun.misc.Unsafe",
+  "allDeclaredFields":true,
+  "methods":[{"name":"arrayBaseOffset","parameterTypes":["java.lang.Class"] }, {"name":"arrayIndexScale","parameterTypes":["java.lang.Class"] }, {"name":"copyMemory","parameterTypes":["long","long","long"] }, {"name":"copyMemory","parameterTypes":["java.lang.Object","long","java.lang.Object","long","long"] }, {"name":"getBoolean","parameterTypes":["java.lang.Object","long"] }, {"name":"getByte","parameterTypes":["long"] }, {"name":"getByte","parameterTypes":["java.lang.Object","long"] }, {"name":"getDouble","parameterTypes":["java.lang.Object","long"] }, {"name":"getFloat","parameterTypes":["java.lang.Object","long"] }, {"name":"getInt","parameterTypes":["long"] }, {"name":"getInt","parameterTypes":["java.lang.Object","long"] }, {"name":"getLong","parameterTypes":["long"] }, {"name":"getLong","parameterTypes":["java.lang.Object","long"] }, {"name":"getObject","parameterTypes":["java.lang.Object","long"] }, {"name":"objectFieldOffset","parameterTypes":["java.lang.reflect.Field"] }, {"name":"putBoolean","parameterTypes":["java.lang.Object","long","boolean"] }, {"name":"putByte","parameterTypes":["long","byte"] }, {"name":"putByte","parameterTypes":["java.lang.Object","long","byte"] }, {"name":"putDouble","parameterTypes":["java.lang.Object","long","double"] }, {"name":"putFloat","parameterTypes":["java.lang.Object","long","float"] }, {"name":"putInt","parameterTypes":["long","int"] }, {"name":"putInt","parameterTypes":["java.lang.Object","long","int"] }, {"name":"putLong","parameterTypes":["long","long"] }, {"name":"putLong","parameterTypes":["java.lang.Object","long","long"] }, {"name":"putObject","parameterTypes":["java.lang.Object","long","java.lang.Object"] }]
+},
+{
+  "name":"sun.security.provider.DRBG",
+  "methods":[{"name":"<init>","parameterTypes":["java.security.SecureRandomParameters"] }]
+},
+{
+  "name":"sun.security.provider.SHA",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.provider.SHA2$SHA256",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+}
 ]

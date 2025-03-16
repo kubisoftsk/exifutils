@@ -1,64 +1,59 @@
 {
-  "resources": {
-    "includes": [
-      {
-        "pattern": "\\QMETA-INF/services/ch.qos.logback.classic.spi.Configurator\\E"
-      },
-      {
-        "pattern": "\\QMETA-INF/services/com.thebuzzmedia.exiftool.logs.LoggerProvider\\E"
-      },
-      {
-        "pattern": "\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
-      },
-      {
-        "pattern": "\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
-      },
-      {
-        "pattern": "\\QMETA-INF/services/javax.xml.parsers.SAXParserFactory\\E"
-      },
-      {
-        "pattern": "\\QMETA-INF/services/org.apache.tika.detect.Detector\\E"
-      },
-      {
-        "pattern": "\\QMETA-INF/services/org.apache.tika.detect.EncodingDetector\\E"
-      },
-      {
-        "pattern": "\\QMETA-INF/services/org.apache.tika.parser.Parser\\E"
-      },
-      {
-        "pattern": "\\QMETA-INF/services/org.apache.tika.renderer.Renderer\\E"
-      },
-      {
-        "pattern": "\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
-      },
-      {
-        "pattern": "\\Qdevice-profiles/default.yml\\E"
-      },
-      {
-        "pattern": "\\Qdevice-profiles/nikon-d3100.yml\\E"
-      },
-      {
-        "pattern": "\\Qdevice-profiles/nikon-d90.yml\\E"
-      },
-      {
-        "pattern": "\\Qlogback-test.scmo\\E"
-      },
-      {
-        "pattern": "\\Qlogback-test.xml\\E"
-      },
-      {
-        "pattern": "\\Qlogback.scmo\\E"
-      },
-      {
-        "pattern": "\\Qlogback.xml\\E"
-      },
-      {
-        "pattern": "\\Qorg/apache/tika/mime/custom-mimetypes.xml\\E"
-      },
-      {
-        "pattern": "\\Qorg/apache/tika/mime/tika-mimetypes.xml\\E"
-      }
-    ]
-  },
-  "bundles": []
+  "resources":{
+  "includes":[{
+    "pattern":"\\QMETA-INF/services/ch.qos.logback.classic.spi.Configurator\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.thebuzzmedia.exiftool.logs.LoggerProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/javax.xml.parsers.SAXParserFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.tika.detect.Detector\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.tika.detect.EncodingDetector\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.tika.parser.Parser\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.tika.renderer.Renderer\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
+  }, {
+    "pattern":"\\Qcom/esri/core/geometry/gcs_id_to_tolerance.txt\\E"
+  }, {
+    "pattern":"\\Qcom/esri/core/geometry/gcs_tolerances.txt\\E"
+  }, {
+    "pattern":"\\Qcom/esri/core/geometry/intermediate_to_old_wkid.txt\\E"
+  }, {
+    "pattern":"\\Qcom/esri/core/geometry/new_to_old_wkid.txt\\E"
+  }, {
+    "pattern":"\\Qcom/esri/core/geometry/pcs_id_to_tolerance.txt\\E"
+  }, {
+    "pattern":"\\Qcom/esri/core/geometry/pcs_tolerances.txt\\E"
+  }, {
+    "pattern":"\\Qdata.tar.zstd\\E"
+  }, {
+    "pattern":"\\Qdevice-profiles/default.yml\\E"
+  }, {
+    "pattern":"\\Qdevice-profiles/nikon-d3100.yml\\E"
+  }, {
+    "pattern":"\\Qdevice-profiles/nikon-d90.yml\\E"
+  }, {
+    "pattern":"\\Qlogback-test.scmo\\E"
+  }, {
+    "pattern":"\\Qlogback-test.xml\\E"
+  }, {
+    "pattern":"\\Qlogback.scmo\\E"
+  }, {
+    "pattern":"\\Qlogback.xml\\E"
+  }, {
+    "pattern":"\\Qorg/apache/tika/mime/custom-mimetypes.xml\\E"
+  }, {
+    "pattern":"\\Qorg/apache/tika/mime/tika-mimetypes.xml\\E"
+  }, {
+    "pattern":"\\Qwin/amd64/libzstd-jni-1.5.5-11.dll\\E"
+  }]},
+  "bundles":[]
 }
