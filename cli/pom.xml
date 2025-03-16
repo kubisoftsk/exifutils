@@ -124,8 +124,33 @@
                             </execution>
                         </executions>
                         <configuration>
+                            <imageName>exifutils</imageName>
                             <mainClass>sk.kubisoft.exifutils.cli.ExifUtilsApplication</mainClass>
+                            <buildArgs>
+                                <buildArg>-H:+AddAllCharsets</buildArg>
+                            </buildArgs>
                         </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>${maven.antrun.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>install-executable</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <mkdir dir="${user.home}/apps/exifutils" />
+                                        <copy file="${project.build.directory}/exifutils.exe"
+                                              tofile="${user.home}/apps/exifutils/exifutils.exe"
+                                              overwrite="true" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
