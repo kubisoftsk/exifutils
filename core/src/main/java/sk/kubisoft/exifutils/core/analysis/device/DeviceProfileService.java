@@ -26,6 +26,7 @@ public class DeviceProfileService {
 		files.add("nikon-d90.yml");
 		files.add("nikon-d3100.yml");
 		files.add("nikon-e4800.yml");
+		files.add("olympus-fe120.yml");
 
 		RESOURCE_PROFILE_FILE_NAMES = Collections.unmodifiableList(files);
 	}

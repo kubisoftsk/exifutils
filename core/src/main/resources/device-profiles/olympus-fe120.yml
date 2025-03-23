@@ -1,0 +1,13 @@
+name: Olympus FE120
+
+tags:
+  Make: OLYMPUS DIGITAL CAMERA
+  Model: FE-120,X-700
+
+imageFields:
+  - dateField: DateTimeOriginal
+    localTime: true
+
+videoFields:
+  - dateField: TrackCreateDate
+    localTime: true
