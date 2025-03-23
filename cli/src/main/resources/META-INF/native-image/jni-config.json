@@ -1,0 +1,10 @@
+[
+{
+  "name":"com.github.luben.zstd.ZstdInputStreamNoFinalizer",
+  "fields":[{"name":"dstPos"}, {"name":"srcPos"}]
+},
+{
+  "name":"java.lang.Boolean",
+  "methods":[{"name":"getBoolean","parameterTypes":["java.lang.String"] }]
+}
+]

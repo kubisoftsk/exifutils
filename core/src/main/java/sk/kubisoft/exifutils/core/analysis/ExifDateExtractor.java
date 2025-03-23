@@ -3,7 +3,6 @@ package sk.kubisoft.exifutils.core.analysis;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import sk.kubisoft.exifutils.core.analysis.device.DateTimeField;
 import sk.kubisoft.exifutils.core.analysis.device.DeviceProfile;
 import sk.kubisoft.exifutils.core.analysis.device.DeviceProfileService;
@@ -13,7 +12,6 @@ import sk.kubisoft.exifutils.core.media.MediaType;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.time.format.DateTimeParseException;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,8 +20,6 @@ import java.util.Optional;
 public class ExifDateExtractor {
 
     private static final Logger logger = LoggerFactory.getLogger(ExifDateExtractor.class);
-
-	private static final String EXIF_MODEL_TAG = "Model";
 
     private final Console console;
 
@@ -39,14 +35,8 @@ public class ExifDateExtractor {
     }
 
     public Optional<ExifDateTime> extractCreationDate(MediaType mediaType, Map<String, String> metadata) {
-		String model = metadata.get(EXIF_MODEL_TAG);
-		DeviceProfile deviceProfile;
-		if (StringUtils.isBlank(model)) {
-			deviceProfile = deviceProfileService.getDefaultProfile();
-		} else {
-			deviceProfile = deviceProfileService.getProfileForModel(model);
-		}
-		console.verboseln("Using device profile: %s", deviceProfile.getModel());
+		DeviceProfile deviceProfile = deviceProfileService.getProfileForTags(metadata);
+		console.verboseln("Using device profile: %s", deviceProfile.getName());
 
 		List<DateTimeField> dateTimeFields = switch (mediaType) {
 			case IMAGE -> deviceProfile.getImageFields();

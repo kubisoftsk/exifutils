@@ -49,19 +49,20 @@ public class MediaAnalyzer {
 		console.println("Starting analysis of media files...", files.size());
 		try (var metaDataHandler = metaDataHandlerFactory.create()) {
 			for (int i = 0; i < files.size(); i++) {
-				var file = files.get(i);
+				MediaFile file = files.get(i);
+				Path path = file.getOriginalPath();
 
 				if (console.isVerbose()) {
-					console.println("Analyzing file %d of %d: %s", i + 1, files.size(), file);
+					console.println("Analyzing file %d of %d: %s", i + 1, files.size(), path);
 				} else {
-					console.progress("Analyzing file %d of %d: %s", i + 1, files.size(), file);
+					console.progress("Analyzing file %d of %d: %s", i + 1, files.size(), path);
 				}
 
 				try {
 					AnalyzedMediaFile mediaFile = analyze(file, metaDataHandler, gpsZoneExtractor);
 					analyzedFiles.add(mediaFile);
 				} catch (Exception e) {
-					console.error("Error processing file: %s", e, file);
+					console.error("Error processing file: %s", e, path);
 				}
 				if (console.isVerbose()) {
 					console.println(""); // Append newline after each file in verbose mode for clarity

@@ -1,4 +1,4 @@
-model: default
+name: Default
 
 imageFields:
   - dateField: DateTimeOriginal
