@@ -1,4 +1,7 @@
-model: NIKON D3100
+name: Nikon D3100
+
+tags:
+  Model: NIKON D3100
 
 imageFields:
   - dateField: DateTimeOriginal

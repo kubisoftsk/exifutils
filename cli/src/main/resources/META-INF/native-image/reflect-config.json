@@ -168,7 +168,7 @@
   "name":"sk.kubisoft.exifutils.core.analysis.device.DeviceProfile",
   "allDeclaredFields":true,
   "queryAllPublicMethods":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setImageFields","parameterTypes":["java.util.List"] }, {"name":"setModel","parameterTypes":["java.lang.String"] }, {"name":"setVideoFields","parameterTypes":["java.util.List"] }]
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setTags","parameterTypes":["java.util.Map"] }, {"name":"setName","parameterTypes":["java.lang.String"] }, {"name":"setImageFields","parameterTypes":["java.util.List"] }, {"name":"setVideoFields","parameterTypes":["java.util.List"] }]
 },
 {
   "name":"sk.kubisoft.exifutils.core.analysis.device.DeviceProfileBeanInfo"

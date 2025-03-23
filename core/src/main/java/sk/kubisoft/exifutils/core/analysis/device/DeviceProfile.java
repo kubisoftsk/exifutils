@@ -1,21 +1,32 @@
 package sk.kubisoft.exifutils.core.analysis.device;
 
 import java.util.List;
+import java.util.Map;
 
 public class DeviceProfile {
 
-	private String model;
+	private String name;
+
+	private Map<String, String> tags;
 
 	private List<DateTimeField> imageFields;
 
 	private List<DateTimeField> videoFields;
 
-	public String getModel() {
-		return model;
+	public String getName() {
+		return name;
 	}
 
-	public void setModel(String model) {
-		this.model = model;
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Map<String, String> getTags() {
+		return tags;
+	}
+
+	public void setTags(Map<String, String> tags) {
+		this.tags = tags;
 	}
 
 	public List<DateTimeField> getImageFields() {

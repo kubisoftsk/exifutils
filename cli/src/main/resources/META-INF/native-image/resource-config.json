@@ -1,6 +1,8 @@
 {
   "resources":{
   "includes":[{
+    "pattern":"device-profiles/.*yml"
+  }, {
     "pattern":"\\QMETA-INF/services/ch.qos.logback.classic.spi.Configurator\\E"
   }, {
     "pattern":"\\QMETA-INF/services/com.thebuzzmedia.exiftool.logs.LoggerProvider\\E"
@@ -34,12 +36,6 @@
     "pattern":"\\Qcom/esri/core/geometry/pcs_tolerances.txt\\E"
   }, {
     "pattern":"\\Qdata.tar.zstd\\E"
-  }, {
-    "pattern":"\\Qdevice-profiles/default.yml\\E"
-  }, {
-    "pattern":"\\Qdevice-profiles/nikon-d3100.yml\\E"
-  }, {
-    "pattern":"\\Qdevice-profiles/nikon-d90.yml\\E"
   }, {
     "pattern":"\\Qlogback-test.scmo\\E"
   }, {

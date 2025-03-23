@@ -1,12 +1,13 @@
-name: Nikon D90
+name: Nikon E4800
 
 tags:
-  Model: NIKON D90
+  Make: NIKON
+  Model: E4800
 
 imageFields:
   - dateField: DateTimeOriginal
     localTime: true
 
 videoFields:
-  - dateField: DateTimeOriginal
+  - dateField: TrackCreateDate
     localTime: true
