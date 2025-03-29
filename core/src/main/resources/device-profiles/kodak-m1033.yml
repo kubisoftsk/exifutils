@@ -1,0 +1,12 @@
+name: Kodak M1033
+
+tags:
+  Information: EASTMAN KODAK COMPANY  KODAK EASYSHARE M1033 DIGITAL CAMERA
+
+imageFields:
+  - dateField: DateTimeOriginal
+    localTime: true
+
+videoFields:
+  - dateField: CreateDate
+    localTime: true
