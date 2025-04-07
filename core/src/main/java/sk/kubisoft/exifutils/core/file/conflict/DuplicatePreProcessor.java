@@ -29,7 +29,14 @@ public class DuplicatePreProcessor {
 
             // 1. Get existing files in the target folder
             var existingFilesTargetFolder = existingFilesMap.computeIfAbsent(targetParent, k -> {
-                var listedFiles = fileExplorer.listFiles(targetParent);
+                List<Path> listedFiles;
+                try {
+                    listedFiles = fileExplorer.listFiles(targetParent);
+                } catch (RuntimeException e) { // FIXME shall be IO related exception
+                    // In certain situations it's OK if target path does not exist, for example
+                    // when the target path is a new folder that is not yet created (in sort command).
+                    listedFiles = new ArrayList<>();
+                }
                 return new HashSet<>(listedFiles.stream()
                         .map(Path::getFileName)
                         .map(Path::toString)
