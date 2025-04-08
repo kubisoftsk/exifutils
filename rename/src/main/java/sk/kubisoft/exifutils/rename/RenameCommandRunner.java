@@ -10,11 +10,19 @@ import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.nio.file.Path;
 import java.time.ZoneId;
 import java.util.List;
 
 @Singleton
 public class RenameCommandRunner implements CommandRunner {
+
+    private static final Option OUTPUT_DIR = Option.builder()
+            .option("o")
+            .longOpt("output-dir")
+            .desc("Output directory for renamed files with flat structure (source subdirectories are left out). If not set, files are renamed in place.")
+            .hasArg()
+            .build();
 
     private static final Option WRITE = Option.builder()
             .option("w")
@@ -69,7 +77,19 @@ public class RenameCommandRunner implements CommandRunner {
             }
         }
 
-        return new RenameCommandInput(args, writeDate, zoneId);
+        Path outputDir = null;
+        if (cmd.hasOption(OUTPUT_DIR)) {
+            String outputDirStr = cmd.getOptionValue(OUTPUT_DIR.getOpt());
+            outputDir = Path.of(outputDirStr);
+            if (!outputDir.toFile().exists()) {
+                throw new ParseException("Output path does not exist: " + outputDirStr);
+            }
+            if (!outputDir.toFile().isDirectory()) {
+                throw new ParseException("Output path is not a directory: " + outputDirStr);
+            }
+        }
+
+        return new RenameCommandInput(args, outputDir, writeDate, zoneId);
     }
 
     @Override
@@ -87,6 +107,7 @@ public class RenameCommandRunner implements CommandRunner {
         var options = new Options();
         options.addOption(WRITE);
         options.addOption(ZONE_ID);
+        options.addOption(OUTPUT_DIR);
         return options;
     }
 

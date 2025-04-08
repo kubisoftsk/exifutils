@@ -18,6 +18,7 @@ import sk.kubisoft.exifutils.core.utils.DateTimeUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.nio.file.Path;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,7 +88,7 @@ public class RenameCommand {
             }
         }
 
-        List<MoveAction> moveActions = createMoveActions(mediaFilesWithDate);
+        List<MoveAction> moveActions = createMoveActions(mediaFilesWithDate, input.outputDir());
 
         if (moveActions.isEmpty()) {
             console.println("No files to rename.");
@@ -117,14 +118,19 @@ public class RenameCommand {
         }
     }
 
-    private List<MoveAction> createMoveActions(List<AnalyzedMediaFile> mediaFiles) {
+    private List<MoveAction> createMoveActions(List<AnalyzedMediaFile> mediaFiles, Path outputDir) {
         List<MoveAction> rawMoveActions = new ArrayList<>();
 
         for (var mediaFile : mediaFiles) {
             var originalPath = mediaFile.getOriginalPath();
 
             var newName = fileNameUtils.createNewName(mediaFile);
-            var targetPath = originalPath.getParent().resolve(newName);
+            Path targetPath;
+            if (outputDir == null) {
+                targetPath = originalPath.getParent().resolve(newName);
+            } else {
+                targetPath = outputDir.resolve(newName);
+            }
 
             rawMoveActions.add(new MoveAction(originalPath, targetPath));
         }
