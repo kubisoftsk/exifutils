@@ -6,7 +6,7 @@ public record SortCommandInput(
 
         String[] inputPaths,
 
-        Path destinationDirectory,
+        Path outputDir,
 
         boolean rename,
 

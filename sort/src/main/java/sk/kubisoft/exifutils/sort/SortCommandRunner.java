@@ -19,11 +19,11 @@ import java.util.List;
 @Singleton
 public class SortCommandRunner implements CommandRunner {
 
-    private static final Option DESTINATION = Option.builder()
-            .option("d").hasArg()
-            .longOpt("destination").hasArg().argName("DIR")
+    private static final Option OUTPUT_DIR = Option.builder()
+            .option("o").hasArg()
+            .longOpt("outputDir").hasArg().argName("DIR")
             .required()
-            .desc("Destination root directory for the sorted files.")
+            .desc("Root output directory for the sorted files.")
             .build();
 
     private static final Option RENAME = Option.builder()
@@ -66,28 +66,28 @@ public class SortCommandRunner implements CommandRunner {
     private SortCommandInput parseInput(CommandLine cmd) throws ParseException {
         String[] args = cmd.getArgs();
 
-        // Parse destination directory (already validated as required by Options setup)
-        String destPath = cmd.getOptionValue(DESTINATION.getOpt());
-        Path destinationDir = Paths.get(destPath);
+        // Parse output directory (already validated as required by Options setup)
+        String outputDirStr = cmd.getOptionValue(OUTPUT_DIR.getOpt());
+        Path outputDir = Paths.get(outputDirStr);
 
         boolean renameFiles = cmd.hasOption(RENAME.getOpt());
 
-        // Check if destination exists and is a directory
-        if (Files.exists(destinationDir)) {
-            if (!Files.isDirectory(destinationDir)) {
-                throw new ParseException("Destination path exists but is not a directory: " + destPath);
+        // Check if output directory exists and is a directory
+        if (Files.exists(outputDir)) {
+            if (!Files.isDirectory(outputDir)) {
+                throw new ParseException("Output path exists but is not a directory: " + outputDirStr);
             }
         } else {
             try {
-                Files.createDirectories(destinationDir);
+                Files.createDirectories(outputDir);
             } catch (IOException e) {
-                throw new ParseException("Cannot create destination directory: " + e.getMessage());
+                throw new ParseException("Cannot create output directory: " + e.getMessage());
             }
         }
 
         boolean writeDate = cmd.hasOption(WRITE.getOpt());
 
-        return new SortCommandInput(args, destinationDir, renameFiles, writeDate);
+        return new SortCommandInput(args, outputDir, renameFiles, writeDate);
     }
 
     @Override
@@ -103,7 +103,7 @@ public class SortCommandRunner implements CommandRunner {
     @Override
     public Options getOptions() {
         Options options = new Options();
-        options.addOption(DESTINATION);
+        options.addOption(OUTPUT_DIR);
         options.addOption(RENAME);
         options.addOption(WRITE);
         return options;
