@@ -35,33 +35,10 @@ jobs:
         run: mvn -Pnative -DskipTests package
         shell: cmd
 
-      - name: Get project version
-        id: project
-        run: |
-          $VERSION = mvn help:evaluate -Dexpression=project.version -q -DforceStdout
-          $ARTIFACT = mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout
-          echo "version=$VERSION" >> $env:GITHUB_OUTPUT
-          echo "artifact=$ARTIFACT" >> $env:GITHUB_OUTPUT
-        shell: pwsh
-
-      - name: Rename executable
-        run: |
-          $ARTIFACT = "${{ steps.project.outputs.artifact }}"
-          $VERSION = "${{ steps.project.outputs.version }}"
-          # Find the native executable in target directory
-          $exe = Get-ChildItem -Path target -Filter "*.exe" | Select-Object -First 1
-          if ($exe) {
-            $newName = "${ARTIFACT}-${VERSION}-windows-x64.exe"
-            Copy-Item $exe.FullName "target/$newName"
-            echo "Found executable: $($exe.Name)"
-            echo "Renamed to: $newName"
-          }
-        shell: pwsh
-
       - name: Upload Windows Executable
         uses: actions/upload-artifact@v4
         with:
           name: exifsort-windows-native
-          path: target/*-windows-x64.exe
+          path: D:\a\exifutils\exifutils\cli\target\exifutils.exe
           if-no-files-found: error
           retention-days: 90
