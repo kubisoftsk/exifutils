@@ -1,6 +1,36 @@
 # exifutils
 A simple tool for organizing and renaming a bunch of media files chronologically by exif metadata.
 
+## Prerequisites
+
+- [exiftool](https://exiftool.org/) must be installed and available in PATH
+  ```bash
+  # Ubuntu/Debian
+  sudo apt install libimage-exiftool-perl
+  ```
+
+## Installation (Native Binary)
+
+1. Go to **Actions** → **Build Native Executable** → Run the workflow
+2. Download the artifact ZIP for your platform (`exifutils-linux-native` or `exifutils-windows-native`)
+3. Install:
+
+**Linux:**
+```bash
+unzip exifutils-linux-native.zip
+chmod +x exifutils
+sudo mv exifutils /usr/local/bin/
+```
+
+Or install for current user only (no sudo):
+```bash
+mkdir -p ~/.local/bin
+mv exifutils ~/.local/bin/
+# Ensure ~/.local/bin is in your PATH
+```
+
+**Update:** Simply repeat the steps above - the new binary will replace the old one.
+
 Notes: 
 What needs to be done:
 Photos: nothing needed
