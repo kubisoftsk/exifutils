@@ -42,7 +42,7 @@
         <timeshape.version>2025b.28</timeshape.version>
 
         <dagger.version>2.57.2</dagger.version>
-        <junit-jupiter.version>5.14.1</junit-jupiter.version>
+        <junit-jupiter.version>6.0.1</junit-jupiter.version>
         <mockito.version>5.21.0</mockito.version>
         <assertj.version>3.27.6</assertj.version>
     </properties>
