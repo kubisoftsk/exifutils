@@ -39,6 +39,7 @@
         <exiftool-lib.version>3.2.0</exiftool-lib.version>
         <jackson-databind.version>2.17.2</jackson-databind.version>
         <snakeyaml.version>2.5</snakeyaml.version>
+        <guava.version>33.5.0-jre</guava.version> <!-- remove ? -->
         <timeshape.version>2025b.28</timeshape.version>
 
         <dagger.version>2.57.2</dagger.version>
@@ -141,6 +142,11 @@
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
             <dependency>
                 <groupId>net.iakovlev</groupId>
