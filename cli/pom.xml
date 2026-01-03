@@ -52,6 +52,10 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
+
+        <!-- Guava is required at runtime by Dagger's generated code (ImmutableMap) -->
+        <!-- Even though it's a transitive dependency of dagger-compiler, that has 'provided' scope -->
+        <!-- so we need to explicitly declare it here for runtime -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>

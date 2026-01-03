@@ -39,7 +39,7 @@
         <exiftool-lib.version>3.2.0</exiftool-lib.version>
         <jackson-databind.version>2.17.2</jackson-databind.version>
         <snakeyaml.version>2.5</snakeyaml.version>
-        <guava.version>33.5.0-jre</guava.version> <!-- remove ? -->
+        <guava.version>33.5.0-jre</guava.version>
         <timeshape.version>2025b.28</timeshape.version>
 
         <dagger.version>2.57.2</dagger.version>
