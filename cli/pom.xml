@@ -57,7 +57,7 @@
 
     <profiles>
         <profile>
-            <id>build-server</id>
+            <id>fat-jar</id>
             <build>
                 <plugins>
                     <plugin>
