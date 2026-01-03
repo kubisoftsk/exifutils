@@ -23,29 +23,29 @@
     </modules>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <native.maven.plugin.version>0.10.5</native.maven.plugin.version>
-        <maven.antrun.plugin.version>3.1.0</maven.antrun.plugin.version>
+        <native.maven.plugin.version>0.11.3</native.maven.plugin.version>
+        <maven.antrun.plugin.version>3.2.0</maven.antrun.plugin.version>
 
-        <slf4j.version>2.0.15</slf4j.version>
-        <logback.version>1.5.13</logback.version>
-        <commons-io.version>2.15.1</commons-io.version>
-        <commons-lang3.version>3.14.0</commons-lang3.version>
-        <commons-collections4.version>4.4</commons-collections4.version>
-        <tika-core.version>2.9.2</tika-core.version>
-        <commons-cli.version>1.9.0</commons-cli.version>
-        <exiftool-lib.version>3.1.0</exiftool-lib.version>
+        <slf4j.version>2.0.17</slf4j.version>
+        <logback.version>1.5.23</logback.version>
+        <commons-io.version>2.21.0</commons-io.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
+        <commons-collections4.version>4.5.0</commons-collections4.version>
+        <tika-core.version>3.2.3</tika-core.version>
+        <commons-cli.version>1.11.0</commons-cli.version>
+        <exiftool-lib.version>3.2.0</exiftool-lib.version>
         <jackson-databind.version>2.17.2</jackson-databind.version>
-        <snakeyaml.version>2.2</snakeyaml.version>
-        <guava.version>33.4.0-jre</guava.version>
-        <timeshape.version>2024a.24</timeshape.version>
+        <snakeyaml.version>2.5</snakeyaml.version>
+        <guava.version>33.5.0-jre</guava.version> <!-- remove ? -->
+        <timeshape.version>2025b.28</timeshape.version>
 
-        <dagger.version>2.51.1</dagger.version>
-        <junit-jupiter.version>5.11.4</junit-jupiter.version>
-        <mockito.version>5.15.2</mockito.version>
-        <assertj.version>3.26.3</assertj.version>
+        <dagger.version>2.57.2</dagger.version>
+        <junit-jupiter.version>5.14.1</junit-jupiter.version>
+        <mockito.version>5.21.0</mockito.version>
+        <assertj.version>3.27.6</assertj.version>
     </properties>
 
     <dependencyManagement>

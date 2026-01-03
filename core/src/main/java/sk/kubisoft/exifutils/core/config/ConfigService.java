@@ -19,7 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Singleton
-public final class ConfigService {
+public class ConfigService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConfigService.class);
 
