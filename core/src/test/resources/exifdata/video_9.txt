@@ -1,0 +1,99 @@
+  AudioBitsPerSample   : 16
+  AudioChannels        : 1
+  AudioFormat          : sowt
+  AudioSampleRate      : 24000
+  AvgBitrate           : 11199606
+  Balance              : 0
+  BitDepth             : 24
+  Brightness           : 0
+  ColorSpace           : 1
+  CompatibleBrands     : qt  |>?niko
+  CompressorID         : avc1
+  Contrast             : 0
+  CreateDate           : 2013:01:11 12:43:35
+  CurrentTime          : 0
+  DateDisplayFormat    : 2
+  DateTimeOriginal     : 2013:01:11 12:43:35
+  DaylightSavings      : 0
+  Directory            : C:/Users/jakub/Pictures/roztriedit/2013/2013-01-11 prechadzka so psom
+  Duration             : 69.1691
+  ExifToolVersion      : 13.11
+  FileAccessDate       : 2025:03:02 20:48:29+01:00
+  FileCreateDate       : 2025:03:02 20:15:52+01:00
+  FileModifyDate       : 2013:01:11 12:43:34+01:00
+  FileName             : DSC_1746.MOV
+  FilePermissions      : 100666
+  FileSize             : 96967327
+  FileType             : MOV
+  FileTypeExtension    : MOV
+  FilterEffect         : 255
+  FrameCount           : 2073
+  FrameHeight          : 720
+  FrameRate            : 29.97002997
+  FrameWidth           : 1280
+  GraphicsMode         : 64
+  HandlerClass         : mhlr
+  HandlerType          : soun
+  HueAdjustment        : 0
+  ImageHeight          : 720
+  ImageSize            : 1280 720
+  ImageWidth           : 1280
+  Lens                 : 18 55 3.5 5.6
+  LensSpec             : 18 55 3.5 5.6 14
+  LensType             : 14
+  MIMEType             : video/quicktime
+  MajorBrand           : qt
+  Make                 : NIKON CORPORATION
+  MakerNoteVersion     : 0210
+  MatrixStructure      : 1 0 0 0 1 0 0 0 1
+  MediaCreateDate      : 2013:01:11 12:43:35
+  MediaDataOffset      : 32
+  MediaDataSize        : 96833332
+  MediaDuration        : 69.169
+  MediaHeaderVersion   : 0
+  MediaModifyDate      : 2013:01:11 12:43:35
+  MediaTimeScale       : 24000
+  Megapixels           : 0.9216
+  MinorVersion         : 2007.9.0
+  Model                : NIKON D3100
+  ModifyDate           : 2013:01:11 12:43:35
+  MovieHeaderVersion   : 0
+  NextTrackID          : 3
+  OpColor              : 32768 32768 32768
+  PictureControlAdjust : 0
+  PictureControlBase   : NEUTRAL
+  PictureControlData   : (Binary data 58 bytes, use -b option to extract)
+  PictureControlName   : NEUTRAL
+  PictureControlQuickAdjust : 127
+  PictureControlVersion : 0100
+  PosterTime           : 0
+  PreferredRate        : 1
+  PreferredVolume      : 1
+  PreviewDuration      : 0
+  PreviewImage         : (Binary data 102332 bytes, use -b option to extract)
+  PreviewTime          : 0
+  Rotation             : 0
+  Saturation           : 0
+  SelectionDuration    : 0
+  SelectionTime        : 0
+  Sharpness            : 2
+  Software             : NIKON D3100 Ver.1.01
+  SourceImageHeight    : 720
+  SourceImageWidth     : 1280
+  ThumbnailImage       : (Binary data 8989 bytes, use -b option to extract)
+  TimeScale            : 30000
+  TimeZone             : 60
+  ToningEffect         : 255
+  ToningSaturation     : 127
+  TrackCreateDate      : 2013:01:11 12:43:35
+  TrackDuration        : 69.1691
+  TrackHeaderVersion   : 0
+  TrackID              : 1
+  TrackLayer           : 0
+  TrackModifyDate      : 2013:01:11 12:43:35
+  TrackVolume          : 0
+  VideoFrameRate       : 29.97002997003
+  WhiteBalance         : SUNNY
+  WhiteBalanceFineTune : 0 0
+  XResolution          : 72
+  YResolution          : 72

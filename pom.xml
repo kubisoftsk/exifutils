@@ -37,7 +37,6 @@
         <tika-core.version>3.2.3</tika-core.version>
         <commons-cli.version>1.11.0</commons-cli.version>
         <exiftool-lib.version>3.2.0</exiftool-lib.version>
-        <jackson-databind.version>2.17.2</jackson-databind.version>
         <snakeyaml.version>2.5</snakeyaml.version>
         <guava.version>33.5.0-jre</guava.version>
         <timeshape.version>2025b.28</timeshape.version>
@@ -132,11 +131,6 @@
                 <groupId>com.github.mjeanroy</groupId>
                 <artifactId>exiftool-lib</artifactId>
                 <version>${exiftool-lib.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson-databind.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.yaml</groupId>

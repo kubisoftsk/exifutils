@@ -1,7 +1,5 @@
 package sk.kubisoft.exifutils.core.analysis;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +9,7 @@ import sk.kubisoft.exifutils.core.analysis.device.DeviceProfileService;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.logging.JUnitConsole;
 import sk.kubisoft.exifutils.core.media.MediaType;
+import sk.kubisoft.exifutils.core.testutil.MetadataParser;
 
 import java.util.Map;
 
@@ -25,8 +24,6 @@ class ExifDateExtractorTest {
 
     private ExifDateExtractor exifDateExtractor;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     @BeforeEach
     void setUp() {
         // we can use real ExifDateParser here, because it is just a simple wrapper around java.time classes
@@ -38,7 +35,7 @@ class ExifDateExtractorTest {
     @Test
     void noDateFoundForImage1() {
         // This is likely image sent via WhatsApp, which does not contain any EXIF metadata
-        Map<String, String> metaData = loadMetaData("/exifdata/image_1.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/image_1.txt");
 
         var exifDateTime = extract(IMAGE, metaData);
 
@@ -48,7 +45,7 @@ class ExifDateExtractorTest {
     @Test
     void extractDateTimeForImage2() {
         // This is full size image taken with IPhone 14 in Greece (hence the correct timezone)
-        Map<String, String> metaData = loadMetaData("/exifdata/image_2.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/image_2.txt");
 
         var exifDateTime = extract(IMAGE, metaData);
 
@@ -61,7 +58,7 @@ class ExifDateExtractorTest {
     @Test
     void extractDateTimeForImage3() {
         // This is full size HEIC image taken with IPhone 14 in Slovakia
-        Map<String, String> metaData = loadMetaData("/exifdata/image_3.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/image_3.txt");
 
         var exifDateTime = extract(IMAGE, metaData);
 
@@ -74,7 +71,7 @@ class ExifDateExtractorTest {
     @Test
     void extractDateTimeForImage4() {
         // This is full size image taken with OnePlus Nord 2T in Slovakia
-        Map<String, String> metaData = loadMetaData("/exifdata/image_4.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/image_4.txt");
 
         var exifDateTime = extract(IMAGE, metaData);
 
@@ -87,7 +84,7 @@ class ExifDateExtractorTest {
     @Test
     void extractDateTimeForImage5() {
         // This is full size image taken with OnePlus 9 Pro in Slovakia
-        Map<String, String> metaData = loadMetaData("/exifdata/image_5.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/image_5.txt");
 
         var exifDateTime = extract(IMAGE, metaData);
 
@@ -100,7 +97,7 @@ class ExifDateExtractorTest {
     @Test
     void extractDateTimeForImage6() {
         // This is full size image taken with OnePlus 12 in Slovakia
-        Map<String, String> metaData = loadMetaData("/exifdata/image_6.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/image_6.txt");
 
         var exifDateTime = extract(IMAGE, metaData);
 
@@ -114,7 +111,7 @@ class ExifDateExtractorTest {
     void extractDateTimeForImage7() {
         // This is full size image taken with OnePlus 6 in Slovakia
         // there is no zone offset in metadata
-        Map<String, String> metaData = loadMetaData("/exifdata/image_7.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/image_7.txt");
 
         var exifDateTime = extract(IMAGE, metaData);
 
@@ -128,7 +125,7 @@ class ExifDateExtractorTest {
     void extractDateTimeForImage8() {
         // This is full size image taken with older OnePlus phone One E1003 in Slovakia
         // there is no zone offset in metadata
-        Map<String, String> metaData = loadMetaData("/exifdata/image_8.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/image_8.txt");
 
         var exifDateTime = extract(IMAGE, metaData);
 
@@ -142,7 +139,7 @@ class ExifDateExtractorTest {
     void extractDateTimeForImage9() {
         // This is full size image taken with Nikon D3100 camera in Slovakia at local time 12:43:35
         // there is no zone offset in metadata
-        Map<String, String> metaData = loadMetaData("/exifdata/image_9.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/image_9.txt");
 
         var exifDateTime = extract(IMAGE, metaData);
 
@@ -155,7 +152,7 @@ class ExifDateExtractorTest {
     @Test
     void noDateFoundForVideo1() {
         // This is likely video sent via WhatsApp, which does not contain any EXIF metadata
-        Map<String, String> metaData = loadMetaData("/exifdata/video_1.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/video_1.txt");
 
         var exifDateTime = extract(VIDEO, metaData);
 
@@ -165,7 +162,7 @@ class ExifDateExtractorTest {
     @Test
     void extractDateTimeForVideo2() {
         // This is video taken with IPhone 14 in Greece shortly before image_2
-        Map<String, String> metaData = loadMetaData("/exifdata/video_2.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/video_2.txt");
 
         var exifDateTime = extract(VIDEO, metaData);
 
@@ -179,7 +176,7 @@ class ExifDateExtractorTest {
     @Test
     void extractDateTimeForVideo3() {
         // This is video taken with IPhone 14 in Slovakia shortly after image_3
-        Map<String, String> metaData = loadMetaData("/exifdata/video_3.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/video_3.txt");
 
         var exifDateTime = extract(VIDEO, metaData);
 
@@ -193,7 +190,7 @@ class ExifDateExtractorTest {
     void extractDateTimeForVideo4() {
         // This is video taken with probably OnePlus Nord 2T at 18:43:21 local time in Slovakia (+0200)
         // Offset is missing in metadata and video dates are stored in UTC by convention
-        Map<String, String> metaData = loadMetaData("/exifdata/video_4.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/video_4.txt");
 
         var exifDateTime = extract(VIDEO, metaData);
 
@@ -207,7 +204,7 @@ class ExifDateExtractorTest {
     void extractDateTimeForVideo5() {
         // This is video taken with OnePlus 9 Pro at 17:52:18 local time in Slovakia (+0200)
 		// Offset is missing in metadata and video dates are stored in UTC by convention
-        Map<String, String> metaData = loadMetaData("/exifdata/video_5.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/video_5.txt");
 
         var exifDateTime = extract(VIDEO, metaData);
 
@@ -221,7 +218,7 @@ class ExifDateExtractorTest {
     void extractDateTimeForVideo6() {
         // This is video taken with OnePlus 12 at 16:58:01 local time in Slovakia (+0100)
 		// Offset is missing in metadata and video dates are stored in UTC by convention
-        Map<String, String> metaData = loadMetaData("/exifdata/video_6.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/video_6.txt");
 
         var exifDateTime = extract(VIDEO, metaData);
 
@@ -235,7 +232,7 @@ class ExifDateExtractorTest {
     void extractDateTimeForVideo7() {
         // This is video taken with OnePlus phone at 16:25:06 local time in Slovakia (+0100)
 		// Offset is missing in metadata and video dates are stored in UTC by convention
-        Map<String, String> metaData = loadMetaData("/exifdata/video_7.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/video_7.txt");
 
         var exifDateTime = extract(VIDEO, metaData);
 
@@ -250,7 +247,7 @@ class ExifDateExtractorTest {
         // This is video taken with Nikon D3100 DSLR camera at 12:43:35 local time in Slovakia (+0100)
         // Offset is missing in metadata
         // This is a special case, because the video date is stored in local time, not in UTC as is common for videos
-        Map<String, String> metaData = loadMetaData("/exifdata/video_9.json");
+        Map<String, String> metaData = loadMetaData("/exifdata/video_9.txt");
 
         var exifDateTime = extract(VIDEO, metaData);
 
@@ -267,11 +264,9 @@ class ExifDateExtractorTest {
 
     private Map<String, String> loadMetaData(String resourceName) {
         try (var is = getClass().getResourceAsStream(resourceName)) {
-            return objectMapper.readValue(is, new TypeReference<>() {
-            });
+            return MetadataParser.parseMetadata(is);
         } catch (Exception e) {
             throw new RuntimeException("Error loading metadata from resource: " + resourceName, e);
-
         }
     }
 
