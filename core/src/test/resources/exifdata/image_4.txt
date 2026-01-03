@@ -1,0 +1,120 @@
+  Aperture             : 2.8
+  ApertureValue        : 2.79917173119039
+  BitsPerSample        : 8
+  BlueMatrixColumn     : 0.14307 0.06061 0.7141
+  BlueTRC              : (Binary data 2060 bytes, use -b option to extract)
+  BrightnessValue      : 2
+  CMMFlags             : 0
+  ColorComponents      : 3
+  ColorSpace           : 1
+  ColorSpaceData       : RGB
+  ComponentsConfiguration : 1 2 3 0
+  Compression          : 6
+  ConnectionSpaceIlluminant : 0.9642 1 0.82491
+  CreateDate           : 2022:12:02 21:43:04
+  DateTimeOriginal     : 2022:12:02 21:43:04
+  DeviceAttributes     : 0 0
+  DeviceManufacturer   : IEC
+  DeviceMfgDesc        : IEC http://www.iec.ch
+  DeviceModel          : sRGB
+  DeviceModelDesc      : IEC 61966-2.1 Default RGB colour space - sRGB
+  DigitalZoomRatio     : 1
+  EncodingProcess      : 0
+  ExifByteOrder        : II
+  ExifImageHeight      : 4096
+  ExifImageWidth       : 3072
+  ExifToolVersion      : 13.11
+  ExifVersion          : 0220
+  ExposureCompensation : 0
+  ExposureMode         : 0
+  ExposureProgram      : 0
+  ExposureTime         : 0.049999
+  FNumber              : 2.8
+  FileAccessDate       : 2025:01:04 22:08:19+01:00
+  FileCreateDate       : 2025:01:02 08:08:46+01:00
+  FileModifyDate       : 2022:12:02 21:43:04+01:00
+  FileSize             : 3444146
+  FileType             : JPEG
+  FileTypeExtension    : JPG
+  Flash                : 16
+  FlashpixVersion      : 0100
+  FocalLength          : 5.59
+  FocalLength35efl     : 5.59
+  FocalLengthIn35mmFormat : 0
+  GPSDateStamp         : 2022:12:02
+  GPSDateTime          : 2022:12:02 20:42:19Z
+  GPSLatitudeRef       : N
+  GPSLongitudeRef      : E
+  GPSProcessingMethod  : CELLID
+  GPSTimeStamp         : 20:42:19
+  GPSVersionID         : 2 2 0 0
+  GreenMatrixColumn    : 0.38515 0.71687 0.09708
+  GreenTRC             : (Binary data 2060 bytes, use -b option to extract)
+  ISO                  : 4267
+  ImageDescription     : 
+  ImageHeight          : 4096
+  ImageSize            : 3072 4096
+  ImageWidth           : 3072
+  InteropIndex         : R98
+  InteropVersion       : 0100
+  LightSource          : 255
+  LightValue           : 1.87766039799082
+  Luminance            : 76.03647 80 87.12462
+  MIMEType             : image/jpeg
+  Make                 : OnePlus
+  MakerNoteUnknownText : (Binary data 256 bytes, use -b option to extract)
+  MaxApertureValue     : 2.79917173119039
+  MeasurementBacking   : 0 0 0
+  MeasurementFlare     : 0.00999
+  MeasurementGeometry  : 0
+  MeasurementIlluminant : 2
+  MeasurementObserver  : 1
+  MediaBlackPoint      : 0 0 0
+  MediaWhitePoint      : 0.95045 1 1.08905
+  Megapixels           : 12.582912
+  MeteringMode         : 2
+  Model                : OnePlus Nord 2T 5G
+  ModifyDate           : 2022:12:02 21:43:04
+  OffsetTimeOriginal   : +01:00
+  Orientation          : 0
+  PrimaryPlatform      : MSFT
+  ProfileCMMType       : Lino
+  ProfileClass         : mntr
+  ProfileConnectionSpace : XYZ
+  ProfileCopyright     : Copyright (c) 1998 Hewlett-Packard Company
+  ProfileCreator       : HP
+  ProfileDateTime      : 1998:02:09 06:49:00
+  ProfileDescription   : sRGB IEC61966-2.1
+  ProfileFileSignature : acsp
+  ProfileID            : 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  ProfileVersion       : 528
+  RecommendedExposureIndex : 0
+  RedMatrixColumn      : 0.43607 0.22249 0.01392
+  RedTRC               : (Binary data 2060 bytes, use -b option to extract)
+  RenderingIntent      : 0
+  ResolutionUnit       : 2
+  SceneCaptureType     : 0
+  SensingMethod        : 0
+  SensitivityType      : 0
+  ShutterSpeed         : 0.049999
+  ShutterSpeedValue    : 0.0500321756660189
+  Software             : MediaTek Camera Application
+  SubSecCreateDate     : 2022:12:02 21:43:04.611
+  SubSecDateTimeOriginal : 2022:12:02 21:43:04.611+01:00
+  SubSecModifyDate     : 2022:12:02 21:43:04.611
+  SubSecTime           : 611
+  SubSecTimeDigitized  : 611
+  SubSecTimeOriginal   : 611
+  Technology           : CRT
+  ThumbnailLength      : 0
+  ThumbnailOffset      : 2048
+  UserComment          : 
+  ViewingCondDesc      : Reference Viewing Condition in IEC61966-2.1
+  ViewingCondIlluminant : 19.6445 20.3718 16.8089
+  ViewingCondIlluminantType : 1
+  ViewingCondSurround  : 3.92889 4.07439 3.36179
+  WhiteBalance         : 0
+  XResolution          : 72
+  YCbCrPositioning     : 2
+  YCbCrSubSampling     : 2 2
+  YResolution          : 72

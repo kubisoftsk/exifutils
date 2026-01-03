@@ -1,0 +1,82 @@
+  AudioBitsPerSample   : 16
+  AudioChannels        : 2
+  AudioFormat          : mp4a
+  AudioSampleRate      : 44100
+  AvgBitrate           : 8824872
+  Balance              : 0
+  BitDepth             : 24
+  CleanApertureDimensions : 1920 1080
+  CompatibleBrands     : qt
+  CompressorID         : hvc1
+  CompressorName       : HEVC
+  ContentDescribes     : 1
+  CreateDate           : 2023:08:31 15:10:31
+  CreationDate         : 2023:08:31 18:10:31+03:00
+  CurrentTime          : 0
+  Duration             : 41.0716666666667
+  EncodedPixelsDimensions : 1920 1080
+  ExifToolVersion      : 13.11
+  FileAccessDate       : 2025:01:04 19:07:54+01:00
+  FileCreateDate       : 2025:01:04 15:55:50+01:00
+  FileModifyDate       : 2025:01:04 15:55:50+01:00
+  FileSize             : 45344847
+  FileType             : MOV
+  FileTypeExtension    : MOV
+  GenBalance           : 0
+  GenFlags             : 0 0 0
+  GenGraphicsMode      : 64
+  GenMediaVersion      : 0
+  GenOpColor           : 32768 32768 32768
+  GraphicsMode         : 64
+  HandlerClass         : dhlr
+  HandlerDescription   : Core Media Data Handler
+  HandlerType          : mdta
+  HandlerVendorID      : appl
+  ImageHeight          : 1080
+  ImageSize            : 1920 1080
+  ImageWidth           : 1920
+  MIMEType             : video/quicktime
+  MajorBrand           : qt
+  Make                 : Apple
+  MatrixStructure      : 1 0 0 0 1 0 0 0 1
+  MediaCreateDate      : 2023:08:31 15:10:31
+  MediaDataOffset      : 36
+  MediaDataSize        : 45306526
+  MediaDuration        : 41.0733333333333
+  MediaHeaderVersion   : 0
+  MediaLanguageCode    : und
+  MediaModifyDate      : 2023:08:31 15:11:13
+  MediaTimeScale       : 600
+  Megapixels           : 2.0736
+  MetaFormat           : mebx
+  MinorVersion         : 0.0.0
+  Model                : iPhone 14
+  ModifyDate           : 2023:08:31 15:11:13
+  MovieHeaderVersion   : 0
+  NextTrackID          : 6
+  OpColor              : 32768 32768 32768
+  PosterTime           : 0
+  PreferredRate        : 1
+  PreferredVolume      : 1
+  PreviewDuration      : 0
+  PreviewTime          : 0
+  ProductionApertureDimensions : 1920 1080
+  PurchaseFileFormat   : mp4a
+  Rotation             : 90
+  SelectionDuration    : 0
+  SelectionTime        : 0
+  Software             : 16.6
+  SourceImageHeight    : 1080
+  SourceImageWidth     : 1920
+  TimeScale            : 600
+  TrackCreateDate      : 2023:08:31 15:10:31
+  TrackDuration        : 41.0716666666667
+  TrackHeaderVersion   : 0
+  TrackID              : 1
+  TrackLayer           : 0
+  TrackModifyDate      : 2023:08:31 15:11:13
+  TrackVolume          : 0
+  VideoFrameRate       : 29.995130660607
+  Warning              : [minor] The ExtractEmbedded option may find more tags in the media data [x12]
+  XResolution          : 72
+  YResolution          : 72

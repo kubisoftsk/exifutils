@@ -1,6 +1,6 @@
 package sk.kubisoft.exifutils.info;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
 import sk.kubisoft.exifutils.core.logging.Console;
@@ -11,20 +11,20 @@ import sk.kubisoft.exifutils.core.media.MediaType;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Singleton
 public class InfoCommand {
 
     private final FileExplorer fileExplorer;
     private final Console console;
-    private final ObjectMapper objectMapper;
     private final MediaAnalyzer mediaAnalyzer;
 
     @Inject
-    public InfoCommand(FileExplorer fileExplorer, Console console, ObjectMapper objectMapper, MediaAnalyzer mediaAnalyzer) {
+    public InfoCommand(FileExplorer fileExplorer, Console console, MediaAnalyzer mediaAnalyzer) {
         this.fileExplorer = fileExplorer;
         this.console = console;
-        this.objectMapper = objectMapper;
         this.mediaAnalyzer = mediaAnalyzer;
     }
 
@@ -45,15 +45,32 @@ public class InfoCommand {
                 console.println("Media type: %s", mediaType);
                 console.println("EXIF metadata:");
                 var metaData = mediaFile.getMetadata();
-                try {
-                    String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(metaData);
-                    console.println(json);
-                } catch (Exception e) {
-                    console.error("Error serializing metadata to JSON: %s", e.getMessage());
-                }
+                printFormattedMetadata(metaData);
             }
             console.println("");
         }
+    }
+
+    private void printFormattedMetadata(Map<String, String> metadata) {
+        if (metadata == null || metadata.isEmpty()) {
+            console.println("  (no metadata)");
+            return;
+        }
+
+        // Sort metadata alphabetically
+        Map<String, String> sortedMetadata = new TreeMap<>(metadata);
+
+        // Find the longest key for padding
+        int maxKeyLength = sortedMetadata.keySet().stream()
+                .mapToInt(String::length)
+                .max()
+                .orElse(0);
+
+        // Print each key-value pair with aligned values
+        sortedMetadata.forEach((key, value) -> {
+            String paddedKey = StringUtils.rightPad(key, maxKeyLength);
+            console.println("  %s : %s", paddedKey, value);
+        });
     }
 
 }
