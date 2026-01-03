@@ -1,6 +1,5 @@
 package sk.kubisoft.exifutils.cli;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
@@ -37,12 +36,6 @@ public class ExifUtilsModule {
     @Singleton
     FileService provideFileService() {
         return new SystemFileService();
-    }
-
-    @Provides
-    @Singleton
-    ObjectMapper provideObjectMapper() {
-        return new ObjectMapper();
     }
 
 	@Provides
