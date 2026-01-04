@@ -51,4 +51,39 @@ public final class EnvironmentUtils {
 
         return appConfigDirectory;
     }
+
+    /**
+     * Returns platform-specific logs directory:
+     * <p>
+     * Windows: C:\Users\<username>\AppData\Local\exifutils\logs\
+     * macOS: ~/Library/Logs/exifutils/
+     * Linux: ~/.local/share/exifutils/logs/ (or custom $XDG_DATA_HOME if set)
+     */
+    public static Path getLogsDirectory() {
+        String os = System.getProperty("os.name").toLowerCase();
+        String userHome = System.getProperty("user.home");
+
+        Path logsDirectory = switch (os) {
+            case String s when s.contains("win") -> Path.of(System.getenv("LOCALAPPDATA"), APP_NAME, "logs");
+            case String s when s.contains("mac") -> Path.of(userHome, "Library", "Logs", APP_NAME);
+            default -> // Linux and others follow XDG Base Directory Specification
+                    Path.of(
+                            System.getenv("XDG_DATA_HOME") != null
+                                    ? System.getenv("XDG_DATA_HOME")
+                                    : Path.of(userHome, ".local", "share").toString(),
+                            APP_NAME, "logs"
+                    );
+        };
+
+        if (!Files.exists(logsDirectory)) {
+            try {
+                Files.createDirectories(logsDirectory);
+                logger.info("Created logs directory: {}", logsDirectory);
+            } catch (IOException e) {
+                throw new UncheckedIOException("Failed to create logs directory: " + logsDirectory, e);
+            }
+        }
+
+        return logsDirectory;
+    }
 }

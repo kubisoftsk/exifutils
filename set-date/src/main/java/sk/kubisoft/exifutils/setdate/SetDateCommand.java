@@ -174,10 +174,8 @@ public class SetDateCommand {
     private ZoneOffset getOffset(LocalDateTime localDateTime, ZoneId zoneId) {
         ZoneId zoneIdToUse = zoneId;
         if (zoneIdToUse == null) {
-            var config = configService.getConfig();
-            var dateTimeConfig = config.getDateTime();
-            String timeZone = (dateTimeConfig == null) ? null : dateTimeConfig.getTimeZone();
-            if (timeZone != null) {
+            String timeZone = configService.getTimeZone();
+            if (timeZone != null && !timeZone.isEmpty()) {
                 zoneIdToUse = ZoneId.of(timeZone);
             }
         }

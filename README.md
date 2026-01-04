@@ -31,6 +31,48 @@ mv exifutils ~/.local/bin/
 
 **Update:** Simply repeat the steps above - the new binary will replace the old one.
 
+## Configuration
+
+Configuration uses [HOCON format](https://github.com/lightbend/config/blob/main/HOCON.md) with layered loading. Your local `application.conf` overrides built-in defaults - you only need to specify values that differ from defaults.
+
+Configuration file location:
+
+| Platform | Path |
+|----------|------|
+| **Linux** | `~/.config/exifutils/application.conf` |
+| **Windows** | `%APPDATA%\exifutils\application.conf` |
+| **macOS** | `~/Library/Application Support/exifutils/application.conf` |
+
+On Linux, the `XDG_CONFIG_HOME` environment variable is respected if set.
+
+A template config file is created automatically on first run. Example configuration:
+
+```hocon
+exifTool {
+  path = "/usr/local/bin/exiftool"
+}
+
+# Override default time zone (default: Europe/Bratislava)
+dateTime.timeZone = "America/New_York"
+
+# Override rename pattern
+rename.pattern = "IMG_${date,yyyyMMdd}_${date,HHmmss}"
+```
+
+## Logging
+
+Log files are stored in platform-specific locations:
+
+| Platform | Path |
+|----------|------|
+| **Linux** | `~/.local/share/exifutils/logs/` |
+| **Windows** | `%LOCALAPPDATA%\exifutils\logs\` |
+| **macOS** | `~/Library/Logs/exifutils/` |
+
+On Linux, the `XDG_DATA_HOME` environment variable is respected if set.
+
+Logs are written to `exifutils.log` and rolled daily or when reaching 10MB. Old logs are compressed to `.gz` and kept until total size exceeds 50MB.
+
 Notes: 
 What needs to be done:
 Photos: nothing needed

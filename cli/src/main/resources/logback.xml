@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+	<!-- Suppress logback's internal status messages -->
+	<statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
 	<!-- Define the property using your class -->
 	<define name="LOGGING_DIRECTORY" class="sk.kubisoft.exifutils.cli.logging.LoggingDirectoryProperty"/>
 
-	<!-- File appender with timestamp -->
-	<timestamp key="timestamp" datePattern="yyyy-MM-dd-HH-mm-ss"/>
-	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
-		<file>${LOGGING_DIRECTORY}/exifutils_${timestamp}.log</file>
-		<append>true</append>
+	<!-- Rolling file appender with size and time based policy -->
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOGGING_DIRECTORY}/exifutils.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${LOGGING_DIRECTORY}/exifutils.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+			<maxFileSize>10MB</maxFileSize>
+			<maxHistory>3560</maxHistory>
+			<totalSizeCap>50MB</totalSizeCap>
+		</rollingPolicy>
 		<encoder>
 			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
@@ -18,7 +25,7 @@
 		<appender-ref ref="FILE"/>
 	</root>
 
-	<!-- Root logger for my application -->
+	<!-- Logger for application classes -->
 	<logger name="sk.kubisoft.exifutils" level="DEBUG"/>
 
 </configuration>

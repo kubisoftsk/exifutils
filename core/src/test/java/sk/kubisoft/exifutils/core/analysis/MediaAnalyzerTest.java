@@ -7,8 +7,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sk.kubisoft.exifutils.core.config.ConfigService;
-import sk.kubisoft.exifutils.core.config.model.DateTimeConfig;
-import sk.kubisoft.exifutils.core.config.model.ExifUtilsConfiguration;
 import sk.kubisoft.exifutils.core.logging.Console;
 import sk.kubisoft.exifutils.core.logging.JUnitConsole;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
@@ -54,15 +52,7 @@ class MediaAnalyzerTest {
     @BeforeEach
     void setUp() {
         mediaAnalyzer = new MediaAnalyzer(console, configServiceMock, metaDataHandlerFactoryMock, exifDateExtractorMock, gpsZoneExtractorMock);
-        lenient().when(configServiceMock.getConfig()).thenReturn(createConfig());
-    }
-
-    private ExifUtilsConfiguration createConfig() {
-        var dateTimeConfig = new DateTimeConfig();
-        dateTimeConfig.setTimeZone("Europe/Bratislava");
-        var exifUtilsConfig = new ExifUtilsConfiguration();
-        exifUtilsConfig.setDateTime(dateTimeConfig);
-        return exifUtilsConfig;
+        lenient().when(configServiceMock.getTimeZone()).thenReturn("Europe/Bratislava");
     }
 
     @Test

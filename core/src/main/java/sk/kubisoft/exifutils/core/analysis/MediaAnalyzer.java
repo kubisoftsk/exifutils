@@ -128,13 +128,11 @@ public class MediaAnalyzer {
 	}
 
 	private ZoneOffset getDefaultZoneOffset(LocalDateTime localDateTime) {
-		var config = configService.getConfig();
-		var dateTimeConfig = config.getDateTime();
-		String timeZone = (dateTimeConfig == null) ? null : dateTimeConfig.getTimeZone();
-		ZoneId timeZoneId = (timeZone == null) ? null : ZoneId.of(timeZone);
+		String timeZone = configService.getTimeZone();
+		ZoneId timeZoneId = (timeZone == null || timeZone.isEmpty()) ? null : ZoneId.of(timeZone);
 
 		if (timeZoneId != null) {
-			console.verboseln("Resolving offset by configured time zone: %s", dateTimeConfig.getTimeZone());
+			console.verboseln("Resolving offset by configured time zone: %s", timeZone);
 		} else {
 			console.verboseln("Resolving offset by system default time zone: %s", ZoneId.systemDefault());
 		}

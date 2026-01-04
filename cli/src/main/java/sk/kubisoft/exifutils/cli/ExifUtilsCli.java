@@ -1,7 +1,6 @@
 package sk.kubisoft.exifutils.cli;
 
 import org.apache.commons.cli.*;
-import sk.kubisoft.exifutils.cli.logging.LoggingUtils;
 import sk.kubisoft.exifutils.core.CommandRunner;
 import sk.kubisoft.exifutils.core.logging.Console;
 
@@ -64,10 +63,6 @@ public class ExifUtilsCli {
             if (cmd.hasOption(VERBOSE) && console instanceof sk.kubisoft.exifutils.cli.logging.SystemConsole systemConsole) {
                 systemConsole.setVerbose(true);
             }
-
-            LoggingUtils.getCurrentLogFile().ifPresent(logFile -> {
-                System.out.println("Started logging to file: " + logFile.toAbsolutePath());
-            });
 
             System.exit(runner.runCommand(cmd));
         } catch (ParseException e) {

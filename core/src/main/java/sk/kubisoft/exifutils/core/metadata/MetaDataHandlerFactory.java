@@ -16,10 +16,6 @@ public class MetaDataHandlerFactory {
     }
 
     public MetaDataHandler create() {
-        var exifToolConfig = configService.getConfig().getExifTool();
-        if (exifToolConfig == null || exifToolConfig.getPath() == null) {
-            throw new IllegalArgumentException("ExifTool path not configured, please check config file.");
-        }
-        return new MetaDataHandler(exifToolConfig.getPath());
+        return new MetaDataHandler(configService.getExifToolPath());
     }
 }
