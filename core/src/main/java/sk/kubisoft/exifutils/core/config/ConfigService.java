@@ -15,6 +15,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZoneId;
 
 @Singleton
 public class ConfigService {
@@ -65,18 +66,19 @@ public class ConfigService {
 		return config.getString("exifTool.path");
 	}
 
-	public String getTimeZone() {
-		return config.getString("dateTime.timeZone");
+	/**
+	 * Returns the configured time zone, or system default if not configured.
+	 */
+	public ZoneId getTimeZone() {
+		String timeZone = config.getString("dateTime.timeZone");
+		if (timeZone == null || timeZone.isEmpty()) {
+			return ZoneId.systemDefault();
+		}
+		return ZoneId.of(timeZone);
 	}
 
 	public String getRenamePattern() {
 		return config.getString("rename.pattern");
 	}
 
-	/**
-	 * Returns the underlying Config object for advanced use cases.
-	 */
-	public Config getConfig() {
-		return config;
-	}
 }

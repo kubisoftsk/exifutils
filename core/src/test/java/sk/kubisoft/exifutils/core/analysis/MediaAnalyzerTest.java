@@ -18,6 +18,7 @@ import sk.kubisoft.exifutils.core.metadata.MetaDataHandlerFactory;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +53,7 @@ class MediaAnalyzerTest {
     @BeforeEach
     void setUp() {
         mediaAnalyzer = new MediaAnalyzer(console, configServiceMock, metaDataHandlerFactoryMock, exifDateExtractorMock, gpsZoneExtractorMock);
-        lenient().when(configServiceMock.getTimeZone()).thenReturn("Europe/Bratislava");
+        lenient().when(configServiceMock.getTimeZone()).thenReturn(ZoneId.of("Europe/Bratislava"));
     }
 
     @Test

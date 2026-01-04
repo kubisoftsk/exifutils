@@ -9,7 +9,6 @@ import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.metadata.MetaDataHandler;
 import sk.kubisoft.exifutils.core.metadata.MetaDataHandlerFactory;
-import sk.kubisoft.exifutils.core.utils.DateTimeUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -128,16 +127,9 @@ public class MediaAnalyzer {
 	}
 
 	private ZoneOffset getDefaultZoneOffset(LocalDateTime localDateTime) {
-		String timeZone = configService.getTimeZone();
-		ZoneId timeZoneId = (timeZone == null || timeZone.isEmpty()) ? null : ZoneId.of(timeZone);
-
-		if (timeZoneId != null) {
-			console.verboseln("Resolving offset by configured time zone: %s", timeZone);
-		} else {
-			console.verboseln("Resolving offset by system default time zone: %s", ZoneId.systemDefault());
-		}
-
-		return DateTimeUtils.getDefaultZoneOffset(localDateTime, timeZoneId);
+		ZoneId timeZone = configService.getTimeZone();
+		console.verboseln("Resolving offset by configured time zone: %s", timeZone);
+		return timeZone.getRules().getOffset(localDateTime);
 	}
 
 }

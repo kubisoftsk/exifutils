@@ -51,12 +51,6 @@ A template config file is created automatically on first run. Example configurat
 exifTool {
   path = "/usr/local/bin/exiftool"
 }
-
-# Override default time zone (default: Europe/Bratislava)
-dateTime.timeZone = "America/New_York"
-
-# Override rename pattern
-rename.pattern = "IMG_${date,yyyyMMdd}_${date,HHmmss}"
 ```
 
 ## Logging
