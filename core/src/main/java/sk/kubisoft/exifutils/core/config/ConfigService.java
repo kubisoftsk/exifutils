@@ -23,7 +23,7 @@ public class ConfigService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConfigService.class);
 
-	private static final String CONFIG_FILE_NAME = "exifsort-config.yml";
+	private static final String CONFIG_FILE_NAME = "exifutils-config.yml";
 
 	private final Yaml yaml;
 

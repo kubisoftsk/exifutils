@@ -7,7 +7,7 @@ import java.nio.file.Path;
 
 public final class EnvironmentUtils {
 
-    private static final String APP_NAME = "exifsort";
+    private static final String APP_NAME = "exifutils";
 
     private EnvironmentUtils() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
@@ -16,9 +16,9 @@ public final class EnvironmentUtils {
     /**
      * This handles:
      * <p>
-     * Windows: C:\Users\<username>\AppData\Roaming\exifsort\
-     * macOS: ~/Library/Application Support/exifsort/
-     * Linux: ~/.config/exifsort/ (or custom $XDG_CONFIG_HOME if set)
+     * Windows: C:\Users\<username>\AppData\Roaming\exifutils\
+     * macOS: ~/Library/Application Support/exifutils/
+     * Linux: ~/.config/exifutils/ (or custom $XDG_CONFIG_HOME if set)
      */
     public static Path getApplicationDirectory() {
         String os = System.getProperty("os.name").toLowerCase();
