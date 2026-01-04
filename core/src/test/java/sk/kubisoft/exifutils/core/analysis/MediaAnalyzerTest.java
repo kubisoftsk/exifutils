@@ -190,7 +190,7 @@ class MediaAnalyzerTest {
         when(metaDataHandlerFactoryMock.create())
                 .thenReturn(Mockito.mock(MetaDataHandler.class));
 		if (gpsResolvedZoneOffset != null) {
-			when(gpsZoneExtractorMock.extractGpsZone(any(Path.class), anyMap()))
+			when(gpsZoneExtractorMock.extractGpsZone(anyMap()))
 					.thenReturn(Optional.of(gpsResolvedZoneOffset));
 		}
 		Path testFilePath = Paths.get("dummy");

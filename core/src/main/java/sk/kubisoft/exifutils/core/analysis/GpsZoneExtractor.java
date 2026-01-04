@@ -27,7 +27,7 @@ public class GpsZoneExtractor {
     public GpsZoneExtractor() {
     }
 
-    public Optional<ZoneId> extractGpsZone(Path path, Map<String, String> metadata) {
+    public Optional<ZoneId> extractGpsZone(Map<String, String> metadata) {
         String gpsLatitude = metadata.get(GPS_LATITUDE_TAG);
         String gpsLongitude = metadata.get(GPS_LONGITUDE_TAG);
         if (StringUtils.isBlank(gpsLatitude) || StringUtils.isBlank(gpsLongitude)) {
@@ -38,11 +38,8 @@ public class GpsZoneExtractor {
         if (latitude == 0 && longitude == 0) {
             return Optional.empty();
         }
-        try {
-            return extractGpsZone(latitude, longitude);
-        } catch (Exception e) {
-            throw new AnalysisException(path, "Error extracting GPS zone", e);
-        }
+
+        return extractGpsZone(latitude, longitude);
     }
 
     public Optional<ZoneId> extractGpsZone(double latitude, double longitude) {

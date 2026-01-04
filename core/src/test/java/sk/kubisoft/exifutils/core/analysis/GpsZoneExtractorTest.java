@@ -23,21 +23,21 @@ class GpsZoneExtractorTest {
 
     @Test
     void testExtractGpsEmptyForNullLatAndLong() {
-        var zoneOptional = gpsZoneExtractor.extractGpsZone(null, createMetadata(null, null));
+        var zoneOptional = gpsZoneExtractor.extractGpsZone(createMetadata(null, null));
 
         assertThat(zoneOptional).isNotPresent();
     }
 
     @Test
     void testExtractGpsEmptyForEmptyLatAndLong() {
-        var zoneOptional = gpsZoneExtractor.extractGpsZone(null, createMetadata("", ""));
+        var zoneOptional = gpsZoneExtractor.extractGpsZone(createMetadata("", ""));
 
         assertThat(zoneOptional).isNotPresent();
     }
 
     @Test
     void testExtractGpsEmptyForZeroLatAndLong() {
-        var zoneOptional = gpsZoneExtractor.extractGpsZone(null, createMetadata("0", "0"));
+        var zoneOptional = gpsZoneExtractor.extractGpsZone(createMetadata("0", "0"));
 
         assertThat(zoneOptional).isNotPresent();
     }
@@ -47,7 +47,7 @@ class GpsZoneExtractorTest {
         var latitude = "48.123456";
         var longitude = "17.123456";
 
-        var zoneOptional = gpsZoneExtractor.extractGpsZone(null, createMetadata(latitude, longitude));
+        var zoneOptional = gpsZoneExtractor.extractGpsZone(createMetadata(latitude, longitude));
 
         assertThat(zoneOptional).isPresent();
         assertThat(zoneOptional).hasValue(ZoneId.of("Europe/Bratislava"));

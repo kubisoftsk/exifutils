@@ -91,7 +91,7 @@ public class MediaAnalyzer {
 		if (zoneOffsetToUse == null) {
 			console.verboseln("Zone offset is missing, resolving offset...");
 			var localDateTime = extractedDate.localDateTime();
-			zoneOffsetToUse = resolveZoneOffset(mediaFile.getOriginalPath(), localDateTime, metadata, gpsZoneExtractor);
+			zoneOffsetToUse = resolveZoneOffset(localDateTime, metadata, gpsZoneExtractor);
 
 			// if the extracted EXIF date is stored in UTC time, so we must convert it to local time with guessed offset
 			// to get the correct true local time at guessed offset
@@ -107,8 +107,8 @@ public class MediaAnalyzer {
 		return new AnalyzedMediaFile(mediaFile.getOriginalPath(), mediaFile.getMediaType(), metadata, mediaDateTime);
 	}
 
-	private ZoneOffset resolveZoneOffset(Path file, LocalDateTime localDateTime, Map<String, String> metadata, GpsZoneExtractor gpsZoneExtractor) {
-		var gpsZoneOffset = getGpsZoneOffset(file, gpsZoneExtractor, localDateTime, metadata);
+	private ZoneOffset resolveZoneOffset(LocalDateTime localDateTime, Map<String, String> metadata, GpsZoneExtractor gpsZoneExtractor) {
+		var gpsZoneOffset = getGpsZoneOffset(gpsZoneExtractor, localDateTime, metadata);
 		if (gpsZoneOffset != null) {
 			return gpsZoneOffset;
 		} else {
@@ -117,8 +117,8 @@ public class MediaAnalyzer {
 		}
 	}
 
-	private ZoneOffset getGpsZoneOffset(Path file, GpsZoneExtractor gpsZoneExtractor, LocalDateTime localDateTime, Map<String, String> metadata) {
-		var zoneIdOptional = gpsZoneExtractor.extractGpsZone(file, metadata);
+	private ZoneOffset getGpsZoneOffset(GpsZoneExtractor gpsZoneExtractor, LocalDateTime localDateTime, Map<String, String> metadata) {
+		var zoneIdOptional = gpsZoneExtractor.extractGpsZone(metadata);
 
 		return zoneIdOptional.map(zoneId -> {
 			console.verboseln("Found zoneId from GPS coordinates: %s", zoneId);
