@@ -20,12 +20,6 @@ public class ExifUtilsCli {
             .desc("Print verbose output.")
             .build();
 
-    private static final Option HELP = Option.builder()
-            .option("h")
-            .longOpt("help")
-            .desc("Print help message.")
-            .build();
-
     @Inject
     public ExifUtilsCli(Map<String, CommandRunner> commands, Console console) {
         this.commands = commands;
@@ -51,13 +45,12 @@ public class ExifUtilsCli {
         CommandLineParser parser = new DefaultParser();
         var options = runner.getOptions();
         options.addOption(VERBOSE);
-        options.addOption(HELP);
         try {
             CommandLine cmd = parser.parse(options, commandArgs);
 
-            if (cmd.hasOption(HELP)) {
+            if (!validateRequiredArguments(runner, cmd)) {
                 printCommandHelp(runner);
-                System.exit(0);
+                System.exit(1);
             }
 
             if (cmd.hasOption(VERBOSE) && console instanceof sk.kubisoft.exifutils.cli.logging.SystemConsole systemConsole) {
@@ -70,6 +63,25 @@ public class ExifUtilsCli {
             printCommandHelp(runner);
             System.exit(1);
         }
+    }
+
+    private boolean validateRequiredArguments(CommandRunner runner, CommandLine cmd) {
+        var commandArguments = runner.getCommandArguments();
+        var providedArgs = cmd.getArgs();
+
+        int requiredCount = 0;
+        for (var arg : commandArguments) {
+            if (arg.isRequired()) {
+                requiredCount++;
+            }
+        }
+
+        if (providedArgs.length < requiredCount) {
+            System.err.println("Missing required argument(s).");
+            return false;
+        }
+
+        return true;
     }
 
     private void printUsage() {
