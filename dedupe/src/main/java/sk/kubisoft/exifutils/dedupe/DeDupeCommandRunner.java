@@ -38,6 +38,10 @@ public class DeDupeCommandRunner implements CommandRunner {
 
     @Override
     public List<CommandArgument> getCommandArguments() {
-        return List.of();
+        return List.of(
+                new CommandArgument.Builder("FILE|DIR")
+                        .multiple()
+                        .build()
+        );
     }
 }

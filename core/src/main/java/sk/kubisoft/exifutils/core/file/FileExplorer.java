@@ -29,11 +29,6 @@ public class FileExplorer {
                 .map(Paths::get)
                 .toList();
 
-        if (inputPaths.isEmpty()) {
-            // No input paths provided, use current directory
-            inputPaths = List.of(Paths.get(""));
-        }
-
         return listFiles(inputPaths);
     }
 
