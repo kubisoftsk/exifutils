@@ -1,10 +1,13 @@
 package sk.kubisoft.exifutils.cli;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.cli.help.HelpFormatter;
 import sk.kubisoft.exifutils.core.CommandRunner;
 import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -18,7 +21,7 @@ public class ExifUtilsCli {
             .option("v")
             .longOpt("verbose")
             .desc("Print verbose output.")
-            .build();
+            .get();
 
     @Inject
     public ExifUtilsCli(Map<String, CommandRunner> commands, Console console) {
@@ -42,6 +45,12 @@ public class ExifUtilsCli {
         }
 
         String[] commandArgs = Arrays.copyOfRange(args, 1, args.length);
+        if (commandArgs.length == 0) {
+            // Display help for command without parsing errors
+            printCommandHelp(runner);
+            System.exit(0);
+        }
+
         CommandLineParser parser = new DefaultParser();
         var options = runner.getOptions();
         options.addOption(VERBOSE);
@@ -49,6 +58,7 @@ public class ExifUtilsCli {
             CommandLine cmd = parser.parse(options, commandArgs);
 
             if (!validateRequiredArguments(runner, cmd)) {
+                System.err.println("Missing required argument(s).");
                 printCommandHelp(runner);
                 System.exit(1);
             }
@@ -61,7 +71,7 @@ public class ExifUtilsCli {
         } catch (ParseException e) {
             System.err.println("Error parsing command arguments: " + e.getMessage());
             printCommandHelp(runner);
-            System.exit(1);
+            System.exit(2);
         }
     }
 
@@ -76,12 +86,7 @@ public class ExifUtilsCli {
             }
         }
 
-        if (providedArgs.length < requiredCount) {
-            System.err.println("Missing required argument(s).");
-            return false;
-        }
-
-        return true;
+        return providedArgs.length >= requiredCount;
     }
 
     private void printUsage() {
@@ -94,13 +99,17 @@ public class ExifUtilsCli {
     }
 
     private void printCommandHelp(CommandRunner runner) {
-        HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp(
-                "exifutils " + runner.getCommandName() + " " + OptionsFormatter.generateUsageSyntax(runner.getOptions(), runner.getCommandArguments()),
-                runner.getCommandDescription(),
-                runner.getOptions(),
-                null
-        );
+        HelpFormatter formatter = HelpFormatter.builder()
+                .setShowSince(false)
+                .get();
+        String cmdLineSyntax = "exifutils " + runner.getCommandName() + " " + OptionsFormatter.generateUsageSyntax(runner.getOptions(), runner.getCommandArguments());
+        String header = runner.getCommandDescription();
+
+        try {
+            formatter.printHelp(cmdLineSyntax, header, runner.getOptions(), null, false);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
 }
