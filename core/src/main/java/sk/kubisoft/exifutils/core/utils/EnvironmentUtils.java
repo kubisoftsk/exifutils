@@ -1,16 +1,9 @@
 package sk.kubisoft.exifutils.core.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class EnvironmentUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(EnvironmentUtils.class);
     private static final String APP_NAME = "exifutils";
 
     private EnvironmentUtils() {
@@ -39,17 +32,7 @@ public final class EnvironmentUtils {
                     );
         };
 
-        var appConfigDirectory = configRootDirectory.resolve(APP_NAME);
-        if (!Files.exists(appConfigDirectory)) {
-            try {
-                Files.createDirectories(appConfigDirectory);
-                logger.info("Created config directory: {}", appConfigDirectory);
-            } catch (IOException e) {
-                throw new UncheckedIOException("Failed to create directory: " + appConfigDirectory, e);
-            }
-        }
-
-        return appConfigDirectory;
+        return configRootDirectory.resolve(APP_NAME);
     }
 
     /**
@@ -63,7 +46,7 @@ public final class EnvironmentUtils {
         String os = System.getProperty("os.name").toLowerCase();
         String userHome = System.getProperty("user.home");
 
-        Path logsDirectory = switch (os) {
+        return switch (os) {
             case String s when s.contains("win") -> Path.of(System.getenv("LOCALAPPDATA"), APP_NAME, "logs");
             case String s when s.contains("mac") -> Path.of(userHome, "Library", "Logs", APP_NAME);
             default -> // Linux and others follow XDG Base Directory Specification
@@ -74,16 +57,5 @@ public final class EnvironmentUtils {
                             APP_NAME, "logs"
                     );
         };
-
-        if (!Files.exists(logsDirectory)) {
-            try {
-                Files.createDirectories(logsDirectory);
-                logger.info("Created logs directory: {}", logsDirectory);
-            } catch (IOException e) {
-                throw new UncheckedIOException("Failed to create logs directory: " + logsDirectory, e);
-            }
-        }
-
-        return logsDirectory;
     }
 }
