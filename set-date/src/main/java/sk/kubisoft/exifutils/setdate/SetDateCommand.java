@@ -172,16 +172,7 @@ public class SetDateCommand {
     }
 
     private ZoneOffset getOffset(LocalDateTime localDateTime, ZoneId zoneId) {
-        ZoneId zoneIdToUse = zoneId;
-        if (zoneIdToUse == null) {
-            var config = configService.getConfig();
-            var dateTimeConfig = config.getDateTime();
-            String timeZone = (dateTimeConfig == null) ? null : dateTimeConfig.getTimeZone();
-            if (timeZone != null) {
-                zoneIdToUse = ZoneId.of(timeZone);
-            }
-        }
-
-        return DateTimeUtils.getDefaultZoneOffset(localDateTime, zoneIdToUse);
+        ZoneId zoneIdToUse = (zoneId != null) ? zoneId : configService.getTimeZone();
+        return zoneIdToUse.getRules().getOffset(localDateTime);
     }
 }

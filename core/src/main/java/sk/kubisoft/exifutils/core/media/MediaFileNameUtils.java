@@ -61,10 +61,6 @@ public class MediaFileNameUtils {
     }
 
     private String getPattern() {
-        var rename = configService.getConfig().getRename();
-        if (rename == null || rename.getPattern() == null) {
-            throw new IllegalArgumentException("Rename pattern not configured");
-        }
-        return rename.getPattern();
+        return configService.getRenamePattern();
     }
 }

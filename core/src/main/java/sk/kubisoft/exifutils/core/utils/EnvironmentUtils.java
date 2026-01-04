@@ -1,13 +1,10 @@
 package sk.kubisoft.exifutils.core.utils;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class EnvironmentUtils {
 
-    private static final String APP_NAME = "exifsort";
+    private static final String APP_NAME = "exifutils";
 
     private EnvironmentUtils() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
@@ -16,11 +13,11 @@ public final class EnvironmentUtils {
     /**
      * This handles:
      * <p>
-     * Windows: C:\Users\<username>\AppData\Roaming\exifsort\
-     * macOS: ~/Library/Application Support/exifsort/
-     * Linux: ~/.config/exifsort/ (or custom $XDG_CONFIG_HOME if set)
+     * Windows: C:\Users\<username>\AppData\Roaming\exifutils\
+     * macOS: ~/Library/Application Support/exifutils/
+     * Linux: ~/.config/exifutils/ (or custom $XDG_CONFIG_HOME if set)
      */
-    public static Path getApplicationDirectory() {
+    public static Path getConfigDirectory() {
         String os = System.getProperty("os.name").toLowerCase();
         String userHome = System.getProperty("user.home");
 
@@ -35,16 +32,30 @@ public final class EnvironmentUtils {
                     );
         };
 
-        var applicationDirectory = configRootDirectory.resolve(APP_NAME);
-        // create the directory if it does not exist
-        try {
-            Files.createDirectories(applicationDirectory);
-            // TODO try
-            //logger.info("Created directory: {}", configDir);
-        } catch (IOException e) {
-            throw new UncheckedIOException("Failed to create directory: " + applicationDirectory, e);
-        }
+        return configRootDirectory.resolve(APP_NAME);
+    }
 
-        return applicationDirectory;
+    /**
+     * Returns platform-specific logs directory:
+     * <p>
+     * Windows: C:\Users\<username>\AppData\Local\exifutils\logs\
+     * macOS: ~/Library/Logs/exifutils/
+     * Linux: ~/.local/share/exifutils/logs/ (or custom $XDG_DATA_HOME if set)
+     */
+    public static Path getLogsDirectory() {
+        String os = System.getProperty("os.name").toLowerCase();
+        String userHome = System.getProperty("user.home");
+
+        return switch (os) {
+            case String s when s.contains("win") -> Path.of(System.getenv("LOCALAPPDATA"), APP_NAME, "logs");
+            case String s when s.contains("mac") -> Path.of(userHome, "Library", "Logs", APP_NAME);
+            default -> // Linux and others follow XDG Base Directory Specification
+                    Path.of(
+                            System.getenv("XDG_DATA_HOME") != null
+                                    ? System.getenv("XDG_DATA_HOME")
+                                    : Path.of(userHome, ".local", "share").toString(),
+                            APP_NAME, "logs"
+                    );
+        };
     }
 }

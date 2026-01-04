@@ -7,8 +7,7 @@ public class LoggingDirectoryProperty extends PropertyDefinerBase {
 
     @Override
     public String getPropertyValue() {
-        var applicationDirectory = EnvironmentUtils.getApplicationDirectory();
-        return applicationDirectory.resolve("logs").toString();
+        return EnvironmentUtils.getLogsDirectory().toString();
     }
 
 }

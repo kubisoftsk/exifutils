@@ -1,73 +1,65 @@
 package sk.kubisoft.exifutils.core.config;
 
-import org.apache.commons.io.IOUtils;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-
-import sk.kubisoft.exifutils.core.config.model.ExifUtilsConfiguration;
 import sk.kubisoft.exifutils.core.utils.EnvironmentUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZoneId;
 
 @Singleton
 public class ConfigService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConfigService.class);
 
-	private static final String CONFIG_FILE_NAME = "exifsort-config.yml";
+	private static final String CONFIG_FILE_NAME = "application.conf";
 
-	private final Yaml yaml;
-
-	private ExifUtilsConfiguration config;
+	private final Config config;
 
 	@Inject
-	public ConfigService(Yaml yaml) {
-		this.yaml = yaml;
-		loadConfig();
+	public ConfigService() {
+		this.config = loadConfig();
 	}
 
-	public ExifUtilsConfiguration getConfig() {
-		return config;
-	}
+	private Config loadConfig() {
+		Config referenceConfig = ConfigFactory.defaultReference();
 
-	private void loadConfig() {
-		Path configDir = EnvironmentUtils.getApplicationDirectory();
+		Path configDir = EnvironmentUtils.getConfigDirectory();
 		Path configFile = configDir.resolve(CONFIG_FILE_NAME);
 
-		if (!Files.exists(configFile)) {
-			System.out.println("Config file does not exist: " + configFile);
-			createDefaultConfig(configFile);
+		if (Files.exists(configFile)) {
+			Config userConfig = ConfigFactory.parseFile(configFile.toFile());
+			Config merged = userConfig.withFallback(referenceConfig).resolve();
+			logger.info("Loaded config from: {}", configFile);
+			return merged;
 		}
 
-		try (InputStream is = Files.newInputStream(configFile)) {
-			config = yaml.loadAs(is, ExifUtilsConfiguration.class);
-			logger.info("Loaded config file: {}", configFile);
-		} catch (IOException e) {
-			throw new UncheckedIOException("Failed to load config file: " + configFile, e);
-		}
+		logger.debug("No user config found, using defaults from reference.conf");
+		return referenceConfig.resolve();
 	}
 
-	private void createDefaultConfig(Path configFile) {
-		// copy default config from resources to file
-		try (var defaultConfigIs = getClass().getResourceAsStream("/configuration-default.yml");
-			 Writer writer = Files.newBufferedWriter(configFile)) {
-			if (defaultConfigIs == null) {
-				throw new IllegalStateException("Default config file not found in resources");
-			}
-			IOUtils.copy(defaultConfigIs, writer, StandardCharsets.UTF_8);
-			logger.info("Created default config file: {}", configFile.toAbsolutePath());
-		} catch (IOException e) {
-			throw new UncheckedIOException("Failed to create config file: " + configFile, e);
+	public String getExifToolPath() {
+		return config.getString("exifTool.path");
+	}
+
+	/**
+	 * Returns the configured time zone, or system default if not configured.
+	 */
+	public ZoneId getTimeZone() {
+		String timeZone = config.getString("dateTime.timeZone");
+		if (timeZone == null || timeZone.isEmpty()) {
+			return ZoneId.systemDefault();
 		}
+		return ZoneId.of(timeZone);
+	}
+
+	public String getRenamePattern() {
+		return config.getString("rename.pattern");
 	}
 
 }

@@ -6,8 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sk.kubisoft.exifutils.core.config.ConfigService;
-import sk.kubisoft.exifutils.core.config.model.ExifUtilsConfiguration;
-import sk.kubisoft.exifutils.core.config.model.RenameConfig;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -27,11 +25,7 @@ class MediaFileNameUtilsTest {
 
     @BeforeEach
     void setUp() {
-        var config = new ExifUtilsConfiguration();
-        var renameConfig = new RenameConfig();
-        renameConfig.setPattern(PATTERN);
-        config.setRename(renameConfig);
-        when(configService.getConfig()).thenReturn(config);
+        when(configService.getRenamePattern()).thenReturn(PATTERN);
         renamer = new MediaFileNameUtils(configService);
     }
 
