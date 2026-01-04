@@ -1,5 +1,8 @@
 package sk.kubisoft.exifutils.core.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -7,6 +10,7 @@ import java.nio.file.Path;
 
 public final class EnvironmentUtils {
 
+    private static final Logger logger = LoggerFactory.getLogger(EnvironmentUtils.class);
     private static final String APP_NAME = "exifutils";
 
     private EnvironmentUtils() {
@@ -20,7 +24,7 @@ public final class EnvironmentUtils {
      * macOS: ~/Library/Application Support/exifutils/
      * Linux: ~/.config/exifutils/ (or custom $XDG_CONFIG_HOME if set)
      */
-    public static Path getApplicationDirectory() {
+    public static Path getConfigDirectory() {
         String os = System.getProperty("os.name").toLowerCase();
         String userHome = System.getProperty("user.home");
 
@@ -35,16 +39,16 @@ public final class EnvironmentUtils {
                     );
         };
 
-        var applicationDirectory = configRootDirectory.resolve(APP_NAME);
-        // create the directory if it does not exist
-        try {
-            Files.createDirectories(applicationDirectory);
-            // TODO try
-            //logger.info("Created directory: {}", configDir);
-        } catch (IOException e) {
-            throw new UncheckedIOException("Failed to create directory: " + applicationDirectory, e);
+        var appConfigDirectory = configRootDirectory.resolve(APP_NAME);
+        if (!Files.exists(appConfigDirectory)) {
+            try {
+                Files.createDirectories(appConfigDirectory);
+                logger.info("Created config directory: {}", appConfigDirectory);
+            } catch (IOException e) {
+                throw new UncheckedIOException("Failed to create directory: " + appConfigDirectory, e);
+            }
         }
 
-        return applicationDirectory;
+        return appConfigDirectory;
     }
 }

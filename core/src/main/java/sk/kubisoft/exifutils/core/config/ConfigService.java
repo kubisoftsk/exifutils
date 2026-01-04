@@ -40,7 +40,7 @@ public class ConfigService {
 	}
 
 	private void loadConfig() {
-		Path configDir = EnvironmentUtils.getApplicationDirectory();
+		Path configDir = EnvironmentUtils.getConfigDirectory();
 		Path configFile = configDir.resolve(CONFIG_FILE_NAME);
 
 		if (!Files.exists(configFile)) {
