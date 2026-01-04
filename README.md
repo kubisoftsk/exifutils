@@ -33,7 +33,9 @@ mv exifutils ~/.local/bin/
 
 ## Configuration
 
-Configuration uses [HOCON format](https://github.com/lightbend/config/blob/main/HOCON.md) with layered loading. Your local `application.conf` overrides built-in defaults - you only need to specify values that differ from defaults.
+The application works out of the box with built-in defaults. Configuration is optional - only create `application.conf` if you need to override defaults.
+
+Configuration uses [HOCON format](https://github.com/lightbend/config/blob/main/HOCON.md) with layered loading.
 
 Configuration file location:
 
@@ -45,7 +47,7 @@ Configuration file location:
 
 On Linux, the `XDG_CONFIG_HOME` environment variable is respected if set.
 
-A template config file is created automatically on first run. Example configuration:
+A template is available at [`config/application-template.conf`](config/application-template.conf). Example:
 
 ```hocon
 exifTool {
