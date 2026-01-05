@@ -23,8 +23,8 @@
     </modules>
 
     <properties>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <native.maven.plugin.version>0.11.3</native.maven.plugin.version>
         <maven.antrun.plugin.version>3.2.0</maven.antrun.plugin.version>
