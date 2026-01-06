@@ -36,6 +36,30 @@ class FileNameAnalyzerTest {
     }
 
     @Test
+    void shouldParseIsoDateWithUnderscoreAndCompactTime() {
+        var result = analyzer.analyzeFileName("2024-01-22_153010.jpg");
+
+        assertTrue(result.isPresent());
+        var date = result.get();
+        assertEquals(
+                LocalDateTime.of(2024, 1, 22, 15, 30, 10),
+                date
+        );
+    }
+
+    @Test
+    void shouldParseIsoDateWithSpaceAndCompactTime() {
+        var result = analyzer.analyzeFileName("2024-01-22 153010.jpg");
+
+        assertTrue(result.isPresent());
+        var date = result.get();
+        assertEquals(
+                LocalDateTime.of(2024, 1, 22, 15, 30, 10),
+                date
+        );
+    }
+
+    @Test
     void shouldParseBasicIsoFormatWithHyphen() {
         var result = analyzer.analyzeFileName("20240122-153010.jpg");
 

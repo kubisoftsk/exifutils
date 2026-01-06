@@ -23,7 +23,9 @@ public class FileNameAnalyzer {
                 createFormatter("yyyyMMddHHmmss"),
                 createFormatter("yyyyMMdd_HHmmss"),
                 createFormatter("yyyyMMdd-HHmmss"),
+                createFormatter("yyyy-MM-dd_HHmmss"),
                 createFormatter("yyyy-MM-dd_HH-mm-ss"),
+                createFormatter("yyyy-MM-dd HHmmss"),
                 createFormatter("yyyy-MM-dd HH-mm-ss"),
 
                 // IMG/VID formats
