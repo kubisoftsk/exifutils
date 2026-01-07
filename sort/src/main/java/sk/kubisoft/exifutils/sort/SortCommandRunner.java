@@ -38,6 +38,12 @@ public class SortCommandRunner implements CommandRunner {
             .desc("Write analyzed date to file metadata.")
             .build();
 
+    private static final Option PATTERN = Option.builder()
+            .option("p").hasArg()
+            .longOpt("pattern").hasArg().argName("PATTERN")
+            .desc("Custom folder pattern using ${date,FORMAT} syntax (e.g., ${date,yyyy}/${date,MM}/${date,dd}).")
+            .build();
+
     private final SortCommand sortCommand;
 
     private final Console console;
@@ -87,7 +93,9 @@ public class SortCommandRunner implements CommandRunner {
 
         boolean writeDate = cmd.hasOption(WRITE.getOpt());
 
-        return new SortCommandInput(args, outputDir, renameFiles, writeDate);
+        String sortPattern = cmd.getOptionValue(PATTERN.getOpt());
+
+        return new SortCommandInput(args, outputDir, renameFiles, writeDate, sortPattern);
     }
 
     @Override
@@ -106,6 +114,7 @@ public class SortCommandRunner implements CommandRunner {
         options.addOption(OUTPUT_DIR);
         options.addOption(RENAME);
         options.addOption(WRITE);
+        options.addOption(PATTERN);
         return options;
     }
 

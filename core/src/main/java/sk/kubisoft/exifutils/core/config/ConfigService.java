@@ -62,4 +62,8 @@ public class ConfigService {
 		return config.getString("rename.pattern");
 	}
 
+	public String getSortPattern() {
+		return config.getString("sort.pattern");
+	}
+
 }

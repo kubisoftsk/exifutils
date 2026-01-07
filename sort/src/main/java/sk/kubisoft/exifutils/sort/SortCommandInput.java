@@ -10,7 +10,13 @@ public record SortCommandInput(
 
         boolean rename,
 
-        boolean writeDate
+        boolean writeDate,
+
+        /**
+         * Custom sort pattern using ${date,FORMAT} syntax.
+         * If null, the default pattern from configuration is used.
+         */
+        String sortPattern
 
 ) {
 }

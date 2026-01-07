@@ -77,7 +77,8 @@ public class SortCommand {
             }
         }
 
-        List<MoveAction> moveActions = mediaFileSorter.sort(mediaFilesWithDate, input.outputDir(), input.rename());
+        List<MoveAction> moveActions = mediaFileSorter.sort(mediaFilesWithDate, input.outputDir(), input.rename(),
+                input.sortPattern());
 
         if (moveActions.isEmpty()) {
             console.println("No files to move.");

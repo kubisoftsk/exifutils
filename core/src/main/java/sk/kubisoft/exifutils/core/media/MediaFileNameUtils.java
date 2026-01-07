@@ -2,15 +2,13 @@ package sk.kubisoft.exifutils.core.media;
 
 import org.apache.commons.lang3.StringUtils;
 import sk.kubisoft.exifutils.core.config.ConfigService;
+import sk.kubisoft.exifutils.core.utils.DatePatternResolver;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
@@ -29,16 +27,8 @@ public class MediaFileNameUtils {
         var mediaDate = mediaFile.getCreationDate();
         LocalDateTime dateTime = mediaDate.getLocalDateTime();
 
-        // Find all ${date,format} patterns
-        Matcher dateMatcher = Pattern.compile("\\$\\{date,([^}]+)}").matcher(result);
-        StringBuilder sb = new StringBuilder();
-        while (dateMatcher.find()) {
-            String format = dateMatcher.group(1);
-            String formatted = dateTime.format(DateTimeFormatter.ofPattern(format));
-            dateMatcher.appendReplacement(sb, formatted);
-        }
-        dateMatcher.appendTail(sb);
-        result = sb.toString();
+        // Resolve ${date,format} patterns
+        result = DatePatternResolver.resolve(result, dateTime);
 
         // Replace other variables
         Map<String, String> replacements = new HashMap<>();
