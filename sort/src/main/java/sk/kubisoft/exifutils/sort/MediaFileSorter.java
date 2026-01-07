@@ -1,10 +1,12 @@
 package sk.kubisoft.exifutils.sort;
 
+import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.file.MoveAction;
 import sk.kubisoft.exifutils.core.file.conflict.DuplicatePreProcessor;
 import sk.kubisoft.exifutils.core.media.AnalyzedMediaFile;
 import sk.kubisoft.exifutils.core.media.MediaDateTime;
 import sk.kubisoft.exifutils.core.media.MediaFileNameUtils;
+import sk.kubisoft.exifutils.core.utils.DatePatternResolver;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,13 +21,19 @@ public class MediaFileSorter {
 
     private final DuplicatePreProcessor duplicatePreProcessor;
 
+    private final ConfigService configService;
+
     @Inject
-    public MediaFileSorter(MediaFileNameUtils fileNameUtils, DuplicatePreProcessor duplicatePreProcessor) {
+    public MediaFileSorter(MediaFileNameUtils fileNameUtils, DuplicatePreProcessor duplicatePreProcessor,
+                           ConfigService configService) {
         this.fileNameUtils = fileNameUtils;
         this.duplicatePreProcessor = duplicatePreProcessor;
+        this.configService = configService;
     }
 
-    public List<MoveAction> sort(List<AnalyzedMediaFile> mediaFiles, Path targetRootPath, boolean rename) {
+    public List<MoveAction> sort(List<AnalyzedMediaFile> mediaFiles, Path targetRootPath, boolean rename,
+                                 String sortPattern) {
+        var effectivePattern = sortPattern != null ? sortPattern : configService.getSortPattern();
         var moveActions = new ArrayList<MoveAction>();
 
         for (var mediaFile : mediaFiles) {
@@ -38,7 +46,7 @@ public class MediaFileSorter {
             } else {
                 targetFileName = originalFileName;
             }
-            var targetDateFolder = createTargetDateFolder(mediaFile.getCreationDate());
+            var targetDateFolder = createTargetDateFolder(mediaFile.getCreationDate(), effectivePattern);
             var finalTargetPath = targetRootPath.resolve(targetDateFolder).resolve(targetFileName);
 
             moveActions.add(new MoveAction(originalPath, finalTargetPath));
@@ -48,14 +56,10 @@ public class MediaFileSorter {
         return duplicatePreProcessor.processConflicts(moveActions);
     }
 
-    private Path createTargetDateFolder(MediaDateTime date) {
-        var localDate = date.getLocalDateTime();
-
-        var year = String.valueOf(localDate.getYear());
-        var month = String.valueOf(localDate.getMonthValue());
-        var paddedMonth = month.length() == 1 ? "0" + month : month;
-
-        return Path.of(year, paddedMonth);
+    private Path createTargetDateFolder(MediaDateTime date, String pattern) {
+        var localDateTime = date.getLocalDateTime();
+        String resolved = DatePatternResolver.resolve(pattern, localDateTime);
+        return Path.of(resolved);
     }
 
 }

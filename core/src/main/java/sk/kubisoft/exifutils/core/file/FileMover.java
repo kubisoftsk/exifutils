@@ -25,6 +25,14 @@ public class FileMover {
     }
 
     public void moveFiles(List<MoveAction> moveActions) {
+        processFiles(moveActions, false);
+    }
+
+    public void copyFiles(List<MoveAction> moveActions) {
+        processFiles(moveActions, true);
+    }
+
+    private void processFiles(List<MoveAction> moveActions, boolean copy) {
         int successCount = 0;
 
         for (var action : moveActions) {
@@ -52,8 +60,8 @@ public class FileMover {
                     continue;
                 }
 
-                // Rest of the existing move logic...
-                if (!Files.isWritable(source)) {
+                // Check source is writable only for move operations
+                if (!copy && !Files.isWritable(source)) {
                     console.errorln("Source file is not writable: %s", source);
                     continue;
                 }
@@ -68,28 +76,35 @@ public class FileMover {
                     continue;
                 }
 
-                console.println("Moving %s", action);
-                // Perform atomic move
-                try {
-                    Files.move(source, target, StandardCopyOption.ATOMIC_MOVE);
+                if (copy) {
+                    console.println("Copying %s", action);
+                    Files.copy(source, target);
                     successCount++;
-                    logger.debug("Successfully moved {} to {}", source, target);
-                } catch (AtomicMoveNotSupportedException e) {
-                    // Fallback to non-atomic move if atomic is not supported
-                    Files.move(source, target);
-                    successCount++;
-                    logger.debug("Successfully moved (non-atomic) {} to {}", source, target);
+                    logger.debug("Successfully copied {} to {}", source, target);
+                } else {
+                    console.println("Moving %s", action);
+                    // Perform atomic move
+                    try {
+                        Files.move(source, target, StandardCopyOption.ATOMIC_MOVE);
+                        successCount++;
+                        logger.debug("Successfully moved {} to {}", source, target);
+                    } catch (AtomicMoveNotSupportedException e) {
+                        // Fallback to non-atomic move if atomic is not supported
+                        Files.move(source, target);
+                        successCount++;
+                        logger.debug("Successfully moved (non-atomic) {} to {}", source, target);
+                    }
                 }
             } catch (SecurityException e) {
-                console.errorln("Security violation moving %s to %s: %s", source, target, e.getMessage());
+                console.errorln("Security violation %s %s to %s: %s", copy ? "copying" : "moving", source, target, e.getMessage());
             } catch (IOException e) {
-                console.errorln("IO error moving %s to %s: %s", source, target, e.getMessage());
+                console.errorln("IO error %s %s to %s: %s", copy ? "copying" : "moving", source, target, e.getMessage());
             } catch (Exception e) {
-                console.errorln("Unexpected error moving %s to %s: %s", source, target, e.getMessage());
+                console.errorln("Unexpected error %s %s to %s: %s", copy ? "copying" : "moving", source, target, e.getMessage());
             }
         }
 
-        console.println("Operation completed. Successfully moved %s out of %s files",
-                successCount, moveActions.size());
+        console.println("Operation completed. Successfully %s %s out of %s files",
+                copy ? "copied" : "moved", successCount, moveActions.size());
     }
 }

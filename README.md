@@ -55,6 +55,37 @@ exifTool {
 }
 ```
 
+## Settings
+
+All available settings with their defaults are defined in [`core/src/main/resources/reference.conf`](core/src/main/resources/reference.conf).
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `exifTool.path` | `""` (use PATH) | Path to the exiftool executable |
+| `dateTime.timeZone` | System default | Default timezone for date/time parsing ([TZDB identifiers](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)) |
+| `rename.pattern` | `IMG_${date,yyyyMMdd}_${date,HHmmss}` | Pattern for renaming files |
+| `sort.pattern` | `${date,yyyy}/${date,MM}` | Pattern for folder structure when sorting |
+
+### Date Pattern Syntax
+
+Both `rename.pattern` and `sort.pattern` use the `${date,FORMAT}` syntax where FORMAT follows [Java DateTimeFormatter](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/format/DateTimeFormatter.html) patterns.
+
+**Sort pattern examples:**
+
+| Pattern | Output | Description |
+|---------|--------|-------------|
+| `${date,yyyy}/${date,MM}` | `2024/07` | Year/month (default) |
+| `${date,yyyy}/${date,MM}/${date,dd}` | `2024/07/15` | Year/month/day |
+| `${date,yyyy}/${date,ww}` | `2024/29` | Year/week of year |
+| `${date,yyyy-MM}` | `2024-07` | Flat year-month |
+| `${date,yyyy}/Q${date,Q}` | `2024/Q3` | Year/quarter |
+
+The sort pattern can be overridden via command line using `-p` or `--pattern`:
+
+```bash
+exifutils sort -o /output -p '${date,yyyy}/${date,MM}/${date,dd}' /input
+```
+
 ## Logging
 
 Log files are stored in platform-specific locations:

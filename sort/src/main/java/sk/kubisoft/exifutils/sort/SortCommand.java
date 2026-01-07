@@ -77,18 +77,24 @@ public class SortCommand {
             }
         }
 
-        List<MoveAction> moveActions = mediaFileSorter.sort(mediaFilesWithDate, input.outputDir(), input.rename());
+        List<MoveAction> moveActions = mediaFileSorter.sort(mediaFilesWithDate, input.outputDir(), input.rename(),
+                input.sortPattern());
 
         if (moveActions.isEmpty()) {
             console.println("No files to move.");
         }
 
-        console.println("Total %d files will be moved:", moveActions.size());
-        moveActions.forEach((moveAction) -> console.println("Move %s", moveAction));
+        console.println("Total %d files will be %s:", moveActions.size(), input.copy() ? "copied" : "moved");
+        moveActions.forEach((moveAction) -> console.println("%s %s", input.copy() ? "Copy" : "Move", moveAction));
 
         if (console.confirmAction("Do you want to continue?")) {
-            console.println("Moving files...");
-            fileMover.moveFiles(moveActions);
+            if (input.copy()) {
+                console.println("Copying files...");
+                fileMover.copyFiles(moveActions);
+            } else {
+                console.println("Moving files...");
+                fileMover.moveFiles(moveActions);
+            }
         } else {
             console.println("Aborted.");
         }
