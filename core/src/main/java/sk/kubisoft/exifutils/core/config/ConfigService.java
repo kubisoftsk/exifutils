@@ -10,7 +10,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.ZoneId;
+import java.util.Optional;
 
 @Singleton
 public class ConfigService {
@@ -64,6 +66,17 @@ public class ConfigService {
 
 	public String getSortPattern() {
 		return config.getString("sort.pattern");
+	}
+
+	/**
+	 * Returns the configured default destination for sort command, or empty if not configured.
+	 */
+	public Optional<Path> getSortDestination() {
+		String destination = config.getString("sort.destination");
+		if (destination == null || destination.isEmpty()) {
+			return Optional.empty();
+		}
+		return Optional.of(Paths.get(destination));
 	}
 
 }
