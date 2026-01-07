@@ -74,20 +74,9 @@ public class FileNameAnalyzer {
 
         // Use default hardcoded patterns
         for (FormatterWithLength formatterWithLength : FORMATTERS) {
-            try {
-                // Try to find a substring that matches our date pattern
-                int maxLength = Math.min(input.length(), formatterWithLength.length());
-                String substring = input.substring(0, maxLength);
-                try {
-                    var result = LocalDateTime.parse(substring, formatterWithLength.formatter());
-                    return Optional.of(result);
-                } catch (DateTimeParseException e) {
-                    // Continue trying with shorter substring
-                    continue;
-                }
-            } catch (Exception e) {
-                // Try next formatter
-                continue;
+            var result = tryParse(input, formatterWithLength.formatter(), formatterWithLength.length());
+            if (result.isPresent()) {
+                return result;
             }
         }
         return Optional.empty();
@@ -95,16 +84,20 @@ public class FileNameAnalyzer {
 
     private Optional<LocalDateTime> tryParseWithUserPattern(String input, String userPattern) {
         try {
-            var formatter = DateTimeFormatter.ofPattern(userPattern);
-            // Remove only the quote characters, keep literal content
-            var patternLength = userPattern.replace("'", "").length();
+            var formatterWithLength = createFormatter(userPattern);
+            return tryParse(input, formatterWithLength.formatter(), formatterWithLength.length());
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<LocalDateTime> tryParse(String input, DateTimeFormatter formatter, int patternLength) {
+        try {
             int maxLength = Math.min(input.length(), patternLength);
             String substring = input.substring(0, maxLength);
             var result = LocalDateTime.parse(substring, formatter);
             return Optional.of(result);
         } catch (DateTimeParseException e) {
-            return Optional.empty();
-        } catch (Exception e) {
             return Optional.empty();
         }
     }
