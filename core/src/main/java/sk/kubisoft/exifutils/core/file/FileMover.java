@@ -33,8 +33,6 @@ public class FileMover {
     }
 
     private void processFiles(List<MoveAction> moveActions, boolean copy) {
-        String operation = copy ? "copy" : "move";
-        String operationPast = copy ? "copied" : "moved";
         int successCount = 0;
 
         for (var action : moveActions) {
@@ -98,15 +96,15 @@ public class FileMover {
                     }
                 }
             } catch (SecurityException e) {
-                console.errorln("Security violation %s %s to %s: %s", operation, source, target, e.getMessage());
+                console.errorln("Security violation %s %s to %s: %s", copy ? "copying" : "moving", source, target, e.getMessage());
             } catch (IOException e) {
-                console.errorln("IO error %s %s to %s: %s", operation, source, target, e.getMessage());
+                console.errorln("IO error %s %s to %s: %s", copy ? "copying" : "moving", source, target, e.getMessage());
             } catch (Exception e) {
-                console.errorln("Unexpected error %s %s to %s: %s", operation, source, target, e.getMessage());
+                console.errorln("Unexpected error %s %s to %s: %s", copy ? "copying" : "moving", source, target, e.getMessage());
             }
         }
 
         console.println("Operation completed. Successfully %s %s out of %s files",
-                operationPast, successCount, moveActions.size());
+                copy ? "copied" : "moved", successCount, moveActions.size());
     }
 }
