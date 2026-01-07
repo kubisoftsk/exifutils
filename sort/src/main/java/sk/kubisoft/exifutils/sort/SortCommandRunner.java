@@ -6,6 +6,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import sk.kubisoft.exifutils.core.CommandArgument;
 import sk.kubisoft.exifutils.core.CommandRunner;
+import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 @Singleton
 public class SortCommandRunner implements CommandRunner {
@@ -22,8 +24,7 @@ public class SortCommandRunner implements CommandRunner {
     private static final Option OUTPUT_DIR = Option.builder()
             .option("o").hasArg()
             .longOpt("outputDir").hasArg().argName("DIR")
-            .required()
-            .desc("Root output directory for the sorted files.")
+            .desc("Root output directory for the sorted files. If not specified, uses sort.destination from config.")
             .build();
 
     private static final Option RENAME = Option.builder()
@@ -54,10 +55,13 @@ public class SortCommandRunner implements CommandRunner {
 
     private final Console console;
 
+    private final ConfigService configService;
+
     @Inject
-    public SortCommandRunner(Console console, SortCommand sortCommand) {
+    public SortCommandRunner(Console console, SortCommand sortCommand, ConfigService configService) {
         this.console = console;
         this.sortCommand = sortCommand;
+        this.configService = configService;
     }
 
     @Override
@@ -78,9 +82,18 @@ public class SortCommandRunner implements CommandRunner {
     private SortCommandInput parseInput(CommandLine cmd) throws ParseException {
         String[] args = cmd.getArgs();
 
-        // Parse output directory (already validated as required by Options setup)
+        // Parse output directory from CLI or fall back to config
         String outputDirStr = cmd.getOptionValue(OUTPUT_DIR.getOpt());
-        Path outputDir = Paths.get(outputDirStr);
+        Path outputDir;
+        if (outputDirStr != null) {
+            outputDir = Paths.get(outputDirStr);
+        } else {
+            Optional<Path> configDestination = configService.getSortDestination();
+            if (configDestination.isEmpty()) {
+                throw new ParseException("Output directory is required. Specify -o/--outputDir or set sort.destination in config.");
+            }
+            outputDir = configDestination.get();
+        }
 
         boolean renameFiles = cmd.hasOption(RENAME.getOpt());
 
