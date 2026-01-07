@@ -156,11 +156,15 @@ public class SetDateCommand {
     }
 
     private List<SetDateAction> listAndParseFromFileNames(List<MediaFile> mediaFiles, ZoneId zoneId, String userPattern) {
-        console.println("Setting date and time for files using pattern guessed from file names");
+        if (userPattern != null && !userPattern.isBlank()) {
+            console.println("Setting date and time for files using user-supplied pattern: %s", userPattern);
+        } else {
+            console.println("Setting date and time for files using pattern guessed from file names");
+        }
 
         List<SetDateAction> actions = new ArrayList<>();
         for (var mediaFile : mediaFiles) {
-            var dateTimeOptional = fileNameAnalyzer.analyzeFileName(mediaFile.getOriginalPath().getFileName().toString());
+            var dateTimeOptional = fileNameAnalyzer.analyzeFileName(mediaFile.getOriginalPath().getFileName().toString(), userPattern);
             dateTimeOptional.ifPresent(localDateTime -> {
                 var offsetToUse = getOffset(localDateTime, zoneId);
                 var mediaDate = new MediaDateTime(localDateTime, offsetToUse);

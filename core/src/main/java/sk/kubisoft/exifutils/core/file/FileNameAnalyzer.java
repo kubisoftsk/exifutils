@@ -56,6 +56,10 @@ public class FileNameAnalyzer {
     }
 
     public Optional<LocalDateTime> analyzeFileName(String fileName) {
+        return analyzeFileName(fileName, null);
+    }
+
+    public Optional<LocalDateTime> analyzeFileName(String fileName, String userPattern) {
         if (fileName == null || fileName.isEmpty()) {
             return Optional.empty();
         }
@@ -63,6 +67,12 @@ public class FileNameAnalyzer {
         // Remove any trailing spaces and common suffixes
         String input = fileName.trim();
 
+        // If user supplied a pattern, use only that (strict mode - no fallback)
+        if (userPattern != null && !userPattern.isBlank()) {
+            return tryParseWithUserPattern(input, userPattern);
+        }
+
+        // Use default hardcoded patterns
         for (FormatterWithLength formatterWithLength : FORMATTERS) {
             try {
                 // Try to find a substring that matches our date pattern
@@ -81,6 +91,22 @@ public class FileNameAnalyzer {
             }
         }
         return Optional.empty();
+    }
+
+    private Optional<LocalDateTime> tryParseWithUserPattern(String input, String userPattern) {
+        try {
+            var formatter = DateTimeFormatter.ofPattern(userPattern);
+            // Remove only the quote characters, keep literal content
+            var patternLength = userPattern.replace("'", "").length();
+            int maxLength = Math.min(input.length(), patternLength);
+            String substring = input.substring(0, maxLength);
+            var result = LocalDateTime.parse(substring, formatter);
+            return Optional.of(result);
+        } catch (DateTimeParseException e) {
+            return Optional.empty();
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     record FormatterWithLength(DateTimeFormatter formatter, int length) {
