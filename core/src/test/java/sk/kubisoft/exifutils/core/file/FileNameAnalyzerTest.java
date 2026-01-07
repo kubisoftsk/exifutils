@@ -140,6 +140,48 @@ class FileNameAnalyzerTest {
         assertTrue(result.isEmpty());
     }
 
+    // User-supplied pattern tests
+
+    @Test
+    void shouldParseWithUserSuppliedPattern() {
+        var result = analyzer.analyzeFileName("photo_2024-01-22_15-30-10.jpg", "'photo_'yyyy-MM-dd'_'HH-mm-ss");
+
+        assertTrue(result.isPresent());
+        assertEquals(LocalDateTime.of(2024, 1, 22, 15, 30, 10), result.get());
+    }
+
+    @Test
+    void shouldParseWithSimpleUserPattern() {
+        var result = analyzer.analyzeFileName("20240122153010_extra.jpg", "yyyyMMddHHmmss");
+
+        assertTrue(result.isPresent());
+        assertEquals(LocalDateTime.of(2024, 1, 22, 15, 30, 10), result.get());
+    }
+
+    @Test
+    void shouldReturnEmptyWhenUserPatternDoesNotMatch() {
+        // User pattern is strict - no fallback to defaults
+        var result = analyzer.analyzeFileName("IMG_20240122_153010.jpg", "'photo_'yyyy-MM-dd");
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void shouldUseDefaultPatternsWhenUserPatternIsNull() {
+        var result = analyzer.analyzeFileName("IMG_20240122_153010.jpg", null);
+
+        assertTrue(result.isPresent());
+        assertEquals(LocalDateTime.of(2024, 1, 22, 15, 30, 10), result.get());
+    }
+
+    @Test
+    void shouldUseDefaultPatternsWhenUserPatternIsBlank() {
+        var result = analyzer.analyzeFileName("IMG_20240122_153010.jpg", "   ");
+
+        assertTrue(result.isPresent());
+        assertEquals(LocalDateTime.of(2024, 1, 22, 15, 30, 10), result.get());
+    }
+
     @Test
     void shouldHandleExtraCharactersAfterDateTime() {
         var result = analyzer.analyzeFileName("IMG_20240122_153010_HDR_BURST1.jpg");

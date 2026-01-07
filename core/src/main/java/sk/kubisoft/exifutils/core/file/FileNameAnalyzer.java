@@ -56,6 +56,10 @@ public class FileNameAnalyzer {
     }
 
     public Optional<LocalDateTime> analyzeFileName(String fileName) {
+        return analyzeFileName(fileName, null);
+    }
+
+    public Optional<LocalDateTime> analyzeFileName(String fileName, String userPattern) {
         if (fileName == null || fileName.isEmpty()) {
             return Optional.empty();
         }
@@ -63,24 +67,39 @@ public class FileNameAnalyzer {
         // Remove any trailing spaces and common suffixes
         String input = fileName.trim();
 
+        // If user supplied a pattern, use only that (strict mode - no fallback)
+        if (userPattern != null && !userPattern.isBlank()) {
+            return tryParseWithUserPattern(input, userPattern);
+        }
+
+        // Use default hardcoded patterns
         for (FormatterWithLength formatterWithLength : FORMATTERS) {
-            try {
-                // Try to find a substring that matches our date pattern
-                int maxLength = Math.min(input.length(), formatterWithLength.length());
-                String substring = input.substring(0, maxLength);
-                try {
-                    var result = LocalDateTime.parse(substring, formatterWithLength.formatter());
-                    return Optional.of(result);
-                } catch (DateTimeParseException e) {
-                    // Continue trying with shorter substring
-                    continue;
-                }
-            } catch (Exception e) {
-                // Try next formatter
-                continue;
+            var result = tryParse(input, formatterWithLength.formatter(), formatterWithLength.length());
+            if (result.isPresent()) {
+                return result;
             }
         }
         return Optional.empty();
+    }
+
+    private Optional<LocalDateTime> tryParseWithUserPattern(String input, String userPattern) {
+        try {
+            var formatterWithLength = createFormatter(userPattern);
+            return tryParse(input, formatterWithLength.formatter(), formatterWithLength.length());
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<LocalDateTime> tryParse(String input, DateTimeFormatter formatter, int patternLength) {
+        try {
+            int maxLength = Math.min(input.length(), patternLength);
+            String substring = input.substring(0, maxLength);
+            var result = LocalDateTime.parse(substring, formatter);
+            return Optional.of(result);
+        } catch (DateTimeParseException e) {
+            return Optional.empty();
+        }
     }
 
     record FormatterWithLength(DateTimeFormatter formatter, int length) {
