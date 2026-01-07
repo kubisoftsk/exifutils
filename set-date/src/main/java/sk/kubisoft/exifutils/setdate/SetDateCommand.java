@@ -74,7 +74,9 @@ public class SetDateCommand {
         }
 
         List<SetDateAction> setDateActionList;
-        if (input.localDateTime() != null) {
+        if (input.fixZone()) {
+            setDateActionList = fixTimeZone(mediaFiles, input.zoneId());
+        } else if (input.localDateTime() != null) {
             setDateActionList = setDateTimeManually(mediaFiles, input.localDateTime(), input.zoneId());
         } else {
             setDateActionList = listAndParseFromFileNames(mediaFiles, input.zoneId(), input.pattern());
@@ -170,6 +172,29 @@ public class SetDateCommand {
                 var mediaDate = new MediaDateTime(localDateTime, offsetToUse);
                 actions.add(new SetDateAction(mediaFile.getOriginalPath(), mediaFile.getMediaType(), mediaDate));
             });
+        }
+
+        return actions;
+    }
+
+    private List<SetDateAction> fixTimeZone(List<MediaFile> mediaFiles, ZoneId zoneId) {
+        console.println("Fixing timezone for files using existing EXIF local date/time");
+
+        var analyzedFiles = mediaAnalyzer.analyze(mediaFiles);
+        List<SetDateAction> actions = new ArrayList<>();
+
+        for (var analyzedFile : analyzedFiles) {
+            var existingDate = analyzedFile.getCreationDate();
+            if (existingDate == null) {
+                console.println("Skipping %s - no EXIF date found", analyzedFile.getOriginalPath().getFileName());
+                continue;
+            }
+
+            var localDateTime = existingDate.getLocalDateTime();
+            var newOffset = getOffset(localDateTime, zoneId);
+            var fixedDate = new MediaDateTime(localDateTime, newOffset);
+
+            actions.add(new SetDateAction(analyzedFile.getOriginalPath(), analyzedFile.getMediaType(), fixedDate));
         }
 
         return actions;
