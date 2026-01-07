@@ -44,6 +44,12 @@ public class SortCommandRunner implements CommandRunner {
             .desc("Custom folder pattern using ${date,FORMAT} syntax (e.g., ${date,yyyy}/${date,MM}/${date,dd}).")
             .build();
 
+    private static final Option COPY = Option.builder()
+            .option("c")
+            .longOpt("copy")
+            .desc("Copy files instead of moving them (useful for experimenting with patterns).")
+            .build();
+
     private final SortCommand sortCommand;
 
     private final Console console;
@@ -95,7 +101,9 @@ public class SortCommandRunner implements CommandRunner {
 
         String sortPattern = cmd.getOptionValue(PATTERN.getOpt());
 
-        return new SortCommandInput(args, outputDir, renameFiles, writeDate, sortPattern);
+        boolean copyFiles = cmd.hasOption(COPY.getOpt());
+
+        return new SortCommandInput(args, outputDir, renameFiles, writeDate, sortPattern, copyFiles);
     }
 
     @Override
@@ -115,6 +123,7 @@ public class SortCommandRunner implements CommandRunner {
         options.addOption(RENAME);
         options.addOption(WRITE);
         options.addOption(PATTERN);
+        options.addOption(COPY);
         return options;
     }
 

@@ -84,12 +84,19 @@ public class SortCommand {
             console.println("No files to move.");
         }
 
-        console.println("Total %d files will be moved:", moveActions.size());
-        moveActions.forEach((moveAction) -> console.println("Move %s", moveAction));
+        String operation = input.copy() ? "copied" : "moved";
+        console.println("Total %d files will be %s:", moveActions.size(), operation);
+        moveActions.forEach((moveAction) -> console.println("%s %s",
+                input.copy() ? "Copy" : "Move", moveAction));
 
         if (console.confirmAction("Do you want to continue?")) {
-            console.println("Moving files...");
-            fileMover.moveFiles(moveActions);
+            if (input.copy()) {
+                console.println("Copying files...");
+                fileMover.copyFiles(moveActions);
+            } else {
+                console.println("Moving files...");
+                fileMover.moveFiles(moveActions);
+            }
         } else {
             console.println("Aborted.");
         }

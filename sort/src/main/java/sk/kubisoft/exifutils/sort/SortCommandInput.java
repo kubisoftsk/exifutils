@@ -16,7 +16,13 @@ public record SortCommandInput(
          * Custom sort pattern using ${date,FORMAT} syntax.
          * If null, the default pattern from configuration is used.
          */
-        String sortPattern
+        String sortPattern,
+
+        /**
+         * If true, copy files instead of moving them.
+         * Useful for experimenting with sort patterns.
+         */
+        boolean copy
 
 ) {
 }
