@@ -102,6 +102,42 @@ Logs are written to `exifutils.log` and rolled daily or when reaching 10MB. Old 
 
 ## Commands
 
+### Common Options
+
+The following option is available across multiple commands that analyze media files:
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--force-field` | `-F` | Force date extraction from a specific EXIF field, bypassing device profiles |
+
+#### Force Field Option (`-F`, `--force-field`)
+
+By default, exifutils uses device-specific profiles to determine which EXIF fields to read for date extraction. The `--force-field` option overrides this behavior and extracts the date from a specific field you specify.
+
+**Available in:** `rename`, `sort`, `set-date`, `shift-date`
+
+**Use cases:**
+- Old video files (e.g., `.MPG`) that lack standard EXIF metadata but have accurate filesystem dates
+- Files where the standard date fields are incorrect but another field contains the correct date
+- Special cases where you need to use a non-standard date field
+
+**Example:**
+```bash
+# Use filesystem modification date for renaming old MPG files
+exifutils rename --force-field FileModifyDate /path/to/old-videos/
+
+# Sort files using a specific metadata field
+exifutils sort -F CreateDate -o /output /input
+
+# List all available fields for a file
+exifutils info -a photo.jpg
+```
+
+**Behavior:**
+- If the specified field exists, its value is used as the creation date
+- If the field doesn't exist or can't be parsed, no date is returned for that file
+- Timezone resolution still applies (GPS fallback, then config default)
+
 ### info
 
 Prints extracted metadata information for given files.
@@ -147,6 +183,7 @@ Sets the creation date in EXIF metadata of media files. This command supports mu
 | `--zone-id` | `-z` | Set timezone ID (e.g., `Europe/Paris`). Falls back to config default if not specified |
 | `--pattern` | `-p` | Parse date from filename using custom DateTimeFormatter pattern |
 | `--fix-zone` | `-f` | Fix timezone using existing EXIF local date/time |
+| `--force-field` | `-F` | Force date extraction from a specific EXIF field (see [Common Options](#common-options)) |
 | `--rename` | `-r` | Rename files after setting date |
 | `--unknown` | `-u` | Only process files with unknown/missing dates |
 
