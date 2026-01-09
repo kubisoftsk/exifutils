@@ -11,7 +11,9 @@ public record RenameCommandInput(
 
         boolean writeDate,
 
-        ZoneId zoneId
+        ZoneId zoneId,
+
+        String forceField
 
 ) {
 }

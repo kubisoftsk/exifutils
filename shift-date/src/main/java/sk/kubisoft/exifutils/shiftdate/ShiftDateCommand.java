@@ -55,7 +55,7 @@ public class ShiftDateCommand {
         List<MediaFile> allMediaFiles = fileExplorer.listMediaFiles(input.inputPaths());
         console.println("Found %d files.", allMediaFiles.size());
 
-        List<AnalyzedMediaFile> analyzedMediaFiles = mediaAnalyzer.analyze(allMediaFiles);
+        List<AnalyzedMediaFile> analyzedMediaFiles = mediaAnalyzer.analyze(allMediaFiles, input.forceField());
 
         List<AnalyzedMediaFile> mediaFilesWithDate = analyzedMediaFiles.stream()
                 .filter(mediaFile -> mediaFile.getCreationDate() != null)

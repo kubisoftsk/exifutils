@@ -257,8 +257,67 @@ class ExifDateExtractorTest {
 		assertThat(exifDateTime.zoneOffset()).isNull();
     }
 
+    @Test
+    void extractDateTimeUsingForceField() {
+        // Using forceField to extract from a specific field (ModifyDate instead of DateTimeOriginal)
+        Map<String, String> metaData = loadMetaData("/exifdata/image_2.txt");
+
+        var exifDateTime = extractWithForceField(IMAGE, metaData, "ModifyDate");
+
+        assertThat(exifDateTime).isNotNull();
+        assertThat(exifDateTime.localDateTime()).hasToString("2023-08-31T18:11:44");
+        assertThat(exifDateTime.localTime()).isTrue();
+        // forceField parses without offset field, so offset should be null
+        assertThat(exifDateTime.zoneOffset()).isNull();
+    }
+
+    @Test
+    void extractDateTimeUsingForceFieldNonExistent() {
+        // Using forceField with a field that does not exist
+        Map<String, String> metaData = loadMetaData("/exifdata/image_2.txt");
+
+        var exifDateTime = extractWithForceField(IMAGE, metaData, "NonExistentField");
+
+        assertThat(exifDateTime).isNull();
+    }
+
+    @Test
+    void extractDateTimeUsingForceFieldFromFileModifyDate() {
+        // Using forceField to extract from FileModifyDate
+        // This tests the use case mentioned in the issue - using filesystem dates
+        Map<String, String> metaData = loadMetaData("/exifdata/image_2.txt");
+
+        var exifDateTime = extractWithForceField(IMAGE, metaData, "FileModifyDate");
+
+        assertThat(exifDateTime).isNotNull();
+        // FileModifyDate: 2025:01:04 15:55:52+01:00 - parsed as local time
+        assertThat(exifDateTime.localDateTime()).hasToString("2025-01-04T15:55:52");
+        assertThat(exifDateTime.localTime()).isTrue();
+        // Offset is embedded in the date string and should be parsed
+        assertThat(exifDateTime.zoneOffset()).hasToString("+01:00");
+    }
+
+    @Test
+    void extractDateTimeUsingForceFieldForImageWithNoDate() {
+        // Using forceField on an image that normally has no date
+        Map<String, String> metaData = loadMetaData("/exifdata/image_1.txt");
+
+        // Normal extraction should return null
+        var normalExifDateTime = extract(IMAGE, metaData);
+        assertThat(normalExifDateTime).isNull();
+
+        // forceField should also return null if the field doesn't exist
+        var forcedExifDateTime = extractWithForceField(IMAGE, metaData, "DateTimeOriginal");
+        assertThat(forcedExifDateTime).isNull();
+    }
+
     private ExifDateTime extract(MediaType mediaType, Map<String, String> metadata) {
         return exifDateExtractor.extractCreationDate(mediaType, metadata)
+                .orElse(null);
+    }
+
+    private ExifDateTime extractWithForceField(MediaType mediaType, Map<String, String> metadata, String forceField) {
+        return exifDateExtractor.extractCreationDate(mediaType, metadata, forceField)
                 .orElse(null);
     }
 

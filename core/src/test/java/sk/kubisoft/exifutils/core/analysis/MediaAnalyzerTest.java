@@ -184,7 +184,7 @@ class MediaAnalyzerTest {
     private MediaDateTime analyze(MediaType mediaType, LocalDateTime localDateTime, boolean localTime,
 								  ZoneOffset zoneOffset, ZoneOffset gpsResolvedZoneOffset) {
 		if (localDateTime != null) {
-			when(exifDateExtractorMock.extractCreationDate(any(), any()))
+			when(exifDateExtractorMock.extractCreationDate(any(), any(), any()))
 					.thenReturn(Optional.of(new ExifDateTime(localDateTime, localTime, zoneOffset)));
 		}
         when(metaDataHandlerFactoryMock.create())

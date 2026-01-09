@@ -59,6 +59,13 @@ public class SetDateCommandRunner implements CommandRunner {
                     "Uses existing EXIF date/time but applies the timezone from --zone-id (or default config).")
             .build();
 
+    private static final Option FORCE_FIELD = Option.builder()
+            .option("F")
+            .longOpt("force-field")
+            .desc("Force date extraction from the specified EXIF field, bypassing device profiles. Use 'info -a' to list available fields. Works with --fix-zone and --unknown options.")
+            .hasArg()
+            .build();
+
     private final Console console;
 
     private final SetDateCommand setDateCommand;
@@ -119,6 +126,7 @@ public class SetDateCommandRunner implements CommandRunner {
         boolean rename = cmd.hasOption(RENAME.getOpt());
         boolean unknownOnly = cmd.hasOption(UNKNOWN_ONLY.getOpt());
         boolean fixZone = cmd.hasOption(FIX_ZONE.getOpt());
+        String forceField = cmd.getOptionValue(FORCE_FIELD.getOpt());
 
         if (fixZone) {
             if (dateTime != null) {
@@ -132,7 +140,7 @@ public class SetDateCommandRunner implements CommandRunner {
             }
         }
 
-        return new SetDateCommandInput(args, patternStr, dateTime, zoneId, rename, unknownOnly, fixZone);
+        return new SetDateCommandInput(args, patternStr, dateTime, zoneId, rename, unknownOnly, fixZone, forceField);
     }
 
     @Override
@@ -154,6 +162,7 @@ public class SetDateCommandRunner implements CommandRunner {
         options.addOption(RENAME);
         options.addOption(UNKNOWN_ONLY);
         options.addOption(FIX_ZONE);
+        options.addOption(FORCE_FIELD);
         return options;
     }
 

@@ -30,6 +30,13 @@ public class ShiftDateCommandRunner implements CommandRunner {
             .desc("Rename files according to their original date and time.")
             .build();
 
+    private static final Option FORCE_FIELD = Option.builder()
+            .option("F")
+            .longOpt("force-field")
+            .desc("Force date extraction from the specified EXIF field, bypassing device profiles. Use 'info -a' to list available fields.")
+            .hasArg()
+            .build();
+
     private final Console console;
 
     private final ShiftDateCommand shiftDateCommand;
@@ -68,7 +75,9 @@ public class ShiftDateCommandRunner implements CommandRunner {
 
         boolean rename = cmd.hasOption(RENAME.getOpt());
 
-        return new ShiftDateCommandInput(args, duration, rename);
+        String forceField = cmd.getOptionValue(FORCE_FIELD.getOpt());
+
+        return new ShiftDateCommandInput(args, duration, rename, forceField);
     }
 
     @Override
@@ -87,6 +96,7 @@ public class ShiftDateCommandRunner implements CommandRunner {
         var options = new Options();
         options.addOption(DURATION);
         options.addOption(RENAME);
+        options.addOption(FORCE_FIELD);
         return options;
     }
 

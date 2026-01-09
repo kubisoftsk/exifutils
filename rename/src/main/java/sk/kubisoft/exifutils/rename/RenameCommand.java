@@ -55,7 +55,7 @@ public class RenameCommand {
         List<MediaFile> mediaFiles = fileExplorer.listMediaFiles(input.inputPaths());
         console.println("Found %d files.", mediaFiles.size());
 
-        List<AnalyzedMediaFile> analyzedFiles = mediaAnalyzer.analyze(mediaFiles);
+        List<AnalyzedMediaFile> analyzedFiles = mediaAnalyzer.analyze(mediaFiles, input.forceField());
 
         List<AnalyzedMediaFile> mediaFilesWithDate = analyzedFiles.stream()
                 .filter(mediaFile -> mediaFile.getCreationDate() != null)

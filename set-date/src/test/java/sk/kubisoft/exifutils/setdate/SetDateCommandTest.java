@@ -94,7 +94,7 @@ class SetDateCommandTest {
                 Collections.emptyMap(), existingDate);
 
         when(fileExplorer.listMediaFiles(any())).thenReturn(List.of(mediaFile));
-        when(mediaAnalyzer.analyze(anyList())).thenReturn(List.of(analyzedFile));
+        when(mediaAnalyzer.analyze(anyList(), any())).thenReturn(List.of(analyzedFile));
 
         // When: fix-zone is called with Europe/Athens timezone (+03:00 in summer)
         ZoneId correctZone = ZoneId.of("Europe/Athens");
@@ -105,7 +105,8 @@ class SetDateCommandTest {
                 correctZone,
                 false, // no rename
                 false, // not unknownOnly
-                true   // fixZone = true
+                true,  // fixZone = true
+                null   // forceField = null
         );
 
         command.execute(input);
@@ -136,7 +137,7 @@ class SetDateCommandTest {
                 Collections.emptyMap(), existingDate);
 
         when(fileExplorer.listMediaFiles(any())).thenReturn(List.of(mediaFile));
-        when(mediaAnalyzer.analyze(anyList())).thenReturn(List.of(analyzedFile));
+        when(mediaAnalyzer.analyze(anyList(), any())).thenReturn(List.of(analyzedFile));
 
         // When: fix-zone is called without specifying zoneId (should use default from config)
         SetDateCommandInput input = new SetDateCommandInput(
@@ -146,7 +147,8 @@ class SetDateCommandTest {
                 null,  // no zoneId - should use default
                 false, // no rename
                 false, // not unknownOnly
-                true   // fixZone = true
+                true,  // fixZone = true
+                null   // forceField = null
         );
 
         command.execute(input);
@@ -169,13 +171,13 @@ class SetDateCommandTest {
                 Collections.emptyMap(), null); // no creation date
 
         when(fileExplorer.listMediaFiles(any())).thenReturn(List.of(mediaFile));
-        when(mediaAnalyzer.analyze(anyList())).thenReturn(List.of(analyzedFile));
+        when(mediaAnalyzer.analyze(anyList(), any())).thenReturn(List.of(analyzedFile));
 
         // When: fix-zone is called
         SetDateCommandInput input = new SetDateCommandInput(
                 new String[]{"/test"},
                 null, null, ZoneId.of("Europe/Paris"),
-                false, false, true
+                false, false, true, null
         );
 
         command.execute(input);
