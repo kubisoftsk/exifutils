@@ -52,6 +52,13 @@ public class SetDateCommandRunner implements CommandRunner {
             .desc("Set date and time only to files with unknown date and time. This option will skip files with already set date and time.")
             .build();
 
+    private static final Option FIX_ZONE = Option.builder()
+            .option("f")
+            .longOpt("fix-zone")
+            .desc("Fix timezone for files that have correct local date/time but wrong or missing timezone. " +
+                    "Uses existing EXIF date/time but applies the timezone from --zone-id (or default config).")
+            .build();
+
     private final Console console;
 
     private final SetDateCommand setDateCommand;
@@ -111,7 +118,21 @@ public class SetDateCommandRunner implements CommandRunner {
 
         boolean rename = cmd.hasOption(RENAME.getOpt());
         boolean unknownOnly = cmd.hasOption(UNKNOWN_ONLY.getOpt());
-        return new SetDateCommandInput(args, patternStr, dateTime, zoneId, rename, unknownOnly);
+        boolean fixZone = cmd.hasOption(FIX_ZONE.getOpt());
+
+        if (fixZone) {
+            if (dateTime != null) {
+                throw new ParseException("Options --fix-zone and --date-time are mutually exclusive.");
+            }
+            if (StringUtils.isNotBlank(patternStr)) {
+                throw new ParseException("Options --fix-zone and --pattern are mutually exclusive.");
+            }
+            if (unknownOnly) {
+                throw new ParseException("Options --fix-zone and --unknown are mutually exclusive.");
+            }
+        }
+
+        return new SetDateCommandInput(args, patternStr, dateTime, zoneId, rename, unknownOnly, fixZone);
     }
 
     @Override
@@ -132,6 +153,7 @@ public class SetDateCommandRunner implements CommandRunner {
         options.addOption(ZONE_ID);
         options.addOption(RENAME);
         options.addOption(UNKNOWN_ONLY);
+        options.addOption(FIX_ZONE);
         return options;
     }
 

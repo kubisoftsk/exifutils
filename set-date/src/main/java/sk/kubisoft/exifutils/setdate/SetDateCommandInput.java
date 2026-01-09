@@ -15,5 +15,7 @@ public record SetDateCommandInput(
 
         boolean rename,
 
-        boolean unknownOnly) {
+        boolean unknownOnly,
+
+        boolean fixZone) {
 }
