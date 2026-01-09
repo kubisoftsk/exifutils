@@ -44,6 +44,10 @@ public class MediaAnalyzer {
 	}
 
 	public List<AnalyzedMediaFile> analyze(List<MediaFile> files) {
+		return analyze(files, null);
+	}
+
+	public List<AnalyzedMediaFile> analyze(List<MediaFile> files, String forceField) {
 		List<AnalyzedMediaFile> analyzedFiles = new ArrayList<>();
 		console.println("Starting analysis of media files...", files.size());
 		try (var metaDataHandler = metaDataHandlerFactory.create()) {
@@ -58,7 +62,7 @@ public class MediaAnalyzer {
 				}
 
 				try {
-					AnalyzedMediaFile mediaFile = analyze(file, metaDataHandler, gpsZoneExtractor);
+					AnalyzedMediaFile mediaFile = analyze(file, metaDataHandler, gpsZoneExtractor, forceField);
 					analyzedFiles.add(mediaFile);
 				} catch (Exception e) {
 					console.error("Error processing file: %s", e, path);
@@ -77,9 +81,9 @@ public class MediaAnalyzer {
 		return analyzedFiles;
 	}
 
-	private AnalyzedMediaFile analyze(MediaFile mediaFile, MetaDataHandler metaDataHandler, GpsZoneExtractor gpsZoneExtractor) {
+	private AnalyzedMediaFile analyze(MediaFile mediaFile, MetaDataHandler metaDataHandler, GpsZoneExtractor gpsZoneExtractor, String forceField) {
 		Map<String, String> metadata = metaDataHandler.extractMetaData(mediaFile.getOriginalPath());
-		Optional<ExifDateTime> extractedDateOptional = exifDateExtractor.extractCreationDate(mediaFile.getMediaType(), metadata);
+		Optional<ExifDateTime> extractedDateOptional = exifDateExtractor.extractCreationDate(mediaFile.getMediaType(), metadata, forceField);
 		if (extractedDateOptional.isEmpty()) {
 			console.verboseln("No date found in metadata");
 			return new AnalyzedMediaFile(mediaFile.getOriginalPath(), mediaFile.getMediaType(), metadata, null);

@@ -17,5 +17,7 @@ public record SetDateCommandInput(
 
         boolean unknownOnly,
 
-        boolean fixZone) {
+        boolean fixZone,
+
+        String forceField) {
 }

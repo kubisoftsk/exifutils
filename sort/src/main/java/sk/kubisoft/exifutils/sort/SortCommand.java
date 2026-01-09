@@ -46,7 +46,7 @@ public class SortCommand {
         List<MediaFile> allMediaFiles = fileExplorer.listMediaFiles(input.inputPaths());
         console.println("Found %d files.", allMediaFiles.size());
 
-        List<AnalyzedMediaFile> analyzedFiles = mediaAnalyzer.analyze(allMediaFiles);
+        List<AnalyzedMediaFile> analyzedFiles = mediaAnalyzer.analyze(allMediaFiles, input.forceField());
 
         List<AnalyzedMediaFile> mediaFilesWithDate = analyzedFiles.stream()
                 .filter(mediaFile -> mediaFile.getCreationDate() != null)

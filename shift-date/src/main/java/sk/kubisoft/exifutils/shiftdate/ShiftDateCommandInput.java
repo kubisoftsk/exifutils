@@ -8,7 +8,9 @@ public record ShiftDateCommandInput(
 
         Duration duration,
 
-        boolean rename
+        boolean rename,
+
+        String forceField
 ) {
 
 }

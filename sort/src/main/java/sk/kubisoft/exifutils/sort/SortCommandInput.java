@@ -22,7 +22,13 @@ public record SortCommandInput(
          * If true, copy files instead of moving them.
          * Useful for experimenting with sort patterns.
          */
-        boolean copy
+        boolean copy,
+
+        /**
+         * If set, force date extraction from the specified EXIF field,
+         * bypassing device profiles.
+         */
+        String forceField
 
 ) {
 }

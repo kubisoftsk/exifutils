@@ -35,6 +35,14 @@ public class ExifDateExtractor {
     }
 
     public Optional<ExifDateTime> extractCreationDate(MediaType mediaType, Map<String, String> metadata) {
+        return extractCreationDate(mediaType, metadata, null);
+    }
+
+    public Optional<ExifDateTime> extractCreationDate(MediaType mediaType, Map<String, String> metadata, String forceField) {
+        if (StringUtils.isNotBlank(forceField)) {
+            return extractFromForcedField(metadata, forceField);
+        }
+
 		DeviceProfile deviceProfile = deviceProfileService.getProfileForTags(metadata);
 		console.verboseln("Using device profile: %s", deviceProfile.getName());
 
@@ -73,6 +81,31 @@ public class ExifDateExtractor {
 			console.verboseln("No valid date found in EXIF tags");
 			return Optional.empty();
 		}
+    }
+
+    private Optional<ExifDateTime> extractFromForcedField(Map<String, String> metadata, String forceField) {
+        console.verboseln("Using forced field: %s", forceField);
+        String dateStr = metadata.get(forceField);
+
+        if (StringUtils.isBlank(dateStr)) {
+            console.verboseln("No value found in forced field: %s", forceField);
+            return Optional.empty();
+        }
+
+        try {
+            // Parse as local time with no offset field - timezone resolution will be handled by MediaAnalyzer
+            var exifDateTimeOptional = exifDateParser.parseExifDate(dateStr, true, null);
+            if (exifDateTimeOptional.isPresent()) {
+                console.verboseln("Found date in forced field %s: %s", forceField, exifDateTimeOptional.get());
+                return exifDateTimeOptional;
+            }
+        } catch (DateTimeParseException e) {
+            logger.warn("Could not parse date from forced field {}: '{}': {}", forceField, dateStr, e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error parsing date from forced field {}: {}", forceField, dateStr, e);
+        }
+
+        return Optional.empty();
     }
 
 }

@@ -63,7 +63,7 @@ public class SetDateCommand {
 
         List<MediaFile> mediaFiles;
         if (input.unknownOnly()) {
-            var analyzedMediaFiles = mediaAnalyzer.analyze(allMediaFiles);
+            var analyzedMediaFiles = mediaAnalyzer.analyze(allMediaFiles, input.forceField());
 
             mediaFiles = analyzedMediaFiles.stream()
                     .filter(mediaFile -> mediaFile.getCreationDate() == null)
@@ -75,7 +75,7 @@ public class SetDateCommand {
 
         List<SetDateAction> setDateActionList;
         if (input.fixZone()) {
-            setDateActionList = fixTimeZone(mediaFiles, input.zoneId());
+            setDateActionList = fixTimeZone(mediaFiles, input.zoneId(), input.forceField());
         } else if (input.localDateTime() != null) {
             setDateActionList = setDateTimeManually(mediaFiles, input.localDateTime(), input.zoneId());
         } else {
@@ -177,10 +177,10 @@ public class SetDateCommand {
         return actions;
     }
 
-    private List<SetDateAction> fixTimeZone(List<MediaFile> mediaFiles, ZoneId zoneId) {
+    private List<SetDateAction> fixTimeZone(List<MediaFile> mediaFiles, ZoneId zoneId, String forceField) {
         console.println("Fixing timezone for files using existing EXIF local date/time");
 
-        var analyzedFiles = mediaAnalyzer.analyze(mediaFiles);
+        var analyzedFiles = mediaAnalyzer.analyze(mediaFiles, forceField);
         List<SetDateAction> actions = new ArrayList<>();
 
         for (var analyzedFile : analyzedFiles) {

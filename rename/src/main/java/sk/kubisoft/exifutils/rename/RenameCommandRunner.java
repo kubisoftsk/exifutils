@@ -37,6 +37,13 @@ public class RenameCommandRunner implements CommandRunner {
             .hasArg()
             .build();
 
+    private static final Option FORCE_FIELD = Option.builder()
+            .option("F")
+            .longOpt("force-field")
+            .desc("Force date extraction from the specified EXIF field, bypassing device profiles. Use 'info -a' to list available fields.")
+            .hasArg()
+            .build();
+
     private final Console console;
 
     private final RenameCommand renameCommand;
@@ -89,7 +96,9 @@ public class RenameCommandRunner implements CommandRunner {
             }
         }
 
-        return new RenameCommandInput(args, outputDir, writeDate, zoneId);
+        String forceField = cmd.getOptionValue(FORCE_FIELD.getOpt());
+
+        return new RenameCommandInput(args, outputDir, writeDate, zoneId, forceField);
     }
 
     @Override
@@ -108,6 +117,7 @@ public class RenameCommandRunner implements CommandRunner {
         options.addOption(WRITE);
         options.addOption(ZONE_ID);
         options.addOption(OUTPUT_DIR);
+        options.addOption(FORCE_FIELD);
         return options;
     }
 

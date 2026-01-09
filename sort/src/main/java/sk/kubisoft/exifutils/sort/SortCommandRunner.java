@@ -51,6 +51,13 @@ public class SortCommandRunner implements CommandRunner {
             .desc("Copy files instead of moving them (useful for experimenting with patterns).")
             .build();
 
+    private static final Option FORCE_FIELD = Option.builder()
+            .option("F")
+            .longOpt("force-field")
+            .desc("Force date extraction from the specified EXIF field, bypassing device profiles. Use 'info -a' to list available fields.")
+            .hasArg()
+            .build();
+
     private final SortCommand sortCommand;
 
     private final Console console;
@@ -116,7 +123,9 @@ public class SortCommandRunner implements CommandRunner {
 
         boolean copyFiles = cmd.hasOption(COPY.getOpt());
 
-        return new SortCommandInput(args, outputDir, renameFiles, writeDate, sortPattern, copyFiles);
+        String forceField = cmd.getOptionValue(FORCE_FIELD.getOpt());
+
+        return new SortCommandInput(args, outputDir, renameFiles, writeDate, sortPattern, copyFiles, forceField);
     }
 
     @Override
@@ -137,6 +146,7 @@ public class SortCommandRunner implements CommandRunner {
         options.addOption(WRITE);
         options.addOption(PATTERN);
         options.addOption(COPY);
+        options.addOption(FORCE_FIELD);
         return options;
     }
 
