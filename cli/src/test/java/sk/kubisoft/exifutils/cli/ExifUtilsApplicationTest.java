@@ -30,13 +30,13 @@ class ExifUtilsApplicationTest {
     }
 
     @Test
-    void daggerComponentShouldProvideAllSevenCommands() {
+    void daggerComponentShouldProvideAllSixCommands() {
         var component = DaggerExifUtilsModule_CliComponent.create();
         var commandRunners = component.commandRunners();
 
         assertThat(commandRunners)
-            .hasSize(7)
-            .containsKeys("info", "sort", "set-date", "shift-date", "set-gps", "dedupe", "rename");
+            .hasSize(6)
+            .containsKeys("info", "sort", "set-date", "shift-date", "set-gps", "rename");
     }
 
     @Test

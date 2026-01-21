@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Documentation restructured into `docs/` directory
 
+### Removed
+- `dedupe` command (use dedicated tools like fdupes, rdfind, or jdupes)
+
 ## [1.0.0] - TBD
 
 ### Added
@@ -27,7 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `set-date` command - Set EXIF date from filename or manual input
 - `shift-date` command - Shift EXIF date by duration
 - `set-gps` command - Set or remove GPS coordinates
-- `dedupe` command - Find duplicate files
 - HOCON configuration support
 - Cross-platform support (Linux, Windows, macOS)
 - GraalVM native image support

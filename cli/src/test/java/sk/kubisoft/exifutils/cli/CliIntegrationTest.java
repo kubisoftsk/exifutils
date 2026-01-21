@@ -31,11 +31,11 @@ class CliIntegrationTest {
     @Test
     void shouldHaveAllRequiredCommands() {
         assertThat(commandRunners)
-            .containsKeys("info", "sort", "set-date", "shift-date", "set-gps", "dedupe", "rename");
+            .containsKeys("info", "sort", "set-date", "shift-date", "set-gps", "rename");
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"info", "sort", "set-date", "shift-date", "set-gps", "dedupe", "rename"})
+    @ValueSource(strings = {"info", "sort", "set-date", "shift-date", "set-gps", "rename"})
     void commandShouldHaveNonNullDescription(String commandName) {
         CommandRunner runner = commandRunners.get(commandName);
 
@@ -45,7 +45,7 @@ class CliIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"info", "sort", "set-date", "shift-date", "set-gps", "dedupe", "rename"})
+    @ValueSource(strings = {"info", "sort", "set-date", "shift-date", "set-gps", "rename"})
     void commandShouldHaveNonNullOptions(String commandName) {
         CommandRunner runner = commandRunners.get(commandName);
 

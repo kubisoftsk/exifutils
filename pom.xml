@@ -13,7 +13,6 @@
     <modules>
         <module>cli</module>
         <module>core</module>
-        <module>dedupe</module>
         <module>info</module>
         <module>rename</module>
         <module>set-date</module>

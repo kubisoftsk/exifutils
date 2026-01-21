@@ -38,16 +38,16 @@ class CliApplicationBootstrapTest {
         assertThat(commandRunners)
             .isNotNull()
             .isNotEmpty()
-            .containsKeys("info", "sort", "set-date", "shift-date", "set-gps", "dedupe", "rename");
+            .containsKeys("info", "sort", "set-date", "shift-date", "set-gps", "rename");
     }
 
     @Test
-    void shouldHaveSevenCommandRunners() {
+    void shouldHaveSixCommandRunners() {
         ExifUtilsModule.CliComponent component = DaggerExifUtilsModule_CliComponent.create();
 
         Map<String, CommandRunner> commandRunners = component.commandRunners();
 
-        assertThat(commandRunners).hasSize(7);
+        assertThat(commandRunners).hasSize(6);
     }
 
     @Test

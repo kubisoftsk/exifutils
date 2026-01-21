@@ -12,7 +12,6 @@ import sk.kubisoft.exifutils.core.CommandRunner;
 import sk.kubisoft.exifutils.core.file.FileService;
 import sk.kubisoft.exifutils.core.file.SystemFileService;
 import sk.kubisoft.exifutils.core.logging.Console;
-import sk.kubisoft.exifutils.dedupe.DeDupeCommandRunner;
 import sk.kubisoft.exifutils.info.InfoCommandRunner;
 import sk.kubisoft.exifutils.rename.RenameCommandRunner;
 import sk.kubisoft.exifutils.setdate.SetDateCommandRunner;
@@ -88,14 +87,6 @@ public class ExifUtilsModule {
     @StringKey("set-gps")
     CommandRunner provideSetGpsCommandRunner(SetGpsCommandRunner setGpsCommandRunner) {
         return setGpsCommandRunner;
-    }
-
-    @Provides
-    @Singleton
-    @IntoMap
-    @StringKey("dedupe")
-    CommandRunner provideDeDupeCommandRunner(DeDupeCommandRunner deDupeCommandRunner) {
-        return deDupeCommandRunner;
     }
 
     @Provides

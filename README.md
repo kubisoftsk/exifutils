@@ -69,7 +69,6 @@ exifutils set-date ~/Pictures/whatsapp-photos/
 - [set-date](docs/commands/set-date.md) - Set EXIF date
 - [shift-date](docs/commands/shift-date.md) - Shift date by duration
 - [set-gps](docs/commands/set-gps.md) - Manage GPS data
-- [dedupe](docs/commands/dedupe.md) - Find duplicates
 
 ## Configuration
 
