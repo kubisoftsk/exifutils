@@ -14,7 +14,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.*;
+import java.util.function.Function;
 
 @Singleton
 public class FileExplorer {
@@ -84,24 +86,23 @@ public class FileExplorer {
     private Comparator<Path> getComparator(FileSortOrder sortOrder) {
         return switch (sortOrder) {
             case NAME -> Comparator.naturalOrder();
-            case LAST_MODIFIED -> (p1, p2) -> compareByAttribute(p1, p2, false);
-            case CREATED -> (p1, p2) -> compareByAttribute(p1, p2, true);
+            case LAST_MODIFIED -> compareByAttribute(BasicFileAttributes::lastModifiedTime);
+            case CREATED -> compareByAttribute(BasicFileAttributes::creationTime);
         };
     }
 
-    private int compareByAttribute(Path p1, Path p2, boolean useCreationTime) {
-        try {
-            var attr1 = Files.readAttributes(p1, BasicFileAttributes.class);
-            var attr2 = Files.readAttributes(p2, BasicFileAttributes.class);
+    private Comparator<Path> compareByAttribute(Function<BasicFileAttributes, FileTime> timeExtractor) {
+        return (p1, p2) -> {
+            try {
+                var attr1 = Files.readAttributes(p1, BasicFileAttributes.class);
+                var attr2 = Files.readAttributes(p2, BasicFileAttributes.class);
 
-            var time1 = useCreationTime ? attr1.creationTime() : attr1.lastModifiedTime();
-            var time2 = useCreationTime ? attr2.creationTime() : attr2.lastModifiedTime();
-
-            return time1.compareTo(time2);
-        } catch (IOException e) {
-            logger.warn("Error reading file attributes for {} or {}: {}", p1, p2, e.getMessage());
-            return 0;
-        }
+                return timeExtractor.apply(attr1).compareTo(timeExtractor.apply(attr2));
+            } catch (IOException e) {
+                logger.warn("Error reading file attributes for {} or {}: {}", p1, p2, e.getMessage());
+                return 0;
+            }
+        };
     }
 
     private List<Path> listPath(Path path) {
