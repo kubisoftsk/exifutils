@@ -1,5 +1,7 @@
 package sk.kubisoft.exifutils.shiftdate;
 
+import sk.kubisoft.exifutils.core.file.FileSortOrder;
+
 import java.time.Duration;
 
 public record ShiftDateCommandInput(
@@ -10,7 +12,9 @@ public record ShiftDateCommandInput(
 
         boolean rename,
 
-        String forceField
+        String forceField,
+
+        FileSortOrder sortOrder
 ) {
 
 }

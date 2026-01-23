@@ -18,6 +18,7 @@ exifutils sort [OPTIONS] <FILE|DIR>...
 | `--write-date` | `-w` | Write analyzed date to file metadata |
 | `--copy` | `-c` | Copy files instead of moving them |
 | `--force-field` | `-F` | Force date extraction from specific EXIF field |
+| `--order` | `-O` | Input file ordering: `name`, `last-modified`, `created`. Overrides config |
 
 ## Examples
 

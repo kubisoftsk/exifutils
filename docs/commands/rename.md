@@ -16,6 +16,7 @@ exifutils rename [OPTIONS] <FILE|DIR>...
 | `--write-date` | `-w` | Write analyzed date to file metadata |
 | `--zone-id` | `-z` | Timezone ID for date writing (requires `-w`) |
 | `--force-field` | `-F` | Force date extraction from specific EXIF field |
+| `--order` | `-O` | Input file ordering: `name`, `last-modified`, `created`. Overrides config |
 
 ## Examples
 

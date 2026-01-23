@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sk.kubisoft.exifutils.core.analysis.MediaTypeDetector;
+import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.media.MediaFile;
 import sk.kubisoft.exifutils.core.media.MediaType;
 
@@ -26,12 +27,15 @@ class FileExplorerTest {
     private FileService fileService;
     @Mock
     private MediaTypeDetector mediaTypeDetector;
+    @Mock
+    private ConfigService configService;
 
     private FileExplorer fileExplorer;
 
     @BeforeEach
     void setUp() throws IOException {
-        fileExplorer = new FileExplorer(fileService, mediaTypeDetector);
+        lenient().when(configService.getFileSortOrder()).thenReturn(FileSortOrder.NAME);
+        fileExplorer = new FileExplorer(fileService, mediaTypeDetector, configService);
         mockTestFiles();
     }
 

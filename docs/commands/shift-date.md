@@ -15,6 +15,7 @@ exifutils shift-date [OPTIONS] <FILE|DIR>...
 | `--duration` | `-d` | Duration to shift (required). Format: ISO 8601 |
 | `--rename` | `-r` | Rename files after shifting date |
 | `--force-field` | `-F` | Force date extraction from specific EXIF field |
+| `--order` | `-O` | Input file ordering: `name`, `last-modified`, `created`. Overrides config |
 
 ## Duration Format
 

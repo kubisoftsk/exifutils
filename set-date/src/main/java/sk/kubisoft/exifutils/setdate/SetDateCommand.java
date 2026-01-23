@@ -58,7 +58,7 @@ public class SetDateCommand {
         console.verboseln("Running ExifUtils Rename command with input: %s", input);
 
         console.println("Searching for media files...");
-        List<MediaFile> allMediaFiles = fileExplorer.listMediaFiles(input.inputPaths());
+        List<MediaFile> allMediaFiles = fileExplorer.listMediaFiles(input.inputPaths(), input.sortOrder());
         console.println("Found %d files.", allMediaFiles.size());
 
         List<MediaFile> mediaFiles;
