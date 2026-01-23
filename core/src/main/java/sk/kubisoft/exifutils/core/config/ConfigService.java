@@ -8,6 +8,8 @@ import sk.kubisoft.exifutils.core.utils.EnvironmentUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import sk.kubisoft.exifutils.core.file.FileSortOrder;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -77,6 +79,11 @@ public class ConfigService {
 			return Optional.empty();
 		}
 		return Optional.of(Paths.get(destination));
+	}
+
+	public FileSortOrder getFileSortOrder() {
+		String sortOrder = config.getString("file.sortOrder");
+		return FileSortOrder.fromString(sortOrder);
 	}
 
 }

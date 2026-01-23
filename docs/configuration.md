@@ -48,6 +48,22 @@ dateTime {
 }
 ```
 
+### file
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `file.sortOrder` | `name` | Order in which input files are processed. Values: `name`, `last-modified`, `created` |
+
+```hocon
+file {
+  sortOrder = "created"
+}
+```
+
+This is useful when files have non-meaningful names (e.g., UUIDs) but their filesystem creation or modification dates reflect the correct order.
+
+Can be overridden per-command with the `--order` / `-O` CLI option.
+
 ### rename
 
 | Setting | Default | Description |
@@ -89,6 +105,10 @@ exifTool {
 
 dateTime {
   timeZone = "Europe/Bratislava"
+}
+
+file {
+  sortOrder = "name"
 }
 
 rename {

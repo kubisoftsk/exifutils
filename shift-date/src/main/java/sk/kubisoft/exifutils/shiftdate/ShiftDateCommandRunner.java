@@ -6,6 +6,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import sk.kubisoft.exifutils.core.CommandArgument;
 import sk.kubisoft.exifutils.core.CommandRunner;
+import sk.kubisoft.exifutils.core.file.FileSortOrder;
 import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
@@ -34,6 +35,13 @@ public class ShiftDateCommandRunner implements CommandRunner {
             .option("F")
             .longOpt("force-field")
             .desc("Force date extraction from the specified EXIF field, bypassing device profiles. Use 'info -a' to list available fields.")
+            .hasArg()
+            .build();
+
+    private static final Option ORDER = Option.builder()
+            .option("O")
+            .longOpt("order")
+            .desc("Order in which input files are processed. Valid values: name, last-modified, created. Overrides config setting.")
             .hasArg()
             .build();
 
@@ -77,7 +85,16 @@ public class ShiftDateCommandRunner implements CommandRunner {
 
         String forceField = cmd.getOptionValue(FORCE_FIELD.getOpt());
 
-        return new ShiftDateCommandInput(args, duration, rename, forceField);
+        FileSortOrder sortOrder = null;
+        if (cmd.hasOption(ORDER)) {
+            try {
+                sortOrder = FileSortOrder.fromString(cmd.getOptionValue(ORDER.getOpt()));
+            } catch (IllegalArgumentException e) {
+                throw new ParseException(e.getMessage());
+            }
+        }
+
+        return new ShiftDateCommandInput(args, duration, rename, forceField, sortOrder);
     }
 
     @Override
@@ -97,6 +114,7 @@ public class ShiftDateCommandRunner implements CommandRunner {
         options.addOption(DURATION);
         options.addOption(RENAME);
         options.addOption(FORCE_FIELD);
+        options.addOption(ORDER);
         return options;
     }
 

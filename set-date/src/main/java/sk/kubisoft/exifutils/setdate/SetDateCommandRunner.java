@@ -7,6 +7,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import sk.kubisoft.exifutils.core.CommandArgument;
 import sk.kubisoft.exifutils.core.CommandRunner;
+import sk.kubisoft.exifutils.core.file.FileSortOrder;
 import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
@@ -63,6 +64,13 @@ public class SetDateCommandRunner implements CommandRunner {
             .option("F")
             .longOpt("force-field")
             .desc("Force date extraction from the specified EXIF field, bypassing device profiles. Use 'info -a' to list available fields. Works with --fix-zone and --unknown options.")
+            .hasArg()
+            .build();
+
+    private static final Option ORDER = Option.builder()
+            .option("O")
+            .longOpt("order")
+            .desc("Order in which input files are processed. Valid values: name, last-modified, created. Overrides config setting.")
             .hasArg()
             .build();
 
@@ -128,6 +136,15 @@ public class SetDateCommandRunner implements CommandRunner {
         boolean fixZone = cmd.hasOption(FIX_ZONE.getOpt());
         String forceField = cmd.getOptionValue(FORCE_FIELD.getOpt());
 
+        FileSortOrder sortOrder = null;
+        if (cmd.hasOption(ORDER)) {
+            try {
+                sortOrder = FileSortOrder.fromString(cmd.getOptionValue(ORDER.getOpt()));
+            } catch (IllegalArgumentException e) {
+                throw new ParseException(e.getMessage());
+            }
+        }
+
         if (fixZone) {
             if (dateTime != null) {
                 throw new ParseException("Options --fix-zone and --date-time are mutually exclusive.");
@@ -140,7 +157,7 @@ public class SetDateCommandRunner implements CommandRunner {
             }
         }
 
-        return new SetDateCommandInput(args, patternStr, dateTime, zoneId, rename, unknownOnly, fixZone, forceField);
+        return new SetDateCommandInput(args, patternStr, dateTime, zoneId, rename, unknownOnly, fixZone, forceField, sortOrder);
     }
 
     @Override
@@ -163,6 +180,7 @@ public class SetDateCommandRunner implements CommandRunner {
         options.addOption(UNKNOWN_ONLY);
         options.addOption(FIX_ZONE);
         options.addOption(FORCE_FIELD);
+        options.addOption(ORDER);
         return options;
     }
 

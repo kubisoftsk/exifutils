@@ -1,5 +1,7 @@
 package sk.kubisoft.exifutils.rename;
 
+import sk.kubisoft.exifutils.core.file.FileSortOrder;
+
 import java.nio.file.Path;
 import java.time.ZoneId;
 
@@ -13,7 +15,9 @@ public record RenameCommandInput(
 
         ZoneId zoneId,
 
-        String forceField
+        String forceField,
+
+        FileSortOrder sortOrder
 
 ) {
 }

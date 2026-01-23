@@ -1,5 +1,7 @@
 package sk.kubisoft.exifutils.sort;
 
+import sk.kubisoft.exifutils.core.file.FileSortOrder;
+
 import java.nio.file.Path;
 
 public record SortCommandInput(
@@ -28,7 +30,9 @@ public record SortCommandInput(
          * If set, force date extraction from the specified EXIF field,
          * bypassing device profiles.
          */
-        String forceField
+        String forceField,
+
+        FileSortOrder sortOrder
 
 ) {
 }

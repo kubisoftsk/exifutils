@@ -52,7 +52,7 @@ public class ShiftDateCommand {
         console.verboseln("Running ExifUtils shift-date command with input: %s", input);
 
         console.println("Searching for media files...");
-        List<MediaFile> allMediaFiles = fileExplorer.listMediaFiles(input.inputPaths());
+        List<MediaFile> allMediaFiles = fileExplorer.listMediaFiles(input.inputPaths(), input.sortOrder());
         console.println("Found %d files.", allMediaFiles.size());
 
         List<AnalyzedMediaFile> analyzedMediaFiles = mediaAnalyzer.analyze(allMediaFiles, input.forceField());

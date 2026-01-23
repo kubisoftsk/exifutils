@@ -19,6 +19,7 @@ exifutils set-date [OPTIONS] <FILE|DIR>...
 | `--force-field` | `-F` | Force date extraction from specific EXIF field |
 | `--rename` | `-r` | Rename files after setting date |
 | `--unknown` | `-u` | Only process files with unknown/missing dates |
+| `--order` | `-O` | Input file ordering: `name`, `last-modified`, `created`. Overrides config |
 
 ## Modes
 
