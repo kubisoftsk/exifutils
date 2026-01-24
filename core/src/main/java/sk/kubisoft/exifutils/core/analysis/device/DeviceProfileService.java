@@ -29,6 +29,7 @@ public class DeviceProfileService {
 		files.add("olympus-fe120.yml");
 		files.add("kodak-m1033.yml");
 		files.add("samsung-galaxy-a52s.yml");
+		files.add("google-pixel-6.yml");
 
 		RESOURCE_PROFILE_FILE_NAMES = Collections.unmodifiableList(files);
 	}

@@ -1,0 +1,14 @@
+name: Google Pixel 6 Pro
+
+tags:
+  AndroidMake: Google
+  AndroidModel: Pixel 6 Pro
+
+imageFields:
+  - dateField: DateTimeOriginal
+    localTime: true
+    offsetField: OffsetTimeOriginal
+
+videoFields:
+  - dateField: CreateDate
+    localTime: true
