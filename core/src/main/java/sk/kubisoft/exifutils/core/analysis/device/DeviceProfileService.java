@@ -30,6 +30,7 @@ public class DeviceProfileService {
 		files.add("kodak-m1033.yml");
 		files.add("samsung-galaxy-a52s.yml");
 		files.add("google-pixel-6.yml");
+		files.add("google-pixel-10.yml");
 
 		RESOURCE_PROFILE_FILE_NAMES = Collections.unmodifiableList(files);
 	}
