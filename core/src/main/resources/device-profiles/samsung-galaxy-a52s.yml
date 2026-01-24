@@ -1,0 +1,14 @@
+name: Samsung Galaxy A52s 5G
+
+tags:
+  Author: Galaxy A52s 5G
+  SamsungModel: SM-A528B
+
+imageFields:
+  - dateField: DateTimeOriginal
+    localTime: true
+    offsetField: OffsetTimeOriginal
+
+videoFields:
+  - dateField: CreateDate
+    localTime: true
