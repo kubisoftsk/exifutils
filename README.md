@@ -82,6 +82,16 @@ Works out of the box. Optional config file for customization:
 
 See [Configuration Guide](docs/configuration.md) for details.
 
+## Logs
+
+| Platform | Path |
+|----------|------|
+| Linux | `~/.local/share/exifutils/logs/` |
+| Windows | `%LOCALAPPDATA%\exifutils\logs\` |
+| macOS | `~/Library/Logs/exifutils/` |
+
+On Linux, if `$XDG_DATA_HOME` is set, logs are in `$XDG_DATA_HOME/exifutils/logs/` instead.
+
 ## License
 
 [MIT](LICENSE)
