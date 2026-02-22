@@ -48,9 +48,16 @@ exifutils set-date -p "yyyy-MM-dd" /path/to/photos/
 
 # Filenames like "20230815_143022_HDR.jpg"
 exifutils set-date -p "yyyyMMdd_HHmmss" /path/to/photos/
+
+# Filenames like "P_20160202_122916_PN.jpg" (literal prefix/suffix with single quotes)
+exifutils set-date -p "'P_'yyyyMMdd'_'HHmmss" /path/to/photos/
 ```
 
 The pattern uses [Java DateTimeFormatter](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/format/DateTimeFormatter.html) syntax.
+
+**Literal text:** Wrap non-date parts in single quotes so they are matched as-is (e.g., `'P_'` matches the literal `P_` prefix). This is standard DateTimeFormatter quoting syntax.
+
+**Trailing text:** Any suffix after the matched pattern (e.g., `_PN`, `_HDR`, `_BURST1`) is automatically ignored — only the portion of the filename needed to satisfy the pattern is parsed.
 
 ### Mode 3: Manual date/time
 
