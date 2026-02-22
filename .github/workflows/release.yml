@@ -1,0 +1,172 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 1.2.3). Leave empty to auto-determine from conventional commits.'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    name: Prepare release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.resolve-version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto-determine next version from conventional commits
+        if: inputs.version == ''
+        uses: mathieudutour/github-tag-action@v6.2
+        id: auto-version
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          dry_run: true
+          default_bump: patch
+
+      - name: Resolve version
+        id: resolve-version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            VERSION="${{ steps.auto-version.outputs.new_version }}"
+            if [ -z "$VERSION" ]; then
+              echo "Could not determine next version from commits. Please provide version manually."
+              exit 1
+            fi
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set release version in pom.xml
+        run: mvn versions:set -DnewVersion=${{ steps.resolve-version.outputs.version }} -DgenerateBackupPoms=false
+
+      - name: Commit release version and tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: release ${{ steps.resolve-version.outputs.version }}"
+          git tag "v${{ steps.resolve-version.outputs.version }}"
+          git push origin main --tags
+
+  build:
+    name: Build ${{ matrix.os-name }} native binary
+    needs: prepare
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            os-name: Linux
+            artifact-name: exifutils-linux-native
+            artifact-path: cli/target/exifutils
+          - os: windows-latest
+            os-name: Windows
+            artifact-name: exifutils-windows-native
+            artifact-path: cli/target/exifutils.exe
+
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.prepare.outputs.version }}
+
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'
+          distribution: 'graalvm-community'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          native-image-job-reports: 'true'
+
+      - name: Setup MSVC (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build native binary (Windows)
+        if: matrix.os == 'windows-latest'
+        run: mvn -Pnative -DskipTests package
+        shell: cmd
+
+      - name: Build native binary (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: mvn -Pnative -DskipTests package
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-path }}
+          if-no-files-found: error
+          retention-days: 1
+
+  release:
+    name: Create GitHub Release and bump snapshot
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download Linux binary
+        uses: actions/download-artifact@v4
+        with:
+          name: exifutils-linux-native
+          path: dist/linux
+
+      - name: Download Windows binary
+        uses: actions/download-artifact@v4
+        with:
+          name: exifutils-windows-native
+          path: dist/windows
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.prepare.outputs.version }}
+          name: v${{ needs.prepare.outputs.version }}
+          generate_release_notes: true
+          files: |
+            dist/linux/exifutils
+            dist/windows/exifutils.exe
+
+      - name: Bump to next snapshot version
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          PATCH=$(echo $VERSION | cut -d. -f3)
+          NEXT_PATCH=$((PATCH + 1))
+          MAJOR=$(echo $VERSION | cut -d. -f1)
+          MINOR=$(echo $VERSION | cut -d. -f2)
+          NEXT_SNAPSHOT="${MAJOR}.${MINOR}.${NEXT_PATCH}-SNAPSHOT"
+          mvn versions:set -DnewVersion=$NEXT_SNAPSHOT -DgenerateBackupPoms=false
+          echo "NEXT_SNAPSHOT=$NEXT_SNAPSHOT" >> $GITHUB_ENV
+
+      - name: Commit snapshot version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: bump version to ${{ env.NEXT_SNAPSHOT }}"
+          git push origin main
