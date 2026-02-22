@@ -28,7 +28,6 @@
   DateTimeOriginal     : 2013:01:03 09:44:05
   DaylightSavings      : 0
   DigitalZoomRatio     : 1
-  Directory            : C:/Users/jakub/Pictures/roztriedit/2013/2013-01-03 mraz na novy rok
   DirectoryNumber      : 100
   EffectiveMaxAperture : 5.33935941668014
   EncodingProcess      : 0

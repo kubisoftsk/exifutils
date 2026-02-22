@@ -15,7 +15,6 @@
   DateDisplayFormat    : 2
   DateTimeOriginal     : 2013:01:11 12:43:35
   DaylightSavings      : 0
-  Directory            : C:/Users/jakub/Pictures/roztriedit/2013/2013-01-11 prechadzka so psom
   Duration             : 69.1691
   ExifToolVersion      : 13.11
   FileAccessDate       : 2025:03:02 20:48:29+01:00
