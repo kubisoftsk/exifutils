@@ -68,7 +68,7 @@ export PATH="$HOME/.local/bin:$PATH"
 Requires Java 21+ and Maven.
 
 ```bash
-git clone https://github.com/your-username/exifutils.git
+git clone https://github.com/kubisoftsk/exifutils.git
 cd exifutils
 mvn clean package -DskipTests
 ```
@@ -86,7 +86,7 @@ java -jar cli/target/exifutils-cli-1.0.0-SNAPSHOT-jar-with-dependencies.jar [com
 Requires GraalVM 21+ with native-image.
 
 ```bash
-git clone https://github.com/your-username/exifutils.git
+git clone https://github.com/kubisoftsk/exifutils.git
 cd exifutils
 mvn clean package -Pnative -DskipTests
 ```

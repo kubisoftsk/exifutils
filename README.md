@@ -1,5 +1,8 @@
 # exifutils
 
+[![Build](https://github.com/kubisoftsk/exifutils/actions/workflows/build.yml/badge.svg)](https://github.com/kubisoftsk/exifutils/actions/workflows/build.yml)
+[![Build Native](https://github.com/kubisoftsk/exifutils/actions/workflows/build-native.yml/badge.svg)](https://github.com/kubisoftsk/exifutils/actions/workflows/build-native.yml)
+
 A command-line tool for organizing and renaming media files by their EXIF metadata.
 
 ## Features
