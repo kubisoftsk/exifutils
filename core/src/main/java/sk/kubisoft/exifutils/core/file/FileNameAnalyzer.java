@@ -4,7 +4,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,7 +52,14 @@ public class FileNameAnalyzer {
     }
 
     private static FormatterWithLength createFormatter(String pattern) {
-        var formatter = DateTimeFormatter.ofPattern(pattern);
+        // Default missing time-of-day fields to midnight, so date-only patterns
+        // (e.g. "yyyy-MM-dd") can still be resolved into a LocalDateTime.
+        var formatter = new DateTimeFormatterBuilder()
+                .appendPattern(pattern)
+                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+                .toFormatter();
         var length = pattern.replaceAll("'", "").length();
         return new FormatterWithLength(formatter, length);
     }
