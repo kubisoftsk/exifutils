@@ -82,6 +82,11 @@ public class SetDateCommand {
             setDateActionList = listAndParseFromFileNames(mediaFiles, input.zoneId(), input.pattern());
         }
 
+        if (setDateActionList.isEmpty()) {
+            console.println("No files to set date.");
+            return;
+        }
+
         console.println("Total %d files will have date set.", setDateActionList.size());
         setDateActionList.forEach((action) -> console.println("%s", action));
 

@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -187,8 +188,8 @@ class SetDateCommandTest {
 
         command.execute(input);
 
-        // Then: no actions should be performed
-        verify(exifDateSetter).setDateTime(actionsCaptor.capture());
-        assertThat(actionsCaptor.getValue()).isEmpty();
+        // Then: no actions should be performed, and the user should not be prompted
+        verify(exifDateSetter, never()).setDateTime(anyList());
+        verify(console, never()).confirmAction(any());
     }
 }
