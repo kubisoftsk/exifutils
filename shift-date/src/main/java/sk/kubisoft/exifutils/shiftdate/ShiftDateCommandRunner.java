@@ -6,6 +6,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import sk.kubisoft.exifutils.core.CommandArgument;
 import sk.kubisoft.exifutils.core.CommandRunner;
+import sk.kubisoft.exifutils.core.file.FileFilter;
+import sk.kubisoft.exifutils.core.file.FileFilterOptions;
 import sk.kubisoft.exifutils.core.file.FileSortOrder;
 import sk.kubisoft.exifutils.core.logging.Console;
 
@@ -94,7 +96,9 @@ public class ShiftDateCommandRunner implements CommandRunner {
             }
         }
 
-        return new ShiftDateCommandInput(args, duration, rename, forceField, sortOrder);
+        FileFilter filter = FileFilterOptions.parse(cmd);
+
+        return new ShiftDateCommandInput(args, duration, rename, forceField, sortOrder, filter);
     }
 
     @Override
@@ -115,6 +119,7 @@ public class ShiftDateCommandRunner implements CommandRunner {
         options.addOption(RENAME);
         options.addOption(FORCE_FIELD);
         options.addOption(ORDER);
+        FileFilterOptions.addTo(options);
         return options;
     }
 

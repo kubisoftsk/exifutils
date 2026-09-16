@@ -128,4 +128,80 @@ class FileExplorerTest {
         );
     }
 
+    @Test
+    void testListFilesRootDirWithGlobInclude() {
+        var filter = FileFilter.of(List.of("*.jpg"), List.of());
+
+        var files = fileExplorer.listFiles(new String[]{"root"}, null, filter);
+
+        assertThat(files).containsExactlyInAnyOrder(
+                Path.of("root", "IMG_00001.jpg"),
+                Path.of("root", "IMG_00002.jpg"),
+                Path.of("root", "first", "P2110001.jpg"),
+                Path.of("root", "first", "P2110002.jpg")
+        );
+    }
+
+    @Test
+    void testListFilesRootDirWithGlobExclude() {
+        var filter = FileFilter.of(List.of(), List.of("*.mov"));
+
+        var files = fileExplorer.listFiles(new String[]{"root"}, null, filter);
+
+        assertThat(files).containsExactlyInAnyOrder(
+                Path.of("root", "IMG_00001.jpg"),
+                Path.of("root", "IMG_00002.jpg"),
+                Path.of("root", "first", "P2110001.jpg"),
+                Path.of("root", "first", "P2110002.jpg"),
+                Path.of("root", "first", "readme.txt")
+        );
+    }
+
+    @Test
+    void testListFilesRootDirWithRegexInclude() {
+        var filter = FileFilter.of(List.of("regex:IMG_.*"), List.of());
+
+        var files = fileExplorer.listFiles(new String[]{"root"}, null, filter);
+
+        assertThat(files).containsExactlyInAnyOrder(
+                Path.of("root", "IMG_00001.jpg"),
+                Path.of("root", "IMG_00002.jpg")
+        );
+    }
+
+    @Test
+    void testListFilesRootDirWithCombinedIncludeExclude() {
+        var filter = FileFilter.of(List.of("*.jpg"), List.of("P21*"));
+
+        var files = fileExplorer.listFiles(new String[]{"root"}, null, filter);
+
+        assertThat(files).containsExactlyInAnyOrder(
+                Path.of("root", "IMG_00001.jpg"),
+                Path.of("root", "IMG_00002.jpg")
+        );
+    }
+
+    @Test
+    void testListFilesRootDirNoFilterRegression() {
+        var files = fileExplorer.listFiles(new String[]{"root"}, null);
+
+        assertThat(files).containsExactlyInAnyOrder(Path.of("root", "DSC_4321.mov"),
+                Path.of("root", "first", "P2110001.jpg"),
+                Path.of("root", "first", "P2110002.jpg"),
+                Path.of("root", "first", "P2110003.mov"),
+                Path.of("root", "first", "readme.txt"),
+                Path.of("root", "IMG_00001.jpg"),
+                Path.of("root", "IMG_00002.jpg")
+        );
+    }
+
+    @Test
+    void testListFilesSpecificPathNotFiltered() {
+        var filter = FileFilter.of(List.of(), List.of("IMG_*.jpg"));
+
+        var files = fileExplorer.listFiles(new String[]{"root/IMG_00001.jpg"}, null, filter);
+
+        assertThat(files).containsExactlyInAnyOrder(Path.of("root/IMG_00001.jpg"));
+    }
+
 }

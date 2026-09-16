@@ -17,6 +17,10 @@ exifutils rename [OPTIONS] <FILE|DIR>...
 | `--zone-id` | `-z` | Timezone ID for date writing (requires `-w`) |
 | `--force-field` | `-F` | Force date extraction from specific EXIF field |
 | `--order` | `-O` | Input file ordering: `name`, `last-modified`, `created`. Overrides config |
+| `--include` | `-i` | Only include files matching PATTERN (glob or `regex:` prefix). Repeatable |
+| `--exclude` | `-x` | Exclude files matching PATTERN (glob or `regex:` prefix). Applied after `--include`. Repeatable |
+
+See [File Filtering](../filtering.md) for more pattern examples.
 
 ## Examples
 

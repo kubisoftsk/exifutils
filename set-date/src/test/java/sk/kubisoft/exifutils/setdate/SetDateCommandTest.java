@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import sk.kubisoft.exifutils.core.analysis.MediaAnalyzer;
 import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.file.FileExplorer;
+import sk.kubisoft.exifutils.core.file.FileFilter;
 import sk.kubisoft.exifutils.core.file.FileNameAnalyzer;
 import sk.kubisoft.exifutils.core.file.FileMover;
 import sk.kubisoft.exifutils.core.file.SetDateAction;
@@ -93,7 +94,7 @@ class SetDateCommandTest {
         AnalyzedMediaFile analyzedFile = new AnalyzedMediaFile(testPath, MediaType.IMAGE,
                 Collections.emptyMap(), existingDate);
 
-        when(fileExplorer.listMediaFiles(any(), any())).thenReturn(List.of(mediaFile));
+        when(fileExplorer.listMediaFiles(any(), any(), any())).thenReturn(List.of(mediaFile));
         when(mediaAnalyzer.analyze(anyList(), any())).thenReturn(List.of(analyzedFile));
 
         // When: fix-zone is called with Europe/Athens timezone (+03:00 in summer)
@@ -107,7 +108,8 @@ class SetDateCommandTest {
                 false, // not unknownOnly
                 true,  // fixZone = true
                 null,  // forceField = null
-                null   // sortOrder = null (use config default)
+                null,  // sortOrder = null (use config default)
+                FileFilter.NONE
         );
 
         command.execute(input);
@@ -137,7 +139,7 @@ class SetDateCommandTest {
         AnalyzedMediaFile analyzedFile = new AnalyzedMediaFile(testPath, MediaType.IMAGE,
                 Collections.emptyMap(), existingDate);
 
-        when(fileExplorer.listMediaFiles(any(), any())).thenReturn(List.of(mediaFile));
+        when(fileExplorer.listMediaFiles(any(), any(), any())).thenReturn(List.of(mediaFile));
         when(mediaAnalyzer.analyze(anyList(), any())).thenReturn(List.of(analyzedFile));
 
         // When: fix-zone is called without specifying zoneId (should use default from config)
@@ -150,7 +152,8 @@ class SetDateCommandTest {
                 false, // not unknownOnly
                 true,  // fixZone = true
                 null,  // forceField = null
-                null   // sortOrder = null (use config default)
+                null,  // sortOrder = null (use config default)
+                FileFilter.NONE
         );
 
         command.execute(input);
@@ -172,14 +175,14 @@ class SetDateCommandTest {
         AnalyzedMediaFile analyzedFile = new AnalyzedMediaFile(testPath, MediaType.IMAGE,
                 Collections.emptyMap(), null); // no creation date
 
-        when(fileExplorer.listMediaFiles(any(), any())).thenReturn(List.of(mediaFile));
+        when(fileExplorer.listMediaFiles(any(), any(), any())).thenReturn(List.of(mediaFile));
         when(mediaAnalyzer.analyze(anyList(), any())).thenReturn(List.of(analyzedFile));
 
         // When: fix-zone is called
         SetDateCommandInput input = new SetDateCommandInput(
                 new String[]{"/test"},
                 null, null, ZoneId.of("Europe/Paris"),
-                false, false, true, null, null
+                false, false, true, null, null, FileFilter.NONE
         );
 
         command.execute(input);

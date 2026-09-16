@@ -43,7 +43,7 @@ public class SortCommand {
         console.verboseln("Running ExifUtils Sort command with input: {}", input);
 
         console.println("Searching for media files...");
-        List<MediaFile> allMediaFiles = fileExplorer.listMediaFiles(input.inputPaths(), input.sortOrder());
+        List<MediaFile> allMediaFiles = fileExplorer.listMediaFiles(input.inputPaths(), input.sortOrder(), input.filter());
         console.println("Found %d files.", allMediaFiles.size());
 
         List<AnalyzedMediaFile> analyzedFiles = mediaAnalyzer.analyze(allMediaFiles, input.forceField());

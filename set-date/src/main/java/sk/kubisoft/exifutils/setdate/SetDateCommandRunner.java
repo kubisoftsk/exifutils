@@ -7,6 +7,8 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import sk.kubisoft.exifutils.core.CommandArgument;
 import sk.kubisoft.exifutils.core.CommandRunner;
+import sk.kubisoft.exifutils.core.file.FileFilter;
+import sk.kubisoft.exifutils.core.file.FileFilterOptions;
 import sk.kubisoft.exifutils.core.file.FileSortOrder;
 import sk.kubisoft.exifutils.core.logging.Console;
 
@@ -157,7 +159,9 @@ public class SetDateCommandRunner implements CommandRunner {
             }
         }
 
-        return new SetDateCommandInput(args, patternStr, dateTime, zoneId, rename, unknownOnly, fixZone, forceField, sortOrder);
+        FileFilter filter = FileFilterOptions.parse(cmd);
+
+        return new SetDateCommandInput(args, patternStr, dateTime, zoneId, rename, unknownOnly, fixZone, forceField, sortOrder, filter);
     }
 
     @Override
@@ -181,6 +185,7 @@ public class SetDateCommandRunner implements CommandRunner {
         options.addOption(FIX_ZONE);
         options.addOption(FORCE_FIELD);
         options.addOption(ORDER);
+        FileFilterOptions.addTo(options);
         return options;
     }
 

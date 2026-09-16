@@ -6,6 +6,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import sk.kubisoft.exifutils.core.CommandArgument;
 import sk.kubisoft.exifutils.core.CommandRunner;
+import sk.kubisoft.exifutils.core.file.FileFilter;
+import sk.kubisoft.exifutils.core.file.FileFilterOptions;
 import sk.kubisoft.exifutils.core.file.FileSortOrder;
 import sk.kubisoft.exifutils.core.logging.Console;
 
@@ -115,7 +117,9 @@ public class RenameCommandRunner implements CommandRunner {
             }
         }
 
-        return new RenameCommandInput(args, outputDir, writeDate, zoneId, forceField, sortOrder);
+        FileFilter filter = FileFilterOptions.parse(cmd);
+
+        return new RenameCommandInput(args, outputDir, writeDate, zoneId, forceField, sortOrder, filter);
     }
 
     @Override
@@ -136,6 +140,7 @@ public class RenameCommandRunner implements CommandRunner {
         options.addOption(OUTPUT_DIR);
         options.addOption(FORCE_FIELD);
         options.addOption(ORDER);
+        FileFilterOptions.addTo(options);
         return options;
     }
 

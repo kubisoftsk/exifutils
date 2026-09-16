@@ -7,6 +7,8 @@ import org.apache.commons.cli.ParseException;
 import sk.kubisoft.exifutils.core.CommandArgument;
 import sk.kubisoft.exifutils.core.CommandRunner;
 import sk.kubisoft.exifutils.core.config.ConfigService;
+import sk.kubisoft.exifutils.core.file.FileFilter;
+import sk.kubisoft.exifutils.core.file.FileFilterOptions;
 import sk.kubisoft.exifutils.core.file.FileSortOrder;
 import sk.kubisoft.exifutils.core.logging.Console;
 
@@ -142,7 +144,9 @@ public class SortCommandRunner implements CommandRunner {
             }
         }
 
-        return new SortCommandInput(args, outputDir, renameFiles, writeDate, sortPattern, copyFiles, forceField, sortOrder);
+        FileFilter filter = FileFilterOptions.parse(cmd);
+
+        return new SortCommandInput(args, outputDir, renameFiles, writeDate, sortPattern, copyFiles, forceField, sortOrder, filter);
     }
 
     @Override
@@ -165,6 +169,7 @@ public class SortCommandRunner implements CommandRunner {
         options.addOption(COPY);
         options.addOption(FORCE_FIELD);
         options.addOption(ORDER);
+        FileFilterOptions.addTo(options);
         return options;
     }
 

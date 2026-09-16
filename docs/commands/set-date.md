@@ -20,6 +20,10 @@ exifutils set-date [OPTIONS] <FILE|DIR>...
 | `--rename` | `-r` | Rename files after setting date |
 | `--unknown` | `-u` | Only process files with unknown/missing dates |
 | `--order` | `-O` | Input file ordering: `name`, `last-modified`, `created`. Overrides config |
+| `--include` | `-i` | Only include files matching PATTERN (glob or `regex:` prefix). Repeatable |
+| `--exclude` | `-x` | Exclude files matching PATTERN (glob or `regex:` prefix). Applied after `--include`. Repeatable |
+
+See [File Filtering](../filtering.md) for more pattern examples.
 
 ## Modes
 

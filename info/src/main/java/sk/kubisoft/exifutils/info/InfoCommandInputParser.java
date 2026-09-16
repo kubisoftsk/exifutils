@@ -2,6 +2,8 @@ package sk.kubisoft.exifutils.info;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
+import sk.kubisoft.exifutils.core.file.FileFilter;
+import sk.kubisoft.exifutils.core.file.FileFilterOptions;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -18,6 +20,8 @@ public class InfoCommandInputParser {
 
         var printAll = cmd.hasOption(InfoCommandRunner.PRINT_ALL.getOpt());
 
-        return new InfoCommandInput(args, printAll);
+        FileFilter filter = FileFilterOptions.parse(cmd);
+
+        return new InfoCommandInput(args, printAll, filter);
     }
 }

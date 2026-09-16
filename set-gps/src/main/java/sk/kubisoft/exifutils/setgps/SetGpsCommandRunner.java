@@ -7,6 +7,8 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import sk.kubisoft.exifutils.core.CommandArgument;
 import sk.kubisoft.exifutils.core.CommandRunner;
+import sk.kubisoft.exifutils.core.file.FileFilter;
+import sk.kubisoft.exifutils.core.file.FileFilterOptions;
 import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
@@ -56,15 +58,16 @@ public class SetGpsCommandRunner implements CommandRunner {
 
     private SetGpsCommandInput parseInput(CommandLine cmd) throws ParseException {
         String[] args = cmd.getArgs();
+        FileFilter filter = FileFilterOptions.parse(cmd);
         if (cmd.hasOption(DELETE)) {
-            return new SetGpsCommandInput(args, null, null, true);
+            return new SetGpsCommandInput(args, null, null, true, filter);
         } else {
             String coordinatesString = cmd.getOptionValue(COORDINATES);
             if (StringUtils.isBlank(coordinatesString)) {
                 throw new ParseException("GPS coordinates must be provided.");
             }
             var coordinates = parseCoordinates(coordinatesString);
-            return new SetGpsCommandInput(args, coordinates.latitude(), coordinates.longitude(), false);
+            return new SetGpsCommandInput(args, coordinates.latitude(), coordinates.longitude(), false, filter);
         }
     }
 
@@ -99,6 +102,7 @@ public class SetGpsCommandRunner implements CommandRunner {
         var options = new Options();
         options.addOption(DELETE);
         options.addOption(COORDINATES);
+        FileFilterOptions.addTo(options);
         return options;
     }
 

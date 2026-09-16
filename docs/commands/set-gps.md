@@ -14,6 +14,10 @@ exifutils set-gps [OPTIONS] <FILE|DIR>...
 |--------|-------|-------------|
 | `--coordinates` | `-c` | GPS coordinates in `latitude,longitude` format |
 | `--delete` | `-d` | Delete GPS information from files |
+| `--include` | `-i` | Only include files matching PATTERN (glob or `regex:` prefix). Repeatable |
+| `--exclude` | `-x` | Exclude files matching PATTERN (glob or `regex:` prefix). Applied after `--include`. Repeatable |
+
+See [File Filtering](../filtering.md) for more pattern examples.
 
 ## Coordinate Format
 
