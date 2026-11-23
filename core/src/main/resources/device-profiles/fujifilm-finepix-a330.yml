@@ -1,0 +1,13 @@
+name: Fujifilm FinePix A330
+
+tags:
+  Make: FUJIFILM
+  Model: FinePix A330
+
+imageFields:
+  - dateField: DateTimeOriginal
+    localTime: true
+
+videoFields:
+  - dateField: DateTimeOriginal
+    localTime: true
