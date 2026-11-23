@@ -56,14 +56,26 @@ class DeviceProfileServiceTest {
     }
 
     @Test
+    void getOlympusFE120Profile() {
+        Map<String, String> metadata = Map.of("Make", "OLYMPUS DIGITAL CAMERA", "Model", "FE-120,X-700");
+
+        DeviceProfile deviceProfile = deviceProfileService.getProfileForTags(metadata);
+
+        assertEquals("Olympus FE120", deviceProfile.getName());
+        assertEquals("CreationDate", deviceProfile.getVideoFields().get(0).getDateField());
+        assertEquals("TrackCreateDate", deviceProfile.getVideoFields().get(1).getDateField());
+    }
+
+    @Test
     void getOlympusX3Profile() {
         Map<String, String> metadata = Map.of("Make", "OLYMPUS DIGITAL CAMERA", "Model", "D4194");
 
         DeviceProfile deviceProfile = deviceProfileService.getProfileForTags(metadata);
 
         assertEquals("Olympus X-3", deviceProfile.getName());
-        assertEquals("TrackCreateDate", deviceProfile.getVideoFields().get(0).getDateField());
-        assertTrue(deviceProfile.getVideoFields().get(0).isLocalTime());
+        assertEquals("CreationDate", deviceProfile.getVideoFields().get(0).getDateField());
+        assertEquals("TrackCreateDate", deviceProfile.getVideoFields().get(1).getDateField());
+        assertTrue(deviceProfile.getVideoFields().get(1).isLocalTime());
     }
 
     @Test
@@ -73,8 +85,9 @@ class DeviceProfileServiceTest {
         DeviceProfile deviceProfile = deviceProfileService.getProfileForTags(metadata);
 
         assertEquals("Olympus u15D", deviceProfile.getName());
-        assertEquals("TrackCreateDate", deviceProfile.getVideoFields().get(0).getDateField());
-        assertTrue(deviceProfile.getVideoFields().get(0).isLocalTime());
+        assertEquals("CreationDate", deviceProfile.getVideoFields().get(0).getDateField());
+        assertEquals("TrackCreateDate", deviceProfile.getVideoFields().get(1).getDateField());
+        assertTrue(deviceProfile.getVideoFields().get(1).isLocalTime());
     }
 
     @Test
