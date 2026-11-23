@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Default sort destination setting (`sort.destination`)
 - Custom sorting pattern option (`sort.pattern`)
 
+### Fixed
+- `set-date` writes date tags into explicit groups (`QuickTime:CreateDate` + `Keys:CreationDate` for videos, `IFD0`/`ExifIFD` for images) and removes misplaced XMP date tags written by older versions (#38)
+
 ### Changed
 - Documentation restructured into `docs/` directory
 

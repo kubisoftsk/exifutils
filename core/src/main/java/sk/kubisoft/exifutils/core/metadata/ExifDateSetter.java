@@ -19,14 +19,26 @@ import java.util.Map;
 @Singleton
 public class ExifDateSetter {
 
-    // Constants for EXIF Image tags
-    private static final String DATE_TIME_TAG = "DateTime";
+    // Tag names as returned by metadata extraction (without group), used for reading
     private static final String DATE_TIME_ORIGINAL_TAG = "DateTimeOriginal";
-    private static final String OFFSET_TIME_TAG = "OffsetTime";
     private static final String OFFSET_TIME_ORIGINAL_TAG = "OffsetTimeOriginal";
-    // Constants for EXIF Video tags
     private static final String CREATE_DATE_UTC_TAG = "CreateDate";
     private static final String CREATION_DATE_OFFSET_TAG = "CreationDate";
+
+    // Group-qualified tag names used for writing. Without a group, ExifTool picks the target group itself
+    // and for some tags it picks a wrong one (e.g. XMP-pdf:CreationDate instead of Keys:CreationDate), see #38.
+    static final String IMAGE_MODIFY_DATE_WRITE_TAG = "IFD0:ModifyDate";
+    static final String IMAGE_DATE_TIME_ORIGINAL_WRITE_TAG = "ExifIFD:DateTimeOriginal";
+    static final String IMAGE_OFFSET_TIME_WRITE_TAG = "ExifIFD:OffsetTime";
+    static final String IMAGE_OFFSET_TIME_ORIGINAL_WRITE_TAG = "ExifIFD:OffsetTimeOriginal";
+    static final String VIDEO_CREATE_DATE_UTC_WRITE_TAG = "QuickTime:CreateDate";
+    static final String VIDEO_CREATION_DATE_OFFSET_WRITE_TAG = "Keys:CreationDate";
+
+    // Misplaced tags written by older versions without group (#38). They are removed on write, because they would
+    // otherwise keep a stale or zone-less date that other apps (e.g. Nextcloud Memories) read instead.
+    static final String STALE_IMAGE_XMP_TIFF_DATE_TIME_TAG = "XMP-tiff:DateTime";
+    static final String STALE_VIDEO_XMP_CREATE_DATE_TAG = "XMP-xmp:CreateDate";
+    static final String STALE_VIDEO_XMP_PDF_CREATION_DATE_TAG = "XMP-pdf:CreationDate";
 
     private final Console console;
 
@@ -98,10 +110,11 @@ public class ExifDateSetter {
         var dateTime = formatToLocalExifDateTime(mediaDateTime.getLocalDateTime());
         var offsetTime = mediaDateTime.getZoneOffset().getId();
         return Map.of(
-                DATE_TIME_TAG, dateTime,
-                DATE_TIME_ORIGINAL_TAG, dateTime,
-                OFFSET_TIME_TAG, offsetTime,
-                OFFSET_TIME_ORIGINAL_TAG, offsetTime
+                IMAGE_MODIFY_DATE_WRITE_TAG, dateTime,
+                IMAGE_DATE_TIME_ORIGINAL_WRITE_TAG, dateTime,
+                IMAGE_OFFSET_TIME_WRITE_TAG, offsetTime,
+                IMAGE_OFFSET_TIME_ORIGINAL_WRITE_TAG, offsetTime,
+                STALE_IMAGE_XMP_TIFF_DATE_TIME_TAG, ""
         );
     }
 
@@ -114,8 +127,10 @@ public class ExifDateSetter {
         var offsetDateTime = formatToOffsetExifDateTime(mediaDateTime.getDateTime());
 
         return Map.of(
-                CREATE_DATE_UTC_TAG, utcDateTime,
-                CREATION_DATE_OFFSET_TAG, offsetDateTime
+                VIDEO_CREATE_DATE_UTC_WRITE_TAG, utcDateTime,
+                VIDEO_CREATION_DATE_OFFSET_WRITE_TAG, offsetDateTime,
+                STALE_VIDEO_XMP_CREATE_DATE_TAG, "",
+                STALE_VIDEO_XMP_PDF_CREATION_DATE_TAG, ""
         );
     }
 
