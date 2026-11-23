@@ -1,0 +1,17 @@
+name: Olympus u15D
+
+tags:
+  Make: OLYMPUS DIGITAL CAMERA
+  # exiftool -n reports the raw Olympus camera type code instead of "u15D"
+  Model: D4216
+
+imageFields:
+  - dateField: DateTimeOriginal
+    localTime: true
+
+videoFields:
+  # CreationDate (with offset) is written by set-date, the camera itself writes only local TrackCreateDate
+  - dateField: CreationDate
+    localTime: true
+  - dateField: TrackCreateDate
+    localTime: true

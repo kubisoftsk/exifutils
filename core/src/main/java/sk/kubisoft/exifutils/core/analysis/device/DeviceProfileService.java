@@ -27,6 +27,9 @@ public class DeviceProfileService {
 		files.add("nikon-d3100.yml");
 		files.add("nikon-e4800.yml");
 		files.add("olympus-fe120.yml");
+		files.add("olympus-x3.yml");
+		files.add("olympus-u15d.yml");
+		files.add("fujifilm-finepix-a330.yml");
 		files.add("kodak-m1033.yml");
 		files.add("samsung-galaxy-a52s.yml");
 		files.add("google-pixel-6.yml");
