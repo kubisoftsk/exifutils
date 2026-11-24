@@ -12,23 +12,32 @@ import java.util.regex.PatternSyntaxException;
  */
 final class GlobPattern {
 
+    static final String SEPARATOR_ERROR = "Only the file name is matched, so the pattern must not contain a path separator";
+
     private static final int FLAGS = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.DOTALL;
+
+    // Characters with a special meaning in a glob that can also be a part of a Windows file name
+    private static final String WINDOWS_ESCAPABLE = "[]{},";
 
     private final String glob;
     private final int[] chars;
+    private final boolean windows;
     private final StringBuilder regex = new StringBuilder();
     private int pos = 0;
 
-    private GlobPattern(String glob) {
+    private GlobPattern(String glob, char separator) {
         this.glob = glob;
+        this.windows = separator == '\\';
         this.chars = glob.codePoints().toArray();
     }
 
     /**
-     * @throws PatternSyntaxException if the glob is not valid
+     * @param separator path separator of the platform. On Windows, a backslash that does not escape anything that can be
+     *                  in a file name is taken as a path separator.
+     * @throws PatternSyntaxException if the glob is not valid or cannot match any file name
      */
-    static Pattern compile(String glob) {
-        return Pattern.compile(new GlobPattern(glob).toRegex(), FLAGS);
+    static Pattern compile(String glob, char separator) {
+        return Pattern.compile(new GlobPattern(glob, separator).toRegex(), FLAGS);
     }
 
     private String toRegex() {
@@ -71,7 +80,11 @@ final class GlobPattern {
                     if (pos == chars.length) {
                         throw error("No character to escape");
                     }
-                    appendLiteral(chars[pos++]);
+                    int escaped = chars[pos++];
+                    if (windows && WINDOWS_ESCAPABLE.indexOf(escaped) < 0) {
+                        throw error(SEPARATOR_ERROR);
+                    }
+                    appendLiteral(escaped);
                 }
                 default -> appendLiteral(c);
             }
@@ -120,6 +133,9 @@ final class GlobPattern {
     }
 
     private void appendLiteral(int c) {
+        if (c == '/' || (windows && c == '\\')) {
+            throw error(SEPARATOR_ERROR);
+        }
         if (Character.isLetterOrDigit(c)) {
             regex.appendCodePoint(c);
         } else {

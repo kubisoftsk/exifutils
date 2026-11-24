@@ -1,6 +1,8 @@
 package sk.kubisoft.exifutils.core.file;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -51,18 +53,6 @@ class FileFilterTest {
     }
 
     @Test
-    void invalidGlobPatternThrows() {
-        assertThatThrownBy(() -> FileFilter.of(List.of("["), List.of()))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    void invalidRegexPatternThrows() {
-        assertThatThrownBy(() -> FileFilter.of(List.of("regex:("), List.of()))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
     void matchesFileNameOnlyNotFullPath() {
         var filter = FileFilter.of(List.of("IMG_00001.jpg"), List.of());
 
@@ -107,10 +97,28 @@ class FileFilterTest {
         assertThat(filter.matches(Path.of("root", "DSC_4321.mov"))).isFalse();
     }
 
-    @Test
-    void patternWithDirectorySeparatorNeverMatches() {
-        var filter = FileFilter.of(List.of("first/*.jpg", "**/*.jpg"), List.of());
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "", "  ", "glob:", "glob: ", "regex:", "regex: ",
+            "first/*.jpg", "**/*.jpg", "/", "glob:first/*.jpg", "{a,b/c}", "[a/b]", "a\\/b", "regex:first/.*\\.jpg",
+            "[", "{a", "glob:[", "regex:("
+    })
+    void rejectsPatternThatCannotMatch(String pattern) {
+        assertThatThrownBy(() -> FileFilter.of(List.of("*", pattern), List.of()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageStartingWith("Invalid --include pattern '" + pattern + "': ");
+        assertThatThrownBy(() -> FileFilter.of(List.of(), List.of("*", pattern)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageStartingWith("Invalid --exclude pattern '" + pattern + "': ");
+    }
 
-        assertThat(filter.matches(Path.of("root", "first", "P2110001.jpg"))).isFalse();
+    @Test
+    void errorMessageDescribesTheProblem() {
+        assertThatThrownBy(() -> FileFilter.of(List.of(""), List.of()))
+                .hasMessage("Invalid --include pattern '': Pattern is empty");
+        assertThatThrownBy(() -> FileFilter.of(List.of(), List.of("thumbs/*.jpg")))
+                .hasMessageContaining("must not contain a path separator");
+        assertThatThrownBy(() -> FileFilter.of(List.of(), List.of("regex:(")))
+                .hasMessage("Invalid --exclude pattern 'regex:(': Unclosed group (near index 1)");
     }
 }

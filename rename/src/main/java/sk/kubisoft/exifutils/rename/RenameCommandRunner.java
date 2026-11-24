@@ -9,6 +9,7 @@ import sk.kubisoft.exifutils.core.CommandRunner;
 import sk.kubisoft.exifutils.core.file.FileFilter;
 import sk.kubisoft.exifutils.core.file.FileFilterOptions;
 import sk.kubisoft.exifutils.core.file.FileSortOrder;
+import sk.kubisoft.exifutils.core.file.InvalidFilterPatternException;
 import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
@@ -70,6 +71,9 @@ public class RenameCommandRunner implements CommandRunner {
             RenameCommandInput input = parseInput(command);
             renameCommand.execute(input);
             return 0;
+        } catch (InvalidFilterPatternException e) {
+            console.errorln("Error parsing command arguments", e);
+            return InvalidFilterPatternException.EXIT_CODE;
         } catch (ParseException e) {
             console.errorln("Error parsing command arguments", e);
             return 1;

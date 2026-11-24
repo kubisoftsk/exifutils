@@ -60,7 +60,7 @@ class FileFilterOptionsTest {
     @Test
     void invalidPatternThrowsParseException() {
         assertThatThrownBy(() -> parse("-i", "regex:(", "somedir"))
-                .isInstanceOf(ParseException.class)
+                .isInstanceOf(InvalidFilterPatternException.class)
                 .hasMessageContaining("regex:(");
     }
 

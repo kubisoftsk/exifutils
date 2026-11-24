@@ -1,5 +1,6 @@
 package sk.kubisoft.exifutils.core.file;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -83,12 +84,25 @@ class GlobPatternTest {
             "skolka*           ; škôlka.jpg        ; false",
     })
     void matches(String glob, String fileName, boolean expected) {
-        assertThat(GlobPattern.compile(glob).matcher(fileName).matches()).isEqualTo(expected);
+        assertThat(GlobPattern.compile(glob, '/').matcher(fileName).matches()).isEqualTo(expected);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"[", "[a", "[!", "[]", "[!]", "[c-a]", "[a-c-e]", "{a,b", "{a,{b}}", "a\\"})
     void rejectsInvalidGlob(String glob) {
-        assertThatThrownBy(() -> GlobPattern.compile(glob)).isInstanceOf(PatternSyntaxException.class);
+        assertThatThrownBy(() -> GlobPattern.compile(glob, '/')).isInstanceOf(PatternSyntaxException.class);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"thumbs\\*.jpg", "thumbs\\IMG.jpg", "\\\\server", "[a\\].jpg", "thumbs/*.jpg"})
+    void rejectsPathSeparatorOnWindows(String glob) {
+        assertThatThrownBy(() -> GlobPattern.compile(glob, '\\'))
+                .isInstanceOf(PatternSyntaxException.class)
+                .hasMessageContaining(GlobPattern.SEPARATOR_ERROR);
+    }
+
+    @Test
+    void acceptsEscapesOnWindows() {
+        assertThat(GlobPattern.compile("\\[a\\]\\{b\\}.jpg", '\\').matcher("[A]{B}.jpg").matches()).isTrue();
     }
 }

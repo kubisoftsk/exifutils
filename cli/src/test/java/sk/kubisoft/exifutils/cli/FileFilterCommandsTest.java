@@ -88,11 +88,11 @@ class FileFilterCommandsTest {
     @Mock
     private GpsDataSetter gpsDataSetter;
 
-    @TempDir
-    private Path tempDir;
+    private Path outputDir;
 
     @BeforeEach
-    void setUp() {
+    void setUp(@TempDir Path tempDir) {
+        outputDir = tempDir.resolve("out");
         lenient().when(fileExplorer.listMediaFiles(any(), any(), any())).thenReturn(List.of());
     }
 
@@ -128,17 +128,18 @@ class FileFilterCommandsTest {
     void commandShouldRejectInvalidPattern(String commandName) throws ParseException {
         int exitCode = run(commandName, "-x", "regex:(");
 
-        assertThat(exitCode).isEqualTo(1);
+        assertThat(exitCode).isEqualTo(2);
+        assertThat(outputDir).doesNotExist();
         verifyNoInteractions(fileExplorer);
         var captor = ArgumentCaptor.forClass(ParseException.class);
         verify(console).errorln(any(), captor.capture());
-        assertThat(captor.getValue()).hasMessageContaining("Invalid filter pattern: 'regex:('");
+        assertThat(captor.getValue()).hasMessageContaining("Invalid --exclude pattern 'regex:('");
     }
 
     private int run(String commandName, String... filterArgs) throws ParseException {
         var args = new ArrayList<>(List.of(filterArgs));
         args.addAll(switch (commandName) {
-            case "sort" -> List.of("-o", tempDir.toString());
+            case "sort" -> List.of("-o", outputDir.toString());
             case "set-date" -> List.of("-d", "2024-07-15 10:00:00", "-z", "Europe/Bratislava", "-r");
             case "shift-date" -> List.of("-d", "PT1H", "-r");
             case "set-gps" -> List.of("-c", "48.1,17.1");

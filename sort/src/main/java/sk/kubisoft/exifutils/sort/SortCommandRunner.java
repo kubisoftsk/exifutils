@@ -10,6 +10,7 @@ import sk.kubisoft.exifutils.core.config.ConfigService;
 import sk.kubisoft.exifutils.core.file.FileFilter;
 import sk.kubisoft.exifutils.core.file.FileFilterOptions;
 import sk.kubisoft.exifutils.core.file.FileSortOrder;
+import sk.kubisoft.exifutils.core.file.InvalidFilterPatternException;
 import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
@@ -87,6 +88,9 @@ public class SortCommandRunner implements CommandRunner {
             SortCommandInput input = parseInput(command);
             sortCommand.execute(input);
             return 0;
+        } catch (InvalidFilterPatternException e) {
+            console.errorln("Error parsing command arguments", e);
+            return InvalidFilterPatternException.EXIT_CODE;
         } catch (ParseException e) {
             console.errorln("Error parsing command arguments", e);
             return 1;
@@ -98,6 +102,9 @@ public class SortCommandRunner implements CommandRunner {
 
     private SortCommandInput parseInput(CommandLine cmd) throws ParseException {
         String[] args = cmd.getArgs();
+
+        // Validate before the output directory is created
+        FileFilter filter = FileFilterOptions.parse(cmd);
 
         // Parse output directory from CLI or fall back to config
         String outputDirStr = cmd.getOptionValue(OUTPUT_DIR.getOpt());
@@ -143,8 +150,6 @@ public class SortCommandRunner implements CommandRunner {
                 throw new ParseException(e.getMessage());
             }
         }
-
-        FileFilter filter = FileFilterOptions.parse(cmd);
 
         return new SortCommandInput(args, outputDir, renameFiles, writeDate, sortPattern, copyFiles, forceField, sortOrder, filter);
     }

@@ -3,7 +3,6 @@ package sk.kubisoft.exifutils.core.file;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,11 +33,11 @@ public final class FileFilterOptions {
         options.addOption(EXCLUDE);
     }
 
-    public static FileFilter parse(CommandLine cmd) throws ParseException {
+    public static FileFilter parse(CommandLine cmd) throws InvalidFilterPatternException {
         try {
             return FileFilter.of(optionValues(cmd, INCLUDE), optionValues(cmd, EXCLUDE));
         } catch (IllegalArgumentException e) {
-            throw new ParseException(e.getMessage());
+            throw new InvalidFilterPatternException(e.getMessage());
         }
     }
 
