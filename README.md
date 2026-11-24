@@ -63,6 +63,7 @@ exifutils set-date ~/Pictures/whatsapp-photos/
 - [Installation](docs/installation.md)
 - [Configuration](docs/configuration.md)
 - [Pattern Syntax](docs/patterns.md)
+- [File Filtering](docs/filtering.md)
 
 ### Commands
 

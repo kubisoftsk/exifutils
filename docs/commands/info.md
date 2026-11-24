@@ -13,6 +13,10 @@ exifutils info [OPTIONS] <FILE|DIR>...
 | Option | Short | Description |
 |--------|-------|-------------|
 | `--all` | `-a` | Print all available metadata information |
+| `--include` | `-i` | Only include files matching PATTERN (glob or `regex:` prefix). Repeatable |
+| `--exclude` | `-x` | Exclude files matching PATTERN (glob or `regex:` prefix). Applied after `--include`. Repeatable |
+
+See [File Filtering](../filtering.md) for more pattern examples.
 
 ## Examples
 

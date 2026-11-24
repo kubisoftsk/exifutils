@@ -6,7 +6,10 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import sk.kubisoft.exifutils.core.CommandArgument;
 import sk.kubisoft.exifutils.core.CommandRunner;
+import sk.kubisoft.exifutils.core.file.FileFilter;
+import sk.kubisoft.exifutils.core.file.FileFilterOptions;
 import sk.kubisoft.exifutils.core.file.FileSortOrder;
+import sk.kubisoft.exifutils.core.file.InvalidFilterPatternException;
 import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
@@ -68,6 +71,9 @@ public class RenameCommandRunner implements CommandRunner {
             RenameCommandInput input = parseInput(command);
             renameCommand.execute(input);
             return 0;
+        } catch (InvalidFilterPatternException e) {
+            console.errorln("Error parsing command arguments", e);
+            return InvalidFilterPatternException.EXIT_CODE;
         } catch (ParseException e) {
             console.errorln("Error parsing command arguments", e);
             return 1;
@@ -115,7 +121,9 @@ public class RenameCommandRunner implements CommandRunner {
             }
         }
 
-        return new RenameCommandInput(args, outputDir, writeDate, zoneId, forceField, sortOrder);
+        FileFilter filter = FileFilterOptions.parse(cmd);
+
+        return new RenameCommandInput(args, outputDir, writeDate, zoneId, forceField, sortOrder, filter);
     }
 
     @Override
@@ -136,6 +144,7 @@ public class RenameCommandRunner implements CommandRunner {
         options.addOption(OUTPUT_DIR);
         options.addOption(FORCE_FIELD);
         options.addOption(ORDER);
+        FileFilterOptions.addTo(options);
         return options;
     }
 

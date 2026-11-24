@@ -2,9 +2,13 @@ package sk.kubisoft.exifutils.core.file;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -95,11 +99,22 @@ public class FileNameAnalyzer {
         try {
             int maxLength = Math.min(input.length(), patternLength);
             String substring = input.substring(0, maxLength);
-            var result = LocalDateTime.parse(substring, formatter);
+            var result = formatter.parse(substring, FileNameAnalyzer::toLocalDateTime);
             return Optional.of(result);
         } catch (DateTimeParseException e) {
             return Optional.empty();
         }
+    }
+
+    /**
+     * Resolves date-only patterns (e.g. "yyyy-MM-dd") to midnight. Patterns with any time field must resolve to
+     * a complete time on their own, otherwise an incomplete pattern would silently produce a wrong time.
+     */
+    private static LocalDateTime toLocalDateTime(TemporalAccessor parsed) {
+        boolean dateOnly = Arrays.stream(ChronoField.values())
+                .filter(ChronoField::isTimeBased)
+                .noneMatch(parsed::isSupported);
+        return dateOnly ? LocalDate.from(parsed).atStartOfDay() : LocalDateTime.from(parsed);
     }
 
     record FormatterWithLength(DateTimeFormatter formatter, int length) {

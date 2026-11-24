@@ -1,5 +1,7 @@
 package sk.kubisoft.exifutils.setgps;
 
+import sk.kubisoft.exifutils.core.file.FileFilter;
+
 public record SetGpsCommandInput(
 
         String[] inputPaths,
@@ -8,7 +10,9 @@ public record SetGpsCommandInput(
 
         Double longitude,
 
-        boolean remove
+        boolean remove,
+
+        FileFilter filter
 
 ) {
 }

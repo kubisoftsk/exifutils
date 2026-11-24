@@ -32,7 +32,7 @@ public class InfoCommand {
         console.verboseln("Running ExifUtils Info command with input: %s", input);
 
         console.println("Searching for media files...");
-        List<MediaFile> mediaFiles = fileExplorer.listMediaFiles(input.inputPaths());
+        List<MediaFile> mediaFiles = fileExplorer.listMediaFiles(input.inputPaths(), null, input.filter());
         console.println("Found %d files.", mediaFiles.size());
 
         List<AnalyzedMediaFile> analyzedFiles = mediaAnalyzer.analyze(mediaFiles);

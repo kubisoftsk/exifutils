@@ -58,7 +58,7 @@ public class SetDateCommand {
         console.verboseln("Running ExifUtils Rename command with input: %s", input);
 
         console.println("Searching for media files...");
-        List<MediaFile> allMediaFiles = fileExplorer.listMediaFiles(input.inputPaths(), input.sortOrder());
+        List<MediaFile> allMediaFiles = fileExplorer.listMediaFiles(input.inputPaths(), input.sortOrder(), input.filter());
         console.println("Found %d files.", allMediaFiles.size());
 
         List<MediaFile> mediaFiles;
@@ -80,6 +80,11 @@ public class SetDateCommand {
             setDateActionList = setDateTimeManually(mediaFiles, input.localDateTime(), input.zoneId());
         } else {
             setDateActionList = listAndParseFromFileNames(mediaFiles, input.zoneId(), input.pattern());
+        }
+
+        if (setDateActionList.isEmpty()) {
+            console.println("No files to set date.");
+            return;
         }
 
         console.println("Total %d files will have date set.", setDateActionList.size());

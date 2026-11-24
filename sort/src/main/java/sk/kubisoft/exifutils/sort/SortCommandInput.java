@@ -1,5 +1,6 @@
 package sk.kubisoft.exifutils.sort;
 
+import sk.kubisoft.exifutils.core.file.FileFilter;
 import sk.kubisoft.exifutils.core.file.FileSortOrder;
 
 import java.nio.file.Path;
@@ -32,7 +33,9 @@ public record SortCommandInput(
          */
         String forceField,
 
-        FileSortOrder sortOrder
+        FileSortOrder sortOrder,
+
+        FileFilter filter
 
 ) {
 }

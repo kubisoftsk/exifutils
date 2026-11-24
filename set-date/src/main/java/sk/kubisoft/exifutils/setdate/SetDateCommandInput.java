@@ -1,5 +1,6 @@
 package sk.kubisoft.exifutils.setdate;
 
+import sk.kubisoft.exifutils.core.file.FileFilter;
 import sk.kubisoft.exifutils.core.file.FileSortOrder;
 
 import java.time.LocalDateTime;
@@ -23,5 +24,7 @@ public record SetDateCommandInput(
 
         String forceField,
 
-        FileSortOrder sortOrder) {
+        FileSortOrder sortOrder,
+
+        FileFilter filter) {
 }

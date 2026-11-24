@@ -35,30 +35,38 @@ public class FileExplorer {
     }
 
     public List<Path> listFiles(String[] args) {
-        return listFiles(args, null);
+        return listFiles(args, null, FileFilter.NONE);
     }
 
     public List<Path> listFiles(String[] args, FileSortOrder sortOrder) {
+        return listFiles(args, sortOrder, FileFilter.NONE);
+    }
+
+    public List<Path> listFiles(String[] args, FileSortOrder sortOrder, FileFilter filter) {
         List<Path> inputPaths = Arrays.stream(args)
                 .map(Paths::get)
                 .toList();
 
-        return listFiles(inputPaths, sortOrder);
+        return listFiles(inputPaths, sortOrder, filter);
     }
 
     public List<Path> listFiles(Path inputPath) {
-        return listFiles(List.of(inputPath), null);
+        return listFiles(List.of(inputPath), null, FileFilter.NONE);
     }
 
     public List<Path> listFiles(List<Path> inputPaths) {
-        return listFiles(inputPaths, null);
+        return listFiles(inputPaths, null, FileFilter.NONE);
     }
 
     public List<Path> listFiles(List<Path> inputPaths, FileSortOrder sortOrder) {
+        return listFiles(inputPaths, sortOrder, FileFilter.NONE);
+    }
+
+    public List<Path> listFiles(List<Path> inputPaths, FileSortOrder sortOrder, FileFilter filter) {
         Set<Path> allPaths = new HashSet<>();
         for (var path : inputPaths) {
             checkPath(path);
-            allPaths.addAll(listPath(path));
+            allPaths.addAll(listPath(path, filter));
         }
 
         FileSortOrder effectiveOrder = (sortOrder != null) ? sortOrder : configService.getFileSortOrder();
@@ -69,12 +77,16 @@ public class FileExplorer {
     }
 
     public List<MediaFile> listMediaFiles(String[] args) {
-        return listMediaFiles(args, null);
+        return listMediaFiles(args, null, FileFilter.NONE);
     }
 
     public List<MediaFile> listMediaFiles(String[] args, FileSortOrder sortOrder) {
+        return listMediaFiles(args, sortOrder, FileFilter.NONE);
+    }
+
+    public List<MediaFile> listMediaFiles(String[] args, FileSortOrder sortOrder, FileFilter filter) {
         List<MediaFile> mediaFiles = new ArrayList<>();
-        for (var path : listFiles(args, sortOrder)) {
+        for (var path : listFiles(args, sortOrder, filter)) {
             var mediaType = mediaTypeDetector.detectMediaType(path);
             if (mediaType != null) {
                 mediaFiles.add(new MediaFile(path, mediaType));
@@ -105,11 +117,11 @@ public class FileExplorer {
         };
     }
 
-    private List<Path> listPath(Path path) {
+    private List<Path> listPath(Path path, FileFilter filter) {
         if (fileService.isDirectory(path)) {
-            return walk(path);
+            return walk(path, filter);
         } else {
-            return List.of(path);
+            return filter.matches(path) ? List.of(path) : List.of();
         }
     }
 
@@ -122,11 +134,12 @@ public class FileExplorer {
         }
     }
 
-    private List<Path> walk(Path inputDir) {
+    private List<Path> walk(Path inputDir, FileFilter filter) {
         List<Path> allPaths = new ArrayList<>();
         try (var filesStream = fileService.walk(inputDir)) {
             var inputDirFiles = filesStream
                     .filter(fileService::isRegularFile)
+                    .filter(filter::matches)
                     .toList();
             allPaths.addAll(inputDirFiles);
         } catch (IOException e) {

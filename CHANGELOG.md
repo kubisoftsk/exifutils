@@ -13,10 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom pattern parsing (`-p`) for `set-date` command
 - Default sort destination setting (`sort.destination`)
 - Custom sorting pattern option (`sort.pattern`)
+- `--include` (`-i`) and `--exclude` (`-x`) options for filtering files by filename in all commands, using case-insensitive glob or regex patterns (#35)
 - Device profiles for Olympus X-3, Olympus u15D and Fujifilm FinePix A330 (their videos store local time, previously read as UTC and shifted by the zone offset)
 
 ### Fixed
 - `set-date` writes date tags into explicit groups (`QuickTime:CreateDate` + `Keys:CreationDate` for videos, `IFD0`/`ExifIFD` for images) and removes misplaced XMP date tags written by older versions (#38)
+- `set-date`, `sort` and `shift-date` no longer ask for confirmation when there are no files to process (#32)
+- Date-only patterns (e.g. `yyyy-MM-dd`) in `set-date -p` are resolved to midnight instead of never matching
 
 ### Changed
 - Documentation restructured into `docs/` directory

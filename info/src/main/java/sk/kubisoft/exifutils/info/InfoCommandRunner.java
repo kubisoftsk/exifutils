@@ -6,6 +6,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import sk.kubisoft.exifutils.core.CommandArgument;
 import sk.kubisoft.exifutils.core.CommandRunner;
+import sk.kubisoft.exifutils.core.file.FileFilterOptions;
+import sk.kubisoft.exifutils.core.file.InvalidFilterPatternException;
 import sk.kubisoft.exifutils.core.logging.Console;
 
 import javax.inject.Inject;
@@ -40,6 +42,9 @@ public class InfoCommandRunner implements CommandRunner {
             InfoCommandInput input = inputParser.parseInput(command);
             infoCommand.execute(input);
             return 0;
+        } catch (InvalidFilterPatternException e) {
+            console.errorln("Error parsing command arguments", e);
+            return InvalidFilterPatternException.EXIT_CODE;
         } catch (ParseException e) {
             console.errorln("Error parsing command arguments", e);
             return 1;
@@ -63,6 +68,7 @@ public class InfoCommandRunner implements CommandRunner {
     public Options getOptions() {
         var options = new Options();
         options.addOption(PRINT_ALL);
+        FileFilterOptions.addTo(options);
         return options;
     }
 
