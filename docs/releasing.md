@@ -30,11 +30,28 @@ Version 1.0.0 is released by entering it by hand.
 
 ## Release
 
-1. **Plan:** run the **Release** workflow on `main` with default inputs. The summary of the run shows the changes since the last release, the suggested version and warnings (commits that are not conventional, nothing visible to users). Nothing is created.
-2. **Draft:** run it again with *draft* checked, optionally with another version. It runs all tests, builds the jar, runs a smoke test of it with ExifTool and creates a draft release with a checksum.
-3. **Publish:** check the draft on the Releases page, edit the notes if needed and publish it. Publishing creates the tag. Releases in this repository are immutable, files cannot be changed afterwards.
+Run the **Release** workflow on `main`:
 
-To start over, delete the draft and run the workflow again.
+| Input | Default | |
+|---|---|---|
+| `version` | empty | Version suggested by the commits, or e.g. `1.0.0` |
+| `dry_run` | off | Only show the plan and run the checks, nothing is created |
+
+```bash
+gh workflow run release.yml --ref main -f dry_run=true   # plan and checks
+gh workflow run release.yml --ref main                   # release
+```
+
+Both do the same checks:
+
+1. **Plan** in the summary of the run: changes since the last release, suggested version and warnings (commits that are not conventional, nothing visible to users). Fails if there are no changes or the version already exists.
+2. **Build:** all tests, the jar, and its smoke test with ExifTool.
+
+Without `dry_run` it continues:
+
+3. **Publish:** release notes, `exifutils.jar` and its checksum. Publishing creates the tag `vX.Y.Z`.
+
+Nothing is published if any check fails. Releases in this repository are immutable: the files and the tag cannot be changed afterwards and the version cannot be used again. Only the title and the notes can be edited. The repository owner can release, and only from `main`.
 
 The plan can be printed locally as well:
 
