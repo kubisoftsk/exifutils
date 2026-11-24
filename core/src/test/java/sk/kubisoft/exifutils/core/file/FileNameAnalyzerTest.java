@@ -3,6 +3,7 @@ package sk.kubisoft.exifutils.core.file;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -192,5 +193,37 @@ class FileNameAnalyzerTest {
                 LocalDateTime.of(2024, 1, 22, 15, 30, 10),
                 date
         );
+    }
+
+    @Test
+    void shouldResolveDateOnlyUserPatternToMidnight() {
+        var result = analyzer.analyzeFileName("2023-08-15-photo.jpg", "yyyy-MM-dd");
+
+        assertEquals(Optional.of(LocalDateTime.of(2023, 8, 15, 0, 0, 0)), result);
+    }
+
+    @Test
+    void shouldParseUserPatternWithoutSeconds() {
+        var result = analyzer.analyzeFileName("20230815_1430.jpg", "yyyyMMdd_HHmm");
+
+        assertEquals(Optional.of(LocalDateTime.of(2023, 8, 15, 14, 30, 0)), result);
+    }
+
+    @Test
+    void shouldParseUserPatternWithClockHour() {
+        var result = analyzer.analyzeFileName("20230815_143022.jpg", "yyyyMMdd_kkmmss");
+
+        assertEquals(Optional.of(LocalDateTime.of(2023, 8, 15, 14, 30, 22)), result);
+    }
+
+    @Test
+    void shouldNotDefaultHourWhenUserPatternHasIncompleteTime() {
+        assertTrue(analyzer.analyzeFileName("20230815_3022.jpg", "yyyyMMdd_mmss").isEmpty());
+        assertTrue(analyzer.analyzeFileName("20230815_023022.jpg", "yyyyMMdd_hhmmss").isEmpty());
+    }
+
+    @Test
+    void shouldNotMatchUserPatternWithoutDate() {
+        assertTrue(analyzer.analyzeFileName("143022.jpg", "HHmmss").isEmpty());
     }
 }

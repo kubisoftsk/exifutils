@@ -47,7 +47,7 @@ Works with filenames like:
 Parse dates from filenames with non-standard naming conventions.
 
 ```bash
-# Filenames like "vacation-2023-08-15-photo.jpg"
+# Filenames like "2023-08-15-photo.jpg" (date only, time is set to 00:00:00)
 exifutils set-date -p "yyyy-MM-dd" /path/to/photos/
 
 # Filenames like "20230815_143022_HDR.jpg"
