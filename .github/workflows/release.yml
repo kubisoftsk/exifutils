@@ -1,8 +1,7 @@
 name: Release
 
-# 1. Run without "draft": only the release plan (changes, suggested version, warnings) in the summary of the run.
-# 2. Run with "draft": tests, build of the jar and a draft release. Nothing is public and no tag exists yet.
-# 3. Check the draft on GitHub and publish it, which creates the tag.
+# Default: release plan, tests, build, smoke test and a published release (which creates the tag).
+# With "dry run": the same plan and checks, but nothing is created.
 # See docs/releasing.md
 
 on:
@@ -12,8 +11,8 @@ on:
         description: 'Version, e.g. 1.2.3. Empty = suggested by the commits.'
         required: false
         type: string
-      draft:
-        description: 'Build and create a draft release (otherwise only the plan)'
+      dry_run:
+        description: 'Dry run: only show the plan and run the checks'
         required: false
         type: boolean
         default: false
@@ -32,7 +31,7 @@ jobs:
       version: ${{ steps.plan.outputs.version }}
     steps:
       - name: Check permission to release
-        if: inputs.draft && (github.ref != 'refs/heads/main' || github.triggering_actor != 'jakubgondar')
+        if: ${{ !inputs.dry_run && (github.ref != 'refs/heads/main' || github.triggering_actor != 'jakubgondar') }}
         run: |
           echo "::error::A release can be created only from main and only by the owner"
           exit 1
@@ -50,6 +49,15 @@ jobs:
           python3 .github/scripts/release_plan.py ${VERSION:+--version "$VERSION"} \
             --notes notes.md --summary "$GITHUB_STEP_SUMMARY" --output "$GITHUB_OUTPUT"
 
+      - name: Check that the version is not released yet
+        env:
+          TAG: v${{ steps.plan.outputs.version }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG"; then
+            echo "::error::Tag $TAG already exists"
+            exit 1
+          fi
+
       - name: Upload release notes
         uses: actions/upload-artifact@v4
         with:
@@ -61,14 +69,14 @@ jobs:
   jar:
     name: Jar
     needs: plan
-    if: inputs.draft
     uses: ./.github/workflows/build.yml
     with:
       revision: ${{ needs.plan.outputs.version }}
 
-  draft:
-    name: Draft release
+  publish:
+    name: Publish release
     needs: [plan, jar]
+    if: ${{ !inputs.dry_run }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -86,17 +94,19 @@ jobs:
           sha256sum * > SHA256SUMS
           cat SHA256SUMS
 
-      # Releases are immutable in this repository: files have to be complete before the draft is published
-      - name: Create draft release
+      # Releases are immutable in this repository: files have to be complete before the release is published,
+      # so it is created as a draft with all files and published only if that succeeded
+      - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           TAG: v${{ needs.plan.outputs.version }}
         run: |
           if gh release view "$TAG" > /dev/null 2>&1; then
-            echo "::error::Release $TAG already exists. If it is a draft, delete it first."
+            echo "::error::Release $TAG already exists. If it is a draft left by a failed run, delete it first."
             exit 1
           fi
           gh release create "$TAG" --draft --target "$GITHUB_SHA" --title "$TAG" \
             --notes-file artifacts/release-notes/notes.md dist/*
-          echo "Draft $TAG is ready, check and publish it: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases" >> "$GITHUB_STEP_SUMMARY"
+          gh release edit "$TAG" --draft=false --latest
+          echo "Released $TAG: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG" >> "$GITHUB_STEP_SUMMARY"
