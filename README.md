@@ -31,13 +31,12 @@ brew install exiftool
 
 ### Install
 
-Download native binary from [Releases](../../releases) or build from source.
+Download a native binary or `exifutils.jar` (Java 21+) from [Releases](../../releases), or build from source.
 
 ```bash
 # Linux
-unzip exifutils-linux-native.zip
-chmod +x exifutils
-sudo mv exifutils /usr/local/bin/
+chmod +x exifutils-linux-x64
+sudo mv exifutils-linux-x64 /usr/local/bin/exifutils
 ```
 
 See [Installation Guide](docs/installation.md) for detailed instructions.
@@ -64,6 +63,7 @@ exifutils set-date ~/Pictures/whatsapp-photos/
 - [Configuration](docs/configuration.md)
 - [Pattern Syntax](docs/patterns.md)
 - [File Filtering](docs/filtering.md)
+- [Snapshots and Releases](docs/releasing.md)
 
 ### Commands
 

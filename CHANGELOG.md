@@ -1,5 +1,7 @@
 # Changelog
 
+> Changes of released versions are in the notes of [GitHub Releases](https://github.com/kubisoftsk/exifutils/releases), generated from conventional commits (see [Snapshots and Releases](docs/releasing.md)). This file is kept as the history before the first release and is not updated anymore.
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
