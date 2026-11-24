@@ -12,7 +12,7 @@ cat exifutils-snapshot/build-info.txt
 java -jar exifutils-snapshot/exifutils.jar
 ```
 
-Native binaries are not part of snapshots and releases yet, see [#](https://github.com/kubisoftsk/exifutils/issues/).
+Native binaries are not part of snapshots and releases yet, see [#53](https://github.com/kubisoftsk/exifutils/issues/53).
 
 ## Versions
 

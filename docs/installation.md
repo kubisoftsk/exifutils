@@ -61,7 +61,7 @@ java -jar cli/target/exifutils-cli-0.9.0-SNAPSHOT.jar [command]
 
 ### Option 3: Build Native Binary Locally (Experimental)
 
-Requires GraalVM 21+ with native-image. Native binaries do not work correctly yet, see [#](https://github.com/kubisoftsk/exifutils/issues/).
+Requires GraalVM 21+ with native-image. Native binaries do not work correctly yet, see [#53](https://github.com/kubisoftsk/exifutils/issues/53).
 
 ```bash
 git clone https://github.com/kubisoftsk/exifutils.git
