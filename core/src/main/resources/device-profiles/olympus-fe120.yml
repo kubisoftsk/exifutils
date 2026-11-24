@@ -9,5 +9,8 @@ imageFields:
     localTime: true
 
 videoFields:
+  # CreationDate (with offset) is written by set-date, the camera itself writes only local TrackCreateDate
+  - dateField: CreationDate
+    localTime: true
   - dateField: TrackCreateDate
     localTime: true
