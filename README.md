@@ -13,7 +13,6 @@ A command-line tool for organizing and renaming media files by their EXIF metada
 - **Shift dates** to correct camera clock errors
 - **Manage GPS** coordinates (add or remove)
 - Cross-platform: Linux, Windows, macOS
-- Native binaries (no Java required at runtime)
 
 ## Quick Start
 
@@ -31,13 +30,10 @@ brew install exiftool
 
 ### Install
 
-Download native binary from [Releases](../../releases) or build from source.
+Download `exifutils.jar` from [Releases](../../releases) (requires Java 21+), or build from source.
 
 ```bash
-# Linux
-unzip exifutils-linux-native.zip
-chmod +x exifutils
-sudo mv exifutils /usr/local/bin/
+java -jar exifutils.jar info photo.jpg
 ```
 
 See [Installation Guide](docs/installation.md) for detailed instructions.
@@ -64,6 +60,7 @@ exifutils set-date ~/Pictures/whatsapp-photos/
 - [Configuration](docs/configuration.md)
 - [Pattern Syntax](docs/patterns.md)
 - [File Filtering](docs/filtering.md)
+- [Snapshots and Releases](docs/releasing.md)
 
 ### Commands
 
