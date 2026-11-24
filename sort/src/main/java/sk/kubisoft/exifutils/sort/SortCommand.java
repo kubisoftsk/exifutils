@@ -81,7 +81,8 @@ public class SortCommand {
                 input.sortPattern());
 
         if (moveActions.isEmpty()) {
-            console.println("No files to move.");
+            console.println("No files to %s.", input.copy() ? "copy" : "move");
+            return;
         }
 
         console.println("Total %d files will be %s:", moveActions.size(), input.copy() ? "copied" : "moved");

@@ -71,6 +71,11 @@ public class ShiftDateCommand {
                 .map(mediaFile -> createSetDateAction(mediaFile, input.duration()))
                 .toList();
 
+        if (setDateActionList.isEmpty()) {
+            console.println("No files to set date.");
+            return;
+        }
+
         console.println("Total %d files will have date set.", setDateActionList.size());
         setDateActionList.forEach((action) -> console.println("%s", action));
 
