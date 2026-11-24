@@ -6,29 +6,67 @@ on:
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      revision:
+        description: 'Version of the build, default is the snapshot version from pom.xml'
+        required: false
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'corretto'
           cache: maven
 
-      - name: Build with Maven
-        run: mvn -B verify -P fat-jar --file pom.xml
+      - name: Test release scripts
+        working-directory: .github/scripts
+        run: python3 -m unittest
 
-      # Cache Maven dependencies
-      - name: Cache Maven packages
-        uses: actions/cache@v3
+      - name: Build with Maven
+        env:
+          REVISION: ${{ inputs.revision }}
+        run: mvn -B verify -P fat-jar ${REVISION:+"-Drevision=$REVISION"} --file pom.xml
+
+      - name: Collect jar
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          REF_NAME: ${{ github.head_ref || github.ref_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          mkdir dist
+          cp cli/target/exifutils-cli-*.jar dist/exifutils.jar
+          {
+            echo "version=$(basename cli/target/exifutils-cli-*.jar .jar | sed 's/^exifutils-cli-//')"
+            echo "commit=$HEAD_SHA"
+            echo "ref=$REF_NAME"
+            echo "built=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "run=$RUN_URL"
+          } > dist/build-info.txt
+          cat dist/build-info.txt
+
+      - name: Smoke test
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl
+          .github/scripts/smoke_test.sh java -jar dist/exifutils.jar
+
+      # Snapshot of main (and of pull requests for a short time), see docs/releasing.md
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
         with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-m2-
+          name: exifutils-jar
+          path: dist
+          if-no-files-found: error
+          retention-days: ${{ github.event_name == 'pull_request' && 7 || 90 }}

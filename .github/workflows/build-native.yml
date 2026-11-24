@@ -2,6 +2,18 @@ name: Build Native Executable
 
 on:
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      revision:
+        description: 'Version of the build, default is the snapshot version from pom.xml'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  MAVEN_REVISION: ${{ inputs.revision && format('-Drevision={0}', inputs.revision) || '' }}
 
 jobs:
   build:
@@ -46,12 +58,26 @@ jobs:
 
       - name: Build with Maven (Windows)
         if: matrix.os == 'windows-latest'
-        run: mvn -Pnative -DskipTests package
+        run: mvn -B -Pnative -DskipTests %MAVEN_REVISION% package
         shell: cmd
 
       - name: Build with Maven (Linux)
         if: matrix.os == 'ubuntu-latest'
-        run: mvn -Pnative -DskipTests package
+        run: mvn -B -Pnative -DskipTests $MAVEN_REVISION package
+
+      - name: Smoke test (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl
+          .github/scripts/smoke_test.sh cli/target/exifutils
+
+      - name: Smoke test (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          choco install exiftool -y --no-progress
+          .github/scripts/smoke_test.sh cli/target/exifutils.exe
 
       - name: Upload Executable
         uses: actions/upload-artifact@v4

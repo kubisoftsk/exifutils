@@ -1,173 +1,112 @@
 name: Release
 
+# 1. Run without "draft": only the release plan (changes, suggested version, warnings) in the summary of the run.
+# 2. Run with "draft": tests, builds and a draft release. Nothing is public and no tag exists yet.
+# 3. Check the draft on GitHub and publish it, which creates the tag.
+# See docs/releasing.md
+
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g. 1.2.3). Leave empty to auto-determine from conventional commits.'
+        description: 'Version, e.g. 1.2.3. Empty = suggested by the commits.'
         required: false
         type: string
+      draft:
+        description: 'Build and create a draft release (otherwise only the plan)'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: release
 
 jobs:
-  prepare:
-    name: Prepare release
+  plan:
+    name: Release plan
     runs-on: ubuntu-latest
-    if: github.actor == 'jakubgondar'
     outputs:
-      version: ${{ steps.resolve-version.outputs.version }}
+      version: ${{ steps.plan.outputs.version }}
     steps:
+      - name: Check permission to release
+        if: inputs.draft && (github.ref != 'refs/heads/main' || github.triggering_actor != 'jakubgondar')
+        run: |
+          echo "::error::A release can be created only from main and only by the owner"
+          exit 1
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Auto-determine next version from conventional commits
-        if: inputs.version == ''
-        uses: mathieudutour/github-tag-action@v6.2
-        id: auto-version
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          dry_run: true
-          default_bump: patch
-
-      - name: Resolve version
-        id: resolve-version
+      - name: Release plan
+        id: plan
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          if [ -n "${{ inputs.version }}" ]; then
-            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
-          else
-            VERSION="${{ steps.auto-version.outputs.new_version }}"
-            if [ -z "$VERSION" ]; then
-              echo "Could not determine next version from commits. Please provide version manually."
-              exit 1
-            fi
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
-          fi
+          python3 .github/scripts/release_plan.py ${VERSION:+--version "$VERSION"} \
+            --notes notes.md --summary "$GITHUB_STEP_SUMMARY" --output "$GITHUB_OUTPUT"
 
-      - name: Set release version in pom.xml
-        run: mvn versions:set -DnewVersion=${{ steps.resolve-version.outputs.version }} -DgenerateBackupPoms=false
-
-      - name: Commit release version and tag
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "chore: release ${{ steps.resolve-version.outputs.version }}"
-          git tag "v${{ steps.resolve-version.outputs.version }}"
-          git push origin main --tags
-
-  build:
-    name: Build ${{ matrix.os-name }} native binary
-    needs: prepare
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            os-name: Linux
-            artifact-name: exifutils-linux-native
-            artifact-path: cli/target/exifutils
-          - os: windows-latest
-            os-name: Windows
-            artifact-name: exifutils-windows-native
-            artifact-path: cli/target/exifutils.exe
-
-    steps:
-      - name: Checkout release tag
-        uses: actions/checkout@v4
-        with:
-          ref: v${{ needs.prepare.outputs.version }}
-
-      - name: Setup GraalVM
-        uses: graalvm/setup-graalvm@v1
-        with:
-          java-version: '21'
-          distribution: 'graalvm-community'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          native-image-job-reports: 'true'
-
-      - name: Setup MSVC (Windows only)
-        if: matrix.os == 'windows-latest'
-        uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Cache Maven packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Build native binary (Windows)
-        if: matrix.os == 'windows-latest'
-        run: mvn -Pnative -DskipTests package
-        shell: cmd
-
-      - name: Build native binary (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: mvn -Pnative -DskipTests package
-
-      - name: Upload binary artifact
+      - name: Upload release notes
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact-name }}
-          path: ${{ matrix.artifact-path }}
+          name: release-notes
+          path: notes.md
           if-no-files-found: error
-          retention-days: 1
+          retention-days: 7
 
-  release:
-    name: Create GitHub Release and bump snapshot
-    needs: [prepare, build]
+  jar:
+    name: Jar
+    needs: plan
+    if: inputs.draft
+    uses: ./.github/workflows/build.yml
+    with:
+      revision: ${{ needs.plan.outputs.version }}
+
+  native:
+    name: Native
+    needs: plan
+    if: inputs.draft
+    uses: ./.github/workflows/build-native.yml
+    with:
+      revision: ${{ needs.plan.outputs.version }}
+
+  draft:
+    name: Draft release
+    needs: [plan, jar, native]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Download Linux binary
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: exifutils-linux-native
-          path: dist/linux
+          path: artifacts
 
-      - name: Download Windows binary
-        uses: actions/download-artifact@v4
-        with:
-          name: exifutils-windows-native
-          path: dist/windows
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ needs.prepare.outputs.version }}
-          name: v${{ needs.prepare.outputs.version }}
-          generate_release_notes: true
-          files: |
-            dist/linux/exifutils
-            dist/windows/exifutils.exe
-
-      - name: Bump to next snapshot version
+      - name: Collect files
         run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          PATCH=$(echo $VERSION | cut -d. -f3)
-          NEXT_PATCH=$((PATCH + 1))
-          MAJOR=$(echo $VERSION | cut -d. -f1)
-          MINOR=$(echo $VERSION | cut -d. -f2)
-          NEXT_SNAPSHOT="${MAJOR}.${MINOR}.${NEXT_PATCH}-SNAPSHOT"
-          mvn versions:set -DnewVersion=$NEXT_SNAPSHOT -DgenerateBackupPoms=false
-          echo "NEXT_SNAPSHOT=$NEXT_SNAPSHOT" >> $GITHUB_ENV
+          mkdir dist
+          cp artifacts/exifutils-jar/exifutils.jar dist/exifutils.jar
+          cp artifacts/exifutils-linux-native/exifutils dist/exifutils-linux-x64
+          cp artifacts/exifutils-windows-native/exifutils.exe dist/exifutils-windows-x64.exe
+          cd dist
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
 
-      - name: Commit snapshot version bump
+      # Releases are immutable in this repository: files have to be complete before the draft is published
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: v${{ needs.plan.outputs.version }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "chore: bump version to ${{ env.NEXT_SNAPSHOT }}"
-          git push origin main
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "::error::Release $TAG already exists. If it is a draft, delete it first."
+            exit 1
+          fi
+          gh release create "$TAG" --draft --target "$GITHUB_SHA" --title "$TAG" \
+            --notes-file artifacts/release-notes/notes.md dist/*
+          echo "Draft $TAG is ready, check and publish it: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases" >> "$GITHUB_STEP_SUMMARY"
