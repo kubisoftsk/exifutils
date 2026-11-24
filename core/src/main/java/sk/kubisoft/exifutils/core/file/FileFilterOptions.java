@@ -15,7 +15,7 @@ public final class FileFilterOptions {
             .longOpt("include")
             .hasArg()
             .argName("PATTERN")
-            .desc("Only include files whose name matches PATTERN (glob by default, or 'regex:' prefix for regex). Repeatable.")
+            .desc("Only include files whose name matches PATTERN, ignoring case (glob by default, or 'regex:' prefix for regex). Repeatable.")
             .build();
 
     private static final Option EXCLUDE = Option.builder()
@@ -23,7 +23,7 @@ public final class FileFilterOptions {
             .longOpt("exclude")
             .hasArg()
             .argName("PATTERN")
-            .desc("Exclude files whose name matches PATTERN (glob by default, or 'regex:' prefix for regex). Applied after --include. Repeatable.")
+            .desc("Exclude files whose name matches PATTERN, ignoring case (glob by default, or 'regex:' prefix for regex). Applied after --include. Repeatable.")
             .build();
 
     private FileFilterOptions() {

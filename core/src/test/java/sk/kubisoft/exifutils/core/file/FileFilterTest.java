@@ -79,12 +79,32 @@ class FileFilterTest {
     }
 
     @Test
-    void regexCanIgnoreCaseWithInlineFlag() {
-        var filter = FileFilter.of(List.of("regex:(?i).*\\.jpe?g"), List.of());
+    void ignoresCaseByDefault() {
+        var glob = FileFilter.of(List.of("*.jpg"), List.of("ŠKÔLKA*"));
+        var regex = FileFilter.of(List.of("regex:.*\\.jpg"), List.of("regex:ŠKÔLKA.*"));
+
+        for (var filter : List.of(glob, regex)) {
+            assertThat(filter.matches(Path.of("root", "IMG_00001.jpg"))).isTrue();
+            assertThat(filter.matches(Path.of("root", "IMG_00001.JPG"))).isTrue();
+            assertThat(filter.matches(Path.of("root", "škôlka.jpg"))).isFalse();
+        }
+    }
+
+    @Test
+    void regexCanMatchCaseWithInlineFlag() {
+        var filter = FileFilter.of(List.of("regex:(?-i).*\\.jpg"), List.of());
 
         assertThat(filter.matches(Path.of("root", "IMG_00001.jpg"))).isTrue();
+        assertThat(filter.matches(Path.of("root", "IMG_00001.JPG"))).isFalse();
+    }
+
+    @Test
+    void globPrefixIsExplicitFormOfDefault() {
+        var filter = FileFilter.of(List.of("glob:*.{jpg,png}"), List.of("glob:*-WA*"));
+
         assertThat(filter.matches(Path.of("root", "IMG_00001.JPG"))).isTrue();
-        assertThat(filter.matches(Path.of("root", "IMG_00001.JPEG"))).isTrue();
+        assertThat(filter.matches(Path.of("root", "IMG-20240715-WA0001.jpg"))).isFalse();
+        assertThat(filter.matches(Path.of("root", "DSC_4321.mov"))).isFalse();
     }
 
     @Test
