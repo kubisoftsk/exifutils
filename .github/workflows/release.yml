@@ -1,7 +1,7 @@
 name: Release
 
 # 1. Run without "draft": only the release plan (changes, suggested version, warnings) in the summary of the run.
-# 2. Run with "draft": tests, builds and a draft release. Nothing is public and no tag exists yet.
+# 2. Run with "draft": tests, build of the jar and a draft release. Nothing is public and no tag exists yet.
 # 3. Check the draft on GitHub and publish it, which creates the tag.
 # See docs/releasing.md
 
@@ -66,17 +66,9 @@ jobs:
     with:
       revision: ${{ needs.plan.outputs.version }}
 
-  native:
-    name: Native
-    needs: plan
-    if: inputs.draft
-    uses: ./.github/workflows/build-native.yml
-    with:
-      revision: ${{ needs.plan.outputs.version }}
-
   draft:
     name: Draft release
-    needs: [plan, jar, native]
+    needs: [plan, jar]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -90,8 +82,6 @@ jobs:
         run: |
           mkdir dist
           cp artifacts/exifutils-jar/exifutils.jar dist/exifutils.jar
-          cp artifacts/exifutils-linux-native/exifutils dist/exifutils-linux-x64
-          cp artifacts/exifutils-windows-native/exifutils.exe dist/exifutils-windows-x64.exe
           cd dist
           sha256sum * > SHA256SUMS
           cat SHA256SUMS

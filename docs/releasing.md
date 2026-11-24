@@ -12,7 +12,7 @@ cat exifutils-snapshot/build-info.txt
 java -jar exifutils-snapshot/exifutils.jar
 ```
 
-Native binaries of any branch can be built by the **Build Native Executable** workflow.
+Native binaries are not part of snapshots and releases yet, see [#](https://github.com/kubisoftsk/exifutils/issues/).
 
 ## Versions
 
@@ -31,7 +31,7 @@ Version 1.0.0 is released by entering it by hand.
 ## Release
 
 1. **Plan:** run the **Release** workflow on `main` with default inputs. The summary of the run shows the changes since the last release, the suggested version and warnings (commits that are not conventional, nothing visible to users). Nothing is created.
-2. **Draft:** run it again with *draft* checked, optionally with another version. It runs all tests, builds the jar and the native binaries, runs a smoke test of each with ExifTool and creates a draft release with checksums.
+2. **Draft:** run it again with *draft* checked, optionally with another version. It runs all tests, builds the jar, runs a smoke test of it with ExifTool and creates a draft release with a checksum.
 3. **Publish:** check the draft on the Releases page, edit the notes if needed and publish it. Publishing creates the tag. Releases in this repository are immutable, files cannot be changed afterwards.
 
 To start over, delete the draft and run the workflow again.

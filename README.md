@@ -13,7 +13,6 @@ A command-line tool for organizing and renaming media files by their EXIF metada
 - **Shift dates** to correct camera clock errors
 - **Manage GPS** coordinates (add or remove)
 - Cross-platform: Linux, Windows, macOS
-- Native binaries (no Java required at runtime)
 
 ## Quick Start
 
@@ -31,12 +30,10 @@ brew install exiftool
 
 ### Install
 
-Download a native binary or `exifutils.jar` (Java 21+) from [Releases](../../releases), or build from source.
+Download `exifutils.jar` from [Releases](../../releases) (requires Java 21+), or build from source.
 
 ```bash
-# Linux
-chmod +x exifutils-linux-x64
-sudo mv exifutils-linux-x64 /usr/local/bin/exifutils
+java -jar exifutils.jar info photo.jpg
 ```
 
 See [Installation Guide](docs/installation.md) for detailed instructions.

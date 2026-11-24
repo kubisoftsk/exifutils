@@ -22,54 +22,26 @@ Download from [exiftool.org](https://exiftool.org/) and add to PATH.
 
 ## Installing exifutils
 
-### Option 1: Native Binary (Recommended)
+### Option 1: Jar (Recommended)
 
-Native binaries are standalone executables that don't require Java. Download from [Releases](https://github.com/kubisoftsk/exifutils/releases):
-
-- `exifutils-linux-x64` for Linux
-- `exifutils-windows-x64.exe` for Windows
-
-`SHA256SUMS` contains checksums of all files.
-
-#### Linux Installation
-
-**System-wide (requires sudo):**
-
-```bash
-chmod +x exifutils-linux-x64
-sudo mv exifutils-linux-x64 /usr/local/bin/exifutils
-```
-
-**User-only (no sudo):**
-
-```bash
-chmod +x exifutils-linux-x64
-mkdir -p ~/.local/bin
-mv exifutils-linux-x64 ~/.local/bin/exifutils
-```
-
-Make sure `~/.local/bin` is in your PATH. Add to `~/.bashrc` or `~/.zshrc`:
-
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-```
-
-#### Windows Installation
-
-1. Rename `exifutils-windows-x64.exe` to `exifutils.exe`
-2. Move it to a directory in your PATH, or add its location to PATH
-
-### Option 2: Jar
-
-Requires Java 21+. Works on all platforms including macOS. Download `exifutils.jar` from [Releases](https://github.com/kubisoftsk/exifutils/releases) and run it:
+Requires Java 21+. Works on Linux, Windows and macOS. Download `exifutils.jar` from [Releases](https://github.com/kubisoftsk/exifutils/releases) (or directly the [latest one](https://github.com/kubisoftsk/exifutils/releases/latest/download/exifutils.jar)) and run it:
 
 ```bash
 java -jar exifutils.jar [command]
 ```
 
-Development snapshots are described in [Snapshots and Releases](releasing.md).
+`SHA256SUMS` contains the checksum. Development snapshots are described in [Snapshots and Releases](releasing.md).
 
-### Option 3: Build from Source
+On Linux and macOS, a small script in a directory from `PATH` makes it available as `exifutils`:
+
+```bash
+mkdir -p ~/.local/share/exifutils ~/.local/bin
+mv exifutils.jar ~/.local/share/exifutils/
+printf '#!/bin/sh\nexec java -jar "$HOME/.local/share/exifutils/exifutils.jar" "$@"\n' > ~/.local/bin/exifutils
+chmod +x ~/.local/bin/exifutils
+```
+
+### Option 2: Build from Source
 
 Requires Java 21+ and Maven.
 
@@ -87,9 +59,9 @@ Run with:
 java -jar cli/target/exifutils-cli-0.9.0-SNAPSHOT.jar [command]
 ```
 
-### Option 4: Build Native Binary Locally
+### Option 3: Build Native Binary Locally (Experimental)
 
-Requires GraalVM 21+ with native-image.
+Requires GraalVM 21+ with native-image. Native binaries do not work correctly yet, see [#](https://github.com/kubisoftsk/exifutils/issues/).
 
 ```bash
 git clone https://github.com/kubisoftsk/exifutils.git
@@ -101,7 +73,7 @@ The native binary will be at `cli/target/exifutils`.
 
 ## Updating
 
-Simply repeat the installation steps. The new binary will replace the old one.
+Simply repeat the installation steps. The new file will replace the old one.
 
 ## Verifying Installation
 
