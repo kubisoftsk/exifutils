@@ -32,6 +32,25 @@ class FileFilterOptionsTest {
     }
 
     @Test
+    void commaInPatternDoesNotSplitValue() throws ParseException {
+        var filter = parse("-i", "*.{jpg,png}", "-x", "a,b.jpg", "somedir");
+
+        assertThat(filter.matches(Path.of("a.jpg"))).isTrue();
+        assertThat(filter.matches(Path.of("b.png"))).isTrue();
+        assertThat(filter.matches(Path.of("a,b.jpg"))).isFalse();
+    }
+
+    @Test
+    void optionDoesNotSwallowPositionalArguments() throws ParseException {
+        var options = new Options();
+        FileFilterOptions.addTo(options);
+
+        var cmd = new DefaultParser().parse(options, new String[]{"-i", "*.jpg", "dir1", "-x", "*.png", "dir2", "dir3"});
+
+        assertThat(cmd.getArgs()).containsExactly("dir1", "dir2", "dir3");
+    }
+
+    @Test
     void noOptionsYieldsNoOpFilter() throws ParseException {
         var filter = parse("somedir");
 

@@ -69,4 +69,28 @@ class FileFilterTest {
         assertThat(filter.matches(Path.of("root", "first", "IMG_00001.jpg"))).isTrue();
         assertThat(filter.matches(Path.of("other", "IMG_00001.jpg"))).isTrue();
     }
+
+    @Test
+    void regexMustMatchWholeFileName() {
+        var filter = FileFilter.of(List.of("regex:WA"), List.of());
+
+        assertThat(filter.matches(Path.of("root", "IMG-20240715-WA0001.jpg"))).isFalse();
+        assertThat(filter.matches(Path.of("root", "WA"))).isTrue();
+    }
+
+    @Test
+    void regexCanIgnoreCaseWithInlineFlag() {
+        var filter = FileFilter.of(List.of("regex:(?i).*\\.jpe?g"), List.of());
+
+        assertThat(filter.matches(Path.of("root", "IMG_00001.jpg"))).isTrue();
+        assertThat(filter.matches(Path.of("root", "IMG_00001.JPG"))).isTrue();
+        assertThat(filter.matches(Path.of("root", "IMG_00001.JPEG"))).isTrue();
+    }
+
+    @Test
+    void patternWithDirectorySeparatorNeverMatches() {
+        var filter = FileFilter.of(List.of("first/*.jpg", "**/*.jpg"), List.of());
+
+        assertThat(filter.matches(Path.of("root", "first", "P2110001.jpg"))).isFalse();
+    }
 }
