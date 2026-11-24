@@ -121,7 +121,7 @@ public class FileExplorer {
         if (fileService.isDirectory(path)) {
             return walk(path, filter);
         } else {
-            return List.of(path);
+            return filter.matches(path) ? List.of(path) : List.of();
         }
     }
 

@@ -196,12 +196,44 @@ class FileExplorerTest {
     }
 
     @Test
-    void testListFilesSpecificPathNotFiltered() {
+    void testListFilesSpecificPathExcluded() {
         var filter = FileFilter.of(List.of(), List.of("IMG_*.jpg"));
 
         var files = fileExplorer.listFiles(new String[]{"root/IMG_00001.jpg"}, null, filter);
 
-        assertThat(files).containsExactlyInAnyOrder(Path.of("root/IMG_00001.jpg"));
+        assertThat(files).isEmpty();
+    }
+
+    @Test
+    void testListFilesSpecificPathsAndDirWithFilter() {
+        var filter = FileFilter.of(List.of("*.jpg"), List.of("*2.jpg"));
+
+        var files = fileExplorer.listFiles(new String[]{"root/first/P2110001.jpg", "root/first/P2110003.mov", "root"}, null, filter);
+
+        assertThat(files).containsExactlyInAnyOrder(
+                Path.of("root", "IMG_00001.jpg"),
+                Path.of("root", "first", "P2110001.jpg")
+        );
+    }
+
+    @Test
+    void testListFilesFilterDoesNotApplyToDirectoryArgument() {
+        var include = FileFilter.of(List.of("IMG_*.jpg"), List.of());
+        assertThat(fileExplorer.listFiles(new String[]{"root"}, null, include)).hasSize(2);
+    }
+
+    @Test
+    void testListFilesExcludeDoesNotApplyToDirectoryArgument() {
+        var exclude = FileFilter.of(List.of(), List.of("root", "first"));
+        assertThat(fileExplorer.listFiles(new String[]{"root"}, null, exclude)).hasSize(7);
+    }
+
+    @Test
+    void testListFilesNonExistentPathFailsEvenIfExcluded() {
+        var filter = FileFilter.of(List.of(), List.of("*"));
+
+        assertThatThrownBy(() -> fileExplorer.listFiles(new String[]{"missing.jpg"}, null, filter))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
 }
