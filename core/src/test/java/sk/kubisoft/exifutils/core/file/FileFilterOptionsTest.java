@@ -7,6 +7,7 @@ import org.apache.commons.cli.ParseException;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -29,6 +30,18 @@ class FileFilterOptionsTest {
         assertThat(filter.matches(Path.of("a.jpg"))).isFalse();
         assertThat(filter.matches(Path.of("b.png"))).isFalse();
         assertThat(filter.matches(Path.of("c.mov"))).isTrue();
+    }
+
+    @Test
+    void excludeIsAppliedAfterIncludeRegardlessOfOptionOrder() throws ParseException {
+        var includeFirst = parse("-i", "*.jpg", "-x", "*-WA*", "somedir");
+        var excludeFirst = parse("-x", "*-WA*", "-i", "*.jpg", "somedir");
+
+        for (var filter : List.of(includeFirst, excludeFirst)) {
+            assertThat(filter.matches(Path.of("IMG_0001.jpg"))).isTrue();
+            assertThat(filter.matches(Path.of("IMG-20240715-WA0001.jpg"))).isFalse();
+            assertThat(filter.matches(Path.of("video.mov"))).isFalse();
+        }
     }
 
     @Test
